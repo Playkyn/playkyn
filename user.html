@@ -349,55 +349,45 @@ const upgradeHtml = isUnlocked ? '' : `
   await renderWordlists();
 })();
 
-/* ════════ 加载词库列表 ════════ */
-async function renderWordlists(){
+/* ======== 加载词库列表 ======== */
+async function renderWordlists() {
   const body = document.getElementById('myWordlistsBody');
-  if(!body) return;
+  if (!body) return;
 
   const { data, error } = await sb
     .from('wordlists')
     .select('id, name, description, word_count, is_public, owner_id, created_at')
     .order('created_at', { ascending: false });
 
-  if(error || !data){
-    body.textContent = '加载失败：' + (error?.message || '未知');
+  if (error || !data) {
+    body.textContent = '加载失败: ' + (error?.message || '未知');
     return;
   }
 
-  const userId = __currentUser.id;
-  const mine = data.filter(w => w.owner_id === userId);
-  const publicOnes = data.filter(w => w.is_public);
-  const all = [...mine, ...publicOnes.filter(p => !mine.some(m => m.id === p.id))];
-
-  if(!all.length){
-    body.innerHTML = '<div style="padding:8px 0">还没有词库。上传你的第一个词表吧！</div>';
+  // 如果没有任何词库
+  if (data.length === 0) {
+    body.innerHTML = '<div style="color:#8A8A9A; font-size:14px; text-align:center; padding:20px;">暂无词库，点击上方按钮上传吧～</div>';
     return;
   }
 
-  const currentId = localStorage.getItem('wq_current_wordlist') || 'bab0ed95-e126-48b3-9ab8-7e92c5da0e130';
-
-  body.innerHTML = all.map(w => {
-    const isCurrent = w.id === currentId;
-    const bgColor = w.is_public ? '#0A0A0A' : '#E11D48';
-    const icon = w.is_public ? '📚' : '📁';
-    const badge = w.is_public
-      ? '<span style="font-size:11px;font-weight:600;color:#8A8A8A;margin-left:6px">公共</span>'
-      : '<span style="font-size:11px;font-weight:600;color:#E11D48;margin-left:6px">我的</span>';
-    const btn = isCurrent
-      ? `<button disabled style="padding:8px 14px;background:#f5f5f5;color:#8A8A8A;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:default;flex-shrink:0">当前使用</button>`
-      : `<button class="use-wordlist" data-id="${w.id}" data-name="${escapeHtml(w.name)}" style="padding:8px 14px;background:#0A0A0A;color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;flex-shrink:0">使用</button>`;
-
-    return `
-      <div style="display:flex;align-items:center;gap:12px;padding:14px 0;border-bottom:1px solid #EBEBEB">
-        <div style="width:36px;height:36px;border-radius:9px;background:${bgColor};color:#fff;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${icon}</div>
-        <div style="flex:1;min-width:0">
-          <div style="font-size:14px;font-weight:600;color:#0A0A0A;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(w.name)}${badge}</div>
-          <div style="font-size:12px;color:#8A8A8A;margin-top:2px">${w.word_count || 0} 个单词</div>
+  // 渲染列表
+  let html = '';
+  data.forEach(item => {
+    html += `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; border-radius:8px; margin-bottom:8px;">
+        <div style="flex:1; overflow:hidden;">
+          <div style="font-weight:bold; font-size:14px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.name}</div>
+          <div style="font-size:12px; color:#8A8A9A; margin-top:4px;">
+            ${item.word_count || 0} 个词 · ${item.is_public ? '公开' : '私有'}
+          </div>
         </div>
-        ${btn}
+        <button onclick="deleteWordlist('${item.id}')" style="background:#ff4d4f; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; flex-shrink:0;">
+          🗑️ 删除
+        </button>
       </div>
     `;
-  }).join('');
+  });
+  body.innerHTML = html;
 }
 
 /* ════════ 切换词库 ════════ */
@@ -652,6 +642,37 @@ function showVipModal() {
   `;
 
   document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+/* ======== 删除词库 ======== */
+async function deleteWordlist(wordlistId) {
+  if (!confirm('确定要删除这个词库吗？里面的所有单词也会被一起删除，且无法恢复！')) {
+    return;
+  }
+
+  try {
+    // 1. 先删子表（单词）
+    const { error: wordsError } = await sb
+      .from('words')
+      .delete()
+      .eq('wordlist_id', wordlistId);
+
+    if (wordsError) throw wordsError;
+
+    // 2. 再删主表（词库）
+    const { error: listError } = await sb
+      .from('wordlists')
+      .delete()
+      .eq('id', wordlistId);
+
+    if (listError) throw listError;
+
+    alert('删除成功！');
+    renderWordlists(); // 刷新列表，无需刷新整个页面
+    
+  } catch (error) {
+    console.error('删除失败:', error);
+    alert('删除失败：' + (error.message || '未知错误，请检查控制台'));
+  }
 }
 </script>
 
