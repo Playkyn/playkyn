@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<title>Playkyn · Just play, Get it.</title>
+<link rel="manifest" href="manifest.json">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --accent:#FF4D8D;
+  --accent-soft:#FFF0F5;
+  --text:#0A0A0A;
+  --text-2:#525252;
+  --text-3:#8A8A8A;
+  --border:#EBEBEB;
+  --bg:#FFFFFF;
+  --bg-soft:#FAFAFA;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  overflow-x:hidden;
+  line-height:1.55;
+  font-size:15px;
+}
+
+/* ════════ 导航栏 ════════ */
+.nav{
+  position:fixed;top:0;left:0;right:0;z-index:1000;
+  background:rgba(255,255,255,.85);
+  backdrop-filter:saturate(180%) blur(20px);
+  -webkit-backdrop-filter:saturate(180%) blur(20px);
+  border-bottom:1px solid var(--border);
+}
+.nav-inner{
+  max-width:1100px;margin:0 auto;
+  display:flex;align-items:center;
+  height:60px;padding:0 24px;gap:32px;
+}
+.nav-logo{
+  font-size:18px;font-weight:700;letter-spacing:-.02em;
+  color:var(--text);text-decoration:none;
+  display:flex;align-items:center;gap:8px;
+  flex-shrink:0;
+}
+.nav-logo-mark{
+  width:28px;height:28px;
+  background:#E11D48;
+  border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.nav-logo-mark img{
+  width:160%;
+  height:160%;
+  object-fit:contain;
+}
+.nav-menu{display:flex;gap:24px;margin-left:8px}
+.nav-link{
+  font-size:14px;font-weight:500;color:var(--text-2);
+  text-decoration:none;transition:color .15s;
+  white-space:nowrap;
+}
+.nav-link:hover{color:var(--text)}
+.nav-spacer{flex:1}
+.nav-actions{display:flex;gap:8px;align-items:center}
+.nav-btn{
+  font-size:14px;font-weight:600;
+  padding:8px 14px;border-radius:8px;
+  border:none;cursor:pointer;font-family:inherit;
+  transition:.15s;white-space:nowrap;
+}
+.nav-btn.ghost{
+  background:transparent;color:var(--text-2);
+}
+.nav-btn.ghost:hover{color:var(--text);background:var(--bg-soft)}
+.nav-btn.primary{
+  background:var(--text);color:#fff;
+}
+.nav-btn.primary:hover{background:#000}
+
+@media(max-width:720px){
+  .nav-inner{padding:0 16px;gap:16px}
+  .nav-menu{gap:16px;margin-left:0}
+  .nav-link{font-size:13px}
+  .nav-btn{padding:7px 11px;font-size:13px}
+}
+@media(max-width:480px){
+  .nav-menu{display:none}
+  #navContact{display:none}
+}
+
+/* ════════ Hero ════════ */
+.hero{
+  padding:160px 24px 100px;
+  text-align:center;
+  max-width:800px;margin:0 auto;
+  position:relative;
+}
+.hero-mark{
+  display:inline-flex;align-items:center;justify-content:center;
+  width:96px;height:96px;
+  margin-bottom:32px;
+  background:#E11D48;
+  border-radius:24px;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);
+  overflow:hidden;
+}
+.hero-mark img{
+  width:160%;
+  height:160%;
+  object-fit:contain;
+}
+.nav-logo-mark img,
+.hero-mark img,
+.footer-mark img {
+  transform: rotate(+10deg);
+}
+.hero-title{
+  font-size:clamp(56px,10vw,88px);
+  font-weight:800;letter-spacing:-.045em;
+  line-height:1;margin-bottom:24px;
+  color:var(--text);
+}
+.hero-tagline{
+  font-size:clamp(16px,2.5vw,20px);
+  font-weight:500;color:var(--text-2);
+  margin-bottom:8px;letter-spacing:-.01em;
+}
+.hero-tagline-cn{
+  font-size:14px;font-weight:500;
+  color:var(--text-3);
+  letter-spacing:.08em;
+  margin-bottom:44px;
+}
+.hero-buttons{
+  display:flex;gap:12px;justify-content:center;
+  flex-wrap:wrap;
+}
+.hero-buttons .btn{min-width:170px}
+
+/* ════════ 按钮 ════════ */
+.btn{
+  border:none;border-radius:10px;
+  padding:13px 22px;font-size:15px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  transition:.15s;text-decoration:none;
+  display:inline-flex;align-items:center;justify-content:center;
+  gap:8px;letter-spacing:-.01em;
+}
+.btn.primary{
+  background:var(--text);color:#fff;
+}
+.btn.primary:hover{background:#000;transform:translateY(-1px)}
+.btn.primary:active{transform:translateY(0)}
+.btn.ghost{
+  background:#fff;color:var(--text);
+  border:1px solid var(--border);
+}
+.btn.ghost:hover{background:var(--bg-soft);border-color:#D4D4D4}
+.btn.ghost:active{transform:translateY(0)}
+.btn.small{padding:10px 18px;font-size:14px}
+.btn .arr{transition:transform .15s}
+.btn:hover .arr{transform:translateX(2px)}
+
+/* ════════ 模块 ════════ */
+.section{
+  padding:100px 24px;
+  scroll-margin-top:80px;
+  border-top:1px solid var(--border);
+}
+.section-inner{max-width:1000px;margin:0 auto}
+.section-head{margin-bottom:56px;max-width:640px}
+.section-eyebrow{
+  font-size:12px;font-weight:600;
+  color:var(--accent);letter-spacing:.1em;
+  text-transform:uppercase;
+  margin-bottom:16px;
+  display:inline-block;
+}
+.section-title{
+  font-size:clamp(28px,4vw,40px);
+  font-weight:700;letter-spacing:-.03em;
+  line-height:1.15;margin-bottom:14px;
+  color:var(--text);
+}
+.section-desc{
+  font-size:16px;color:var(--text-2);
+  line-height:1.65;font-weight:400;
+}
+
+/* ════════ 品牌卡片 ════════ */
+.grid-3{
+  display:grid;grid-template-columns:1fr;
+  gap:1px;background:var(--border);
+  border:1px solid var(--border);
+  border-radius:14px;overflow:hidden;
+}
+@media(min-width:720px){ .grid-3{grid-template-columns:repeat(3,1fr)} }
+.feature{
+  background:#fff;padding:32px 28px;
+  transition:background .15s;
+}
+.feature:hover{background:var(--bg-soft)}
+.feature-icon{
+  width:36px;height:36px;
+  margin-bottom:20px;
+  color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  border-radius:9px;
+  background:var(--bg-soft);
+  border:1px solid var(--border);
+}
+.feature-icon svg{width:18px;height:18px}
+.feature-title{
+  font-size:16px;font-weight:600;
+  margin-bottom:10px;color:var(--text);
+  letter-spacing:-.01em;
+}
+.feature-desc{
+  font-size:14px;color:var(--text-2);
+  line-height:1.65;font-weight:400;
+}
+
+/* ════════ 产品 ════════ */
+.product-card{
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:32px;
+  background:#fff;
+  transition:.15s;
+}
+.product-card:hover{border-color:#D4D4D4}
+.product-head{
+  display:flex;align-items:center;gap:14px;
+  margin-bottom:20px;
+}
+.product-head-icon{
+  width:44px;height:44px;border-radius:10px;
+  background:var(--accent-soft);
+  display:flex;align-items:center;justify-content:center;
+  color:var(--accent);flex-shrink:0;
+}
+.product-head-icon svg{width:22px;height:22px}
+.product-title{
+  font-size:18px;font-weight:700;
+  letter-spacing:-.02em;
+  margin-bottom:2px;
+}
+.product-sub{
+  font-size:13px;color:var(--text-3);
+  font-weight:500;
+}
+.product-desc{
+  font-size:15px;color:var(--text-2);
+  line-height:1.7;margin-bottom:24px;
+}
+
+/* 预览 mock */
+.preview-box{
+  margin-top:32px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:32px 24px;
+  background:var(--bg-soft);
+}
+.preview-cards{
+  display:flex;gap:8px;justify-content:center;
+  margin-bottom:16px;flex-wrap:wrap;
+}
+.preview-card{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:10px;
+  padding:12px 16px;
+  min-width:88px;
+  text-align:center;
+}
+.preview-card .en{
+  font-size:14px;font-weight:600;
+  color:var(--text);margin-bottom:2px;
+  letter-spacing:-.01em;
+}
+.preview-card .zh{
+  font-size:11px;font-weight:500;
+  color:var(--text-3);
+}
+.preview-card.hl{
+  background:var(--text);border-color:var(--text);
+}
+.preview-card.hl .en{color:#fff}
+.preview-card.hl .zh{color:rgba(255,255,255,.65)}
+.preview-meta{
+  display:flex;justify-content:center;gap:20px;
+  font-size:12px;font-weight:500;color:var(--text-3);
+  margin-top:20px;
+}
+
+/* ════════ FAQ ════════ */
+.faq-list{
+  display:flex;flex-direction:column;
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+}
+.faq-item{
+  padding:24px 28px;
+  border-bottom:1px solid var(--border);
+  background:#fff;
+}
+.faq-item:last-child{border-bottom:none}
+.faq-q{
+  font-size:15px;font-weight:600;
+  color:var(--text);margin-bottom:8px;
+  letter-spacing:-.01em;
+}
+.faq-a{
+  font-size:14px;color:var(--text-2);
+  line-height:1.7;
+}
+.faq-a b{color:var(--text);font-weight:600}
+
+/* ════════ 页脚 ════════ */
+.footer{
+  padding:56px 24px 48px;
+  border-top:1px solid var(--border);
+  background:var(--bg-soft);
+  text-align:center;
+}
+.footer-brand{
+  font-size:16px;font-weight:700;
+  color:var(--text);letter-spacing:-.02em;
+  margin-bottom:8px;
+  display:inline-flex;align-items:center;gap:8px;
+}
+.footer-mark{
+  width:22px;height:22px;
+  background:#E11D48;
+  border-radius:7px;
+  display:inline-flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.footer-mark img{
+  width:160%;
+  height:160%;
+  object-fit:contain;
+}
+.footer-slogan{
+  font-size:12px;font-weight:500;
+  color:var(--text-3);letter-spacing:.08em;
+  margin-bottom:24px;
+}
+.footer-info{
+  font-size:12px;color:var(--text-3);
+  line-height:1.9;font-weight:400;
+  max-width:560px;margin:0 auto;
+}
+.footer-info a{
+  color:var(--text-2);text-decoration:none;
+  border-bottom:1px solid var(--border);
+  transition:border-color .15s,color .15s;
+}
+.footer-info a:hover{color:var(--text);border-color:var(--text-3)}
+
+/* ════════ 弹窗 ════════ */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(10,10,10,.4);
+  backdrop-filter:blur(8px);
+  -webkit-backdrop-filter:blur(8px);
+  z-index:2000;display:none;
+  align-items:center;justify-content:center;padding:20px;
+}
+.modal-overlay.show{display:flex}
+.modal-card{
+  background:#fff;
+  border-radius:16px;
+  padding:28px;width:100%;max-width:380px;
+  box-shadow:0 20px 60px -20px rgba(0,0,0,.25);
+  animation:popIn .25s cubic-bezier(.2,1.2,.5,1);
+  max-height:85vh;overflow-y:auto;
+}
+@keyframes popIn{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-title{
+  font-size:17px;font-weight:700;
+  color:var(--text);margin-bottom:6px;
+  letter-spacing:-.02em;
+}
+.modal-sub{
+  font-size:13px;color:var(--text-3);
+  margin-bottom:22px;line-height:1.6;
+}
+.field{margin-bottom:14px;text-align:left}
+.field label{
+  display:block;font-size:13px;
+  font-weight:600;color:var(--text-2);
+  margin-bottom:6px;
+}
+.text-input{
+  width:100%;padding:11px 13px;
+  border-radius:9px;background:#fff;
+  border:1px solid var(--border);
+  color:var(--text);font-size:14px;
+  outline:none;font-family:inherit;
+  font-weight:500;transition:.15s;
+}
+.text-input:focus{
+  border-color:var(--text);
+  box-shadow:0 0 0 3px rgba(10,10,10,.06);
+}
+.form-err{
+  font-size:13px;color:#DC2626;
+  font-weight:500;text-align:left;
+  min-height:18px;margin-bottom:10px;
+}
+.modal-divider{
+  display:flex;align-items:center;
+  margin:16px 0;color:var(--text-3);
+  font-size:12px;
+}
+.modal-divider::before,
+.modal-divider::after{
+  content:"";flex:1;height:1px;background:var(--border);
+}
+.modal-divider span{padding:0 12px}
+
+/* ════════ PWA ════════ */
+.pwa-toast{
+  position:fixed;bottom:24px;left:24px;right:24px;
+  z-index:1500;
+  background:var(--text);color:#fff;
+  border-radius:12px;padding:14px 18px;
+  box-shadow:0 20px 40px -12px rgba(0,0,0,.35);
+  display:none;align-items:center;gap:14px;
+  max-width:480px;margin:0 auto;
+  animation:slideUp .35s cubic-bezier(.2,1.2,.5,1);
+}
+.pwa-toast.show{display:flex}
+@keyframes slideUp{from{transform:translateY(80px);opacity:0}to{transform:translateY(0);opacity:1}}
+.pwa-toast-icon{
+  width:32px;height:32px;border-radius:8px;
+  background:rgba(255,255,255,.12);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;font-size:16px;
+}
+.pwa-toast-text{flex:1;font-size:13px;font-weight:500;line-height:1.5}
+.pwa-toast-btn{
+  background:#fff;color:var(--text);
+  border:none;border-radius:8px;padding:8px 14px;
+  font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  flex-shrink:0;transition:.15s;
+}
+.pwa-toast-btn:hover{background:#F0F0F0}
+.pwa-toast-close{
+  background:transparent;color:#fff;border:none;
+  font-size:18px;cursor:pointer;
+  padding:0 4px;font-family:inherit;
+  flex-shrink:0;opacity:.6;transition:.15s;
+}
+.pwa-toast-close:hover{opacity:1}
+</style>
+</head>
+<body>
+
+<!-- ════════ 导航栏 ════════ -->
+<nav class="nav" id="nav">
+  <div class="nav-inner">
+    <a class="nav-logo" href="#top">
+      <span class="nav-logo-mark">
+  <img src="logo.svg" alt="Playkyn" width="20" height="20">
+</span>
+      Playkyn
+    </a>
+
+    <div class="nav-menu">
+      <a class="nav-link" href="#brand">品牌介绍</a>
+      <a class="nav-link" href="#products">产品介绍</a>
+      <a class="nav-link" href="#" id="navFaq">FAQ</a>
+    </div>
+
+    <div class="nav-spacer"></div>
+
+   <div class="nav-actions" id="navActions">
+  <button class="nav-btn ghost" id="navContact">联系客服</button>
+  <button class="nav-btn ghost" id="navLogin">登录</button>
+  <button class="nav-btn primary" id="navRegister">注册</button>
+  <button class="nav-btn ghost" id="navUser" style="display:none">我的账号</button>
+  <button class="nav-btn ghost" id="navLogout" style="display:none">退出</button>
+</div>
+  </div>
+</nav>
+
+<!-- ════════ Hero ════════ -->
+<section class="hero" id="top">
+  <div class="hero-mark">
+  <img src="logo.svg" alt="Playkyn" width="80" height="80">
+</div>
+  <h1 class="hero-title">Playkyn</h1>
+  <div class="hero-tagline">Just play, Get it.</div>
+  <div class="hero-tagline-cn">趣玩 · 通晓于心</div>
+
+  <div class="hero-buttons">
+   <button class="btn primary" id="btnTryNow">
+  立即体验 <span class="arr">→</span>
+</button>
+    <button class="btn ghost" id="btnInstall">添加到主屏幕</button>
+  </div>
+</section>
+
+<!-- ════════ 品牌介绍 ════════ -->
+<section class="section" id="brand">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="section-eyebrow">About</div>
+      <h2 class="section-title">为什么做 Playkyn</h2>
+      <p class="section-desc">
+        学习不一定要苦。我们想把知识变成游戏，让记忆在快乐中留下来。
+      </p>
+    </div>
+
+    <div class="grid-3">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 3v2M5 6l1.5 1.5M19 6l-1.5 1.5M9 17h6M12 17v4"/>
+            <path d="M12 17a5 5 0 1 1 0-10 5 5 0 0 1 0 10z"/>
+          </svg>
+        </div>
+        <div class="feature-title">品牌理念</div>
+        <div class="feature-desc">
+          Playkyn = play + kyn（古英语：知晓、通晓、烂熟于心）。玩与学，本就不是对立的。
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="9"/>
+            <circle cx="12" cy="12" r="5"/>
+            <circle cx="12" cy="12" r="1.5" fill="currentColor"/>
+          </svg>
+        </div>
+        <div class="feature-title">产品定位</div>
+        <div class="feature-desc">
+          一个可定制的记忆训练游戏平台。从单词记忆起步，未来拓展到任意需要记忆的内容。
+        </div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20V10"/>
+            <path d="M12 10c0-4 3-6 7-6 0 4-3 6-7 6z"/>
+            <path d="M12 14c0-2-2-4-5-4 0 2 2 4 5 4z"/>
+          </svg>
+        </div>
+        <div class="feature-title">创立初衷</div>
+        <div class="feature-desc">
+          孩子背单词不该靠抄写。让每个普通人都能拥有一个爱玩的"私人记忆教练"。
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ 产品介绍 ════════ -->
+<section class="section" id="products">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="section-eyebrow">Products</div>
+      <h2 class="section-title">我们的产品</h2>
+      <p class="section-desc">
+        第一款上线：单词记忆定制小游戏。更多可定制记忆产品开发中。
+      </p>
+    </div>
+
+    <div class="product-card">
+      <div class="product-head">
+        <div class="product-head-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="7" width="18" height="12" rx="3"/>
+            <path d="M8 11v4M16 11v4M12 11v4"/>
+          </svg>
+        </div>
+        <div>
+          <div class="product-title">单词记忆定制小游戏</div>
+          <div class="product-sub">PET · 已上线</div>
+        </div>
+      </div>
+
+      <div class="product-desc">
+        PET / KET / 中考 / 雅思 / 校内词表——上传你的词表，一键生成可玩的记忆游戏。
+        包含连连看、听音选词、趣味消词、单词矿工等多种玩法。
+      </div>
+
+      <button class="btn primary" id="btnTryNow2">
+  免费体验 <span class="arr">→</span>
+</button>
+
+      <div class="preview-box">
+        <div class="preview-cards">
+          <div class="preview-card hl">
+            <div class="en">abandon</div>
+            <div class="zh">放弃</div>
+          </div>
+          <div class="preview-card">
+            <div class="en">ability</div>
+            <div class="zh">能力</div>
+          </div>
+          <div class="preview-card">
+            <div class="en">achieve</div>
+            <div class="zh">实现</div>
+          </div>
+        </div>
+        <div class="preview-meta">
+          <span>Lv.3 · 单词小侠</span>
+          <span>连击 x5</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════ FAQ ════════ -->
+<section class="section" id="faq" style="display:none">
+  <div class="section-inner">
+    <div class="section-head">
+      <div class="section-eyebrow">FAQ</div>
+      <h2 class="section-title">常见问题</h2>
+    </div>
+
+    <div class="faq-list">
+      <div class="faq-item">
+        <div class="faq-q">Playkyn 是免费的吗？</div>
+        <div class="faq-a">免费注册后，可以完整体验 PET U1U2 全部内容。后续单元需要付费解锁，或联系客服获取体验账号。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">能定制我自己的词表吗？</div>
+        <div class="faq-a">可以。KET、中考、高考、雅思、校内词表都可以上传生成。请通过「联系客服」告诉我们你的需求。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">能在手机上玩吗？</div>
+        <div class="faq-a">可以。Playkyn 支持手机浏览器打开，也可以「添加到主屏幕」，像 App 一样使用。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">学习进度会丢失吗？</div>
+        <div class="faq-a">注册账号后，学习进度会保存到云端，换设备也能同步。</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">怎么联系你们？</div>
+        <div class="faq-a">
+          微信号：<b>Playkyn</b>　·　邮箱：<b>495493831@qq.com</b>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align:center;margin-top:32px">
+      <button class="btn ghost" id="faqClose">收起 FAQ</button>
+    </div>
+  </div>
+</section>
+
+<div style="text-align:center;padding:32px 16px 0;font-size:13px;color:var(--text-3);font-weight:500;letter-spacing:.05em">
+  网站开发中，敬请期待
+  <span style="display:inline-block;animation:blink 1.5s ease-in-out infinite">·</span>
+  <span style="display:inline-block;animation:blink 1.5s ease-in-out infinite .3s">·</span>
+  <span style="display:inline-block;animation:blink 1.5s ease-in-out infinite .6s">·</span>
+</div>
+<style>
+@keyframes blink{
+  0%, 100% { opacity:.2 }
+  50% { opacity:1 }
+}
+</style>
+<!-- ════════ 页脚 ════════ -->
+<footer class="footer">
+  <div class="footer-brand">
+    <span class="footer-mark">
+  <img src="logo.svg" alt="Playkyn" width="16" height="16">
+</span>
+    Playkyn
+  </div>
+  <div class="footer-slogan">JUST PLAY, GET IT.</div>
+  <div class="footer-info">
+    © 2026 Playkyn · 保留所有权利<br>
+    本平台所有游戏内容、界面设计、源代码均为原创<br>
+    未经授权，禁止复制、转载或商用<br>
+    <a href="mailto:hello@playkyn.com">hello@playkyn.com</a> · playkyn.com
+  </div>
+</footer>
+
+<!-- ════════ 弹窗 ════════ -->
+<div class="modal-overlay" id="modal">
+  <div class="modal-card" id="modalCard"></div>
+</div>
+
+<!-- ════════ PWA 提示条 ════════ -->
+<div class="pwa-toast" id="pwaToast">
+  <div class="pwa-toast-icon">📲</div>
+  <div class="pwa-toast-text">把 Playkyn 加到主屏幕，随时打开就能玩</div>
+  <button class="pwa-toast-btn" id="pwaInstallBtn">安装</button>
+  <button class="pwa-toast-close" id="pwaCloseBtn">×</button>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+/* ════════ Supabase 初始化 ════════ */
+const supabaseUrl = 'https://zuhymqoxyqgpkxoaygtl.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1aHltcW94eXFncGt4b2F5Z3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4OTkwOTgsImV4cCI6MjEwNzQ3NTA5OH0.T5-KpCzs69mh3K6DNvwo_LdgLnKbos6PoaI7j9tgVZE';
+const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+/* ════════ 弹窗 ════════ */
+function openModal(html){
+  document.getElementById('modalCard').innerHTML = html;
+  document.getElementById('modal').classList.add('show');
+}
+function closeModal(){
+  document.getElementById('modal').classList.remove('show');
+}
+document.getElementById('modal').onclick = e => {
+  if(e.target.id === 'modal') closeModal();
+};
+
+/* ════════ 注册 ════════ */
+document.getElementById('navRegister').onclick = async ()=>{
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) { alert('你已经登录了：' + session.user.email); return; }
+  openModal(`
+    <div class="modal-title">注册 Playkyn</div>
+    <div class="modal-sub">免费注册，立刻体验 PET U1U2 全部内容。</div>
+    <div class="field">
+      <label>邮箱</label>
+      <input type="email" id="signupEmail" class="text-input" placeholder="your@email.com">
+    </div>
+    <div class="field">
+      <label>密码（至少 6 位）</label>
+      <input type="password" id="signupPassword" class="text-input" placeholder="设置密码">
+    </div>
+    <div class="form-err" id="signupErr"></div>
+    <button class="btn primary" id="btnDoSignup" style="width:100%">注册</button>
+    <div class="modal-divider"><span>已有账号</span></div>
+    <button class="btn ghost small" id="btnGoLogin" style="width:100%">去登录</button>
+  `);
+
+  document.getElementById('btnDoSignup').onclick = async () => {
+    const email = document.getElementById('signupEmail').value.trim();
+    const password = document.getElementById('signupPassword').value;
+    const errEl = document.getElementById('signupErr');
+    if (!email || !password) { errEl.textContent = '请填写邮箱和密码'; return; }
+    if (password.length < 6) { errEl.textContent = '密码至少 6 位'; return; }
+    errEl.textContent = '注册中...';
+    errEl.style.color = 'var(--text-3)';
+
+    const { data, error } = await sb.auth.signUp({ email, password });
+    if (error) {
+      errEl.style.color = '#DC2626';
+      errEl.textContent = error.message;
+    } else {
+      closeModal();
+      setTimeout(()=>{ window.location.href = 'wordgame.html'; }, 300);
+    }
+  };
+
+  document.getElementById('btnGoLogin').onclick = ()=>{
+    closeModal();
+    setTimeout(()=>{ document.getElementById('navLogin').click(); }, 150);
+  };
+};
+
+/* ════════ 登录 ════════ */
+document.getElementById('navLogin').onclick = async ()=>{
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    if (confirm('已登录：' + session.user.email + '\n\n是否退出登录？')) {
+      await sb.auth.signOut();
+      location.reload();
+    }
+    return;
+  }
+  openModal(`
+    <div class="modal-title">登录 Playkyn</div>
+    <div class="modal-sub">继续你的学习进度。</div>
+    <div class="field">
+      <label>邮箱</label>
+      <input type="email" id="loginEmail" class="text-input" placeholder="your@email.com">
+    </div>
+    <div class="field">
+      <label>密码</label>
+      <input type="password" id="loginPassword" class="text-input" placeholder="你的密码">
+    </div>
+    <div class="form-err" id="loginErr"></div>
+    <button class="btn primary" id="btnDoLogin" style="width:100%">登录</button>
+    <div class="modal-divider"><span>没有账号</span></div>
+    <button class="btn ghost small" id="btnGoSignup" style="width:100%">去注册</button>
+  `);
+
+  document.getElementById('btnDoLogin').onclick = async () => {
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginErr');
+    if (!email || !password) { errEl.textContent = '请填写邮箱和密码'; return; }
+    errEl.textContent = '登录中...';
+    errEl.style.color = 'var(--text-3)';
+
+    const { data, error } = await sb.auth.signInWithPassword({ email, password });
+    if (error) {
+      errEl.style.color = '#DC2626';
+      errEl.textContent = error.message;
+    } else {
+      closeModal();
+      setTimeout(()=>{ window.location.href = 'wordgame.html'; }, 300);
+    }
+  };
+
+  document.getElementById('btnGoSignup').onclick = ()=>{
+    closeModal();
+    setTimeout(()=>{ document.getElementById('navRegister').click(); }, 150);
+  };
+};
+
+/* ════════ 登录状态刷新 ════════ */
+async function refreshNavAuth(){
+  try{
+    const { data: { session } } = await sb.auth.getSession();
+    const navLogin = document.getElementById('navLogin');
+    const navRegister = document.getElementById('navRegister');
+    const navUser = document.getElementById('navUser');
+    const navLogout = document.getElementById('navLogout');
+
+    if(session){
+      // 已登录
+      navLogin.style.display = 'none';
+      navRegister.style.display = 'none';
+      navUser.style.display = 'inline-flex';
+      navLogout.style.display = 'inline-flex';
+      const email = session.user.email || '';
+      const shortName = email.split('@')[0];
+      navUser.textContent = shortName.length > 10 ? shortName.slice(0,10) + '…' : shortName;
+      navUser.title = email;
+      navUser.onclick = ()=>{ window.location.href = 'user.html'; };
+    } else {
+      // 未登录
+      navLogin.style.display = 'inline-flex';
+      navRegister.style.display = 'inline-flex';
+      navUser.style.display = 'none';
+      navLogout.style.display = 'none';
+    }
+  }catch(e){ console.error(e); }
+}
+
+/* 退出登录 */
+document.getElementById('navLogout').onclick = async ()=>{
+  if(!confirm('确定要退出登录吗？')) return;
+  await sb.auth.signOut();
+  location.reload();
+};
+
+/* 页面加载时刷新一次 */
+refreshNavAuth();
+
+/* 监听登录状态变化（跨标签页自动同步） */
+sb.auth.onAuthStateChange((event)=>{
+  refreshNavAuth();
+});
+/* ════════ 立即体验 ════════ */
+document.getElementById('btnTryNow').onclick = async ()=>{
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    // 已登录 → 直接进游戏
+    window.location.href = 'wordgame.html';
+  } else {
+    // 未登录 → 弹登录窗口
+    document.getElementById('navLogin').click();
+  }
+};
+document.getElementById('btnTryNow2').onclick = async ()=>{
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    window.location.href = 'wordgame.html';
+  } else {
+    document.getElementById('navLogin').click();
+  }
+};
+
+/* ════════ FAQ 折叠 ════════ */
+document.getElementById('navFaq').onclick = (e)=>{
+  e.preventDefault();
+  const faq = document.getElementById('faq');
+  if(faq.style.display === 'none'){
+    faq.style.display = 'block';
+    setTimeout(()=>{
+      faq.scrollIntoView({ behavior:'smooth', block:'start' });
+    }, 100);
+  } else {
+    faq.style.display = 'none';
+  }
+};
+
+/* FAQ 底部的"收起"按钮 */
+document.getElementById('faqClose').onclick = ()=>{
+  const faq = document.getElementById('faq');
+  faq.style.display = 'none';
+  window.scrollTo({ top:0, behavior:'smooth' });
+};
+
+
+/* ════════ 联系客服 ════════ */
+document.getElementById('navContact').onclick = ()=>{
+  openModal(`
+    <div class="modal-title">联系客服</div>
+    <div class="modal-sub">需要定制词表或解锁完整版，欢迎联系我们。</div>
+    <div class="field">
+      <label>微信号</label>
+      <input type="text" class="text-input" value="Playkyn" readonly onclick="this.select()">
+    </div>
+    <div class="field">
+      <label>邮箱</label>
+      <input type="text" class="text-input" value="495493831@qq.com" readonly onclick="this.select()">
+    </div>
+    <div style="font-size:13px;color:var(--text-3);line-height:1.6;margin-top:14px">
+      添加时请备注「Playkyn」，方便快速通过。
+    </div>
+    <button class="btn primary" onclick="closeModal()" style="width:100%;margin-top:20px">知道了</button>
+  `);
+};
+
+/* ════════ PWA 安装 ════════ */
+let deferredPrompt = null;
+const pwaToast = document.getElementById('pwaToast');
+const pwaInstallBtn = document.getElementById('pwaInstallBtn');
+const pwaCloseBtn = document.getElementById('pwaCloseBtn');
+
+function isPwaDismissed(){
+  try{
+    const t = localStorage.getItem('pwa_dismissed_at');
+    if(!t) return false;
+    return Date.now() - parseInt(t) < 7*24*3600*1000;
+  }catch(e){ return false; }
+}
+function dismissPwa(){
+  pwaToast.classList.remove('show');
+  try{ localStorage.setItem('pwa_dismissed_at', String(Date.now())); }catch(e){}
+}
+
+window.addEventListener('beforeinstallprompt', (e)=>{
+  e.preventDefault();
+  deferredPrompt = e;
+  if(!isPwaDismissed()) pwaToast.classList.add('show');
+});
+
+if(window.matchMedia('(display-mode: standalone)').matches){
+  pwaToast.classList.remove('show');
+}
+
+pwaInstallBtn.onclick = async ()=>{
+  if(!deferredPrompt){
+    openModal(`
+      <div class="modal-title">添加到主屏幕</div>
+      <div class="modal-sub">把 Playkyn 装到手机上，像 App 一样打开。</div>
+      <div style="font-size:14px;color:var(--text-2);line-height:1.8">
+        <b style="color:var(--text)">iPhone（Safari）</b><br>
+        点击底部「分享」按钮 → 选择「添加到主屏幕」<br><br>
+        <b style="color:var(--text)">Android（Chrome）</b><br>
+        点击右上角「菜单」→ 选择「安装应用」或「添加到主屏幕」
+      </div>
+      <button class="btn primary" onclick="closeModal()" style="width:100%;margin-top:20px">知道了</button>
+    `);
+    return;
+  }
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  pwaToast.classList.remove('show');
+};
+
+pwaCloseBtn.onclick = dismissPwa;
+document.getElementById('btnInstall').onclick = ()=> pwaInstallBtn.click();
+
+/* ════════ Service Worker ════════ */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js?v=1.0.8').catch(()=>{});
+  });
+}
+</script>
+
+</body>
+</html>
