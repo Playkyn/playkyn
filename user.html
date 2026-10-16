@@ -416,8 +416,8 @@ function selectWordlist(wordlistId, wordlistName) {
   }
 
   // 2. 存小纸条
-  localStorage.setItem('selected_wordlist_id', wordlistId);
-  localStorage.setItem('selected_wordlist_name', wordlistName);
+  localStorage.setItem('selected_wordlist_id', String(wordlistId).trim());
+localStorage.setItem('selected_wordlist_name', String(wordlistName).trim());
 
   // 3. 反馈并跳转
   alert(`✅ 已选择词库：${wordlistName}，即将进入游戏...`);

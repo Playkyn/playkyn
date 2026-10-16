@@ -1494,8 +1494,7 @@ async function loadWordlist(){
   console.log('🌐 从数据库加载词库...');
 
   // 读用户选中的词库（localStorage），没选过就用 PET
-  const wordlistId = localStorage.getItem('wq_current_wordlist')
-                  || 'bab0ed95-e126-48b3-9ab8-7e92c5da0e130';
+ const wordlistId = (localStorage.getItem('selected_wordlist_id') || 'bab0ed95-e126-48b3-9ab8-7e92c5da0e130').trim();
   console.log('📚 使用词库 ID：', wordlistId);
 
   const { data, error } = await sb
@@ -6868,56 +6867,59 @@ $('#btnLmPrev').onclick = () => {
 };
 
 
+
 /* ═══════════════════════════════════════════════════════════
    启动
    ═══════════════════════════════════════════════════════════ */
-(function init(){
-  /* 先查解锁状态，再启动页面 */
-  
-  // 1. 先从小纸条（localStorage）里查，看用户有没有在“我的词库”选过词库
-  const savedWordlistId = localStorage.getItem('selected_wordlist_id');
+(async function init() {
+  const savedWordlistId = localStorage.getItem('selected_wordlist_id')?.trim();
 
-  // 2. 如果用户选过，我们就去 Supabase 拉他选的那个词库
-  const loadCustomWords = savedWordlistId 
-    ? sb.from('words').select('*').eq('wordlist_id', savedWordlistId).then(res => res.data)
-    : Promise.resolve(null);
+  // 1. 同时执行：检查解锁状态、拉取默认词库、拉取选中的自定义词库
+  const [isUnlocked, dbWords, customWords] = await Promise.all([
+    checkUnlock(),
+    loadWordlist(),
+    savedWordlistId 
+      ? sb.from('words').select('*').eq('wordlist_id', savedWordlistId).then(res => res.data) 
+      : null
+  ]);
 
-  // 3. 同时执行：检查解锁状态、拉取默认词库、拉取选中的自定义词库
-  Promise.all([checkUnlock(), loadWordlist(), loadCustomWords]).then(([_, dbWords, customWords]) => {
-    
-    let finalWords = dbWords; // 默认先用原有的数据库词库
+  let finalWords = dbWords; // 默认先用数据库的默认词库
 
-    // 4. 如果咱们成功拿到了自定义词库，就优先用它！
-    if (customWords && customWords.length > 0) {
+  // 2. 如果咱们成功拿到了自定义词库，就检查权限！
+  if (customWords && customWords.length > 0) {
+    if (!isUnlocked) {
+      // 未解锁 → 弹窗提示，并强制使用默认词库
+      alert('🔒 使用自定义词库是完整版专享功能，请先升级！');
+      showUnlockPrompt(); // wordgame.html 里已有的升级弹窗
+    } else {
       finalWords = customWords;
       console.log('🔥 检测到自定义词库，正在加载...');
     }
+  }
 
-    // 5. 把最终确定的词库塞进 WORDS 里
-    if (finalWords && finalWords.length) {
-      WORDS.length = 0; // 清空旧数据
+  // 3. 把最终确定的词库塞进 WORDS 里
+  if (finalWords && finalWords.length) {
+    WORDS.length = 0;
 
-      // ⚠️ 关键：要把数据库的字段（word, meaning...）转换成游戏需要的格式（en, zh...）
-      if (customWords && customWords.length > 0) {
-        WORDS.push(...customWords.map(w => ({
-          en: w.word,
-          zh: w.meaning,
-          ph: w.phonetic || '',
-          u: w.unit || '',
-          g: w.group || ''
-        })));
-        console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自自定义词库）');
-      } else {
-        WORDS.push(...finalWords);
-        console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自数据库）');
-      }
+    if (customWords && customWords.length > 0 && isUnlocked) {
+      WORDS.push(...customWords.map(w => ({
+        en: w.word,
+        zh: w.meaning,
+        ph: w.phonetic || '',
+        u: w.unit || '',
+        g: w.group || ''
+      })));
+      console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自自定义词库）');
     } else {
-      console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自本地 w.js）');
+      WORDS.push(...finalWords);
+      console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自默认词库）');
     }
+  } else {
+    console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自本地 w.js）');
+  }
 
-    // 6. 一切就绪，启动游戏页面！
-    initPage();
-  });
+  // 4. 一切就绪，启动游戏页面！
+  initPage();
 })();
 
 function initPage(){
