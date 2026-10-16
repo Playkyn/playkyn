@@ -513,6 +513,14 @@ body{
 </button>
     <button class="btn ghost" id="btnInstall">添加到主屏幕</button>
   </div>
+  <style>
+  /* 当屏幕宽度大于 768px 时（电脑端），隐藏这个按钮 */
+@media (min-width: 769px) {
+    #btnInstall {
+        display: none !important;
+    }
+}
+</style>
 </section>
 
 <!-- ════════ 品牌介绍 ════════ -->
