@@ -370,10 +370,11 @@ async function renderWordlists() {
   const body = document.getElementById('myWordlistsBody');
   if (!body) return;
 
-  const { data, error } = await sb
-    .from('wordlists')
-    .select('id, name, description, word_count, is_public, owner_id, created_at')
-    .order('created_at', { ascending: false });
+ const { data, error } = await sb
+  .from('wordlists')
+  .select('id, name, description, word_count, is_public, owner_id, created_at')
+  .or(`owner_id.eq.${__currentUser.id},is_public.eq.true`)
+  .order('created_at', { ascending: false });
 
   if (error || !data) {
     body.textContent = '加载失败: ' + (error?.message || '未知');
@@ -405,9 +406,9 @@ async function renderWordlists() {
             ? `<button disabled style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:12px; opacity:0.8; cursor:not-allowed;">✅ 当前选择</button>`
             : `<button onclick="selectWordlist('${item.id}', '${escapeHtml(item.name).replace(/'/g, "\\'")}')" style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">▶️ 使用</button>`
           }
-          <button onclick="deleteWordlist('${item.id}')" style="background:#ff4d4f; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
-            🗑️ 删除
-          </button>
+          ${item.owner_id === __currentUser.id
+            ? `<button onclick="deleteWordlist('${item.id}')" style="background:#ff4d4f; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">🗑️ 删除</button>`
+            : ''}
         </div>
       </div>
     `;

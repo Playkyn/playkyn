@@ -1,4 +1,4 @@
-const CACHE_NAME = 'playkyn-v1.0.9'; // 👈 每次上线，就把这个数字加1，比如 v1.0.9
+const CACHE_NAME = 'playkyn-v1.1.0'; // 👈 每次上线，就把这个数字加1，比如 v1.0.9
 
 self.addEventListener('install', e => {
   self.skipWaiting();
