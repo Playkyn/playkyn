@@ -364,7 +364,6 @@ async function renderWordlists() {
     return;
   }
 
-  // 如果没有任何词库
   if (data.length === 0) {
     body.innerHTML = '<div style="color:#8A8A9A; font-size:14px; text-align:center; padding:20px;">暂无词库，点击上方按钮上传吧～</div>';
     return;
@@ -372,19 +371,30 @@ async function renderWordlists() {
 
   // 渲染列表
   let html = '';
+  const currentWordlistId = localStorage.getItem('selected_wordlist_id');
+
   data.forEach(item => {
+    const isSelected = (item.id === currentWordlistId);
+const safeName = escapeHtml(item.name).replace(/'/g, "\\'"); 
     html += `
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; border-radius:8px; margin-bottom:8px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid ${isSelected ? '#1677FF' : '#eee'}; border-radius:8px; margin-bottom:8px; background:${isSelected ? '#f0f7ff' : 'transparent'};">
         <div style="flex:1; overflow:hidden;">
-          <div style="font-weight:bold; font-size:14px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden;">${item.name}</div>
+          <div style="font-weight:bold; font-size:14px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; color:${isSelected ? '#1677FF' : '#333'};">
+            ${isSelected ? '✅ ' : ''}${escapeHtml(item.name)}
+          </div>
           <div style="font-size:12px; color:#8A8A9A; margin-top:4px;">
             ${item.word_count || 0} 个词 · ${item.is_public ? '公开' : '私有'}
           </div>
         </div>
         <div style="display:flex; gap:8px; flex-shrink:0;">
-          <button onclick="selectWordlist('${item.id}', '${item.name}')" style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
-            ▶️ 使用
-          </button>
+          ${isSelected 
+            ? `<button disabled style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:12px; opacity:0.8; cursor:not-allowed;">
+                 ✅ 当前选择
+               </button>`
+            : `<button onclick="selectWordlist('${item.id}', '${item.name}')" style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
+                 ▶️ 使用
+               </button>`
+          }
           <button onclick="deleteWordlist('${item.id}')" style="background:#ff4d4f; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
             🗑️ 删除
           </button>
@@ -395,32 +405,28 @@ async function renderWordlists() {
   body.innerHTML = html;
 }
 
-/* ════════ 切换词库 ════════ */
-document.addEventListener('click', async (e)=>{
-  const btn = e.target.closest('.use-wordlist');
-  if(!btn) return;
-
-  // 免费用户不能切换
+/* ======== 选择并使用词库 ======== */
+async function selectWordlist(wordlistId, wordlistName) {
+  // 1. 权限检查：免费用户不能切换
   const { data: { session } } = await sb.auth.getSession();
-  if(session){
-    const { data: profile } = await sb.from('profiles').select('is_unlocked').eq('id', session.user.id).single();
-    if(!profile || !profile.is_unlocked){
+  if (session) {
+    const { data: profile } = await sb.from('profiles')
+      .select('is_unlocked').eq('id', session.user.id).single();
+    if (!profile || !profile.is_unlocked) {
       showUpgradePrompt();
       return;
     }
   }
 
-  const id = btn.dataset.id;
-  const name = btn.dataset.name;
-  if(!confirm(`切换到「${name}」？\n游戏页将使用这个词库。`)) return;
-
-  localStorage.setItem('wq_current_wordlist', id);
-  localStorage.setItem('wq_current_wordlist_name', name);
+  // 2. 存小纸条（用统一的键名）
+  localStorage.setItem('selected_wordlist_id', wordlistId);
+  localStorage.setItem('selected_wordlist_name', wordlistName);
   localStorage.removeItem('wq_wordlist_cache_v1');
 
-  alert('✅ 已切换！');
-  location.reload();
-});
+  // 3. 反馈并跳转游戏页
+  alert(`✅ 已选择词库：${wordlistName}，即将进入游戏...`);
+  window.location.href = 'wordgame.html';
+}
 
 /* ════════ 上传弹窗 ════════ */
 function openUploadModal(){
@@ -508,7 +514,7 @@ function openUploadModal(){
       status.style.color = '#22c55e';
       setTimeout(()=>{
         modal.remove();
-        location.reload();
+        renderWordlists(); // 👈 改成这个，页面不会闪
       }, 1500);
 
     }catch(e){
@@ -679,36 +685,7 @@ async function deleteWordlist(wordlistId) {
     alert('删除失败：' + (error.message || '未知错误，请检查控制台'));
   }
 }
-/* ======== 选择并使用词库 ======== */
-async function selectWordlist(wordlistId, wordlistName) {
-  // 1. 从 Supabase 拉取这个词库的所有单词
-  const { data: words, error } = await sb
-    .from('words')
-    .select('*')
-    .eq('wordlist_id', wordlistId);
 
-  if (error || !words) {
-    alert('加载词库失败: ' + (error?.message || '未知错误'));
-    return;
-  }
-
-  if (words.length === 0) {
-    alert('这个词库是空的，请先上传单词！');
-    return;
-  }
-
-  // 2. TODO: 把你原来的“切换词库并进入游戏”的逻辑填在这里
-  // 例如：可能是修改 state 里的变量，然后跳转到游戏页面
-  // state.goal = { unit: wordlistName, groups: [] };
-  // state.words = words; // 或者存入本地缓存
-  // showGamesScreen(); // 跳转到游戏主页
-  
-  console.log(`成功加载词库：${wordlistName}，共 ${words.length} 个单词`);
-  alert(`已选择词库：${wordlistName}，即将进入游戏...`);
-
-  // 3. 跳转到游戏选择页面（假设你已经有了这个函数）
-  // showGamesScreen();
-}
 </script>
 
 
