@@ -290,6 +290,7 @@ let __currentUser = null;
   const displayName = (profile && profile.display_name) || shortName;
   const initial = (displayName[0] || 'U').toUpperCase();
   const isUnlocked = !!(profile && profile.is_unlocked);
+  window.__isUnlocked = isUnlocked; // 👈 新增：缓存到全局，供 selectWordlist 用
   const registeredAt = user.created_at;
   const unlockedAt = profile && profile.unlocked_at;
   const unlockCode = profile && profile.unlock_code;
@@ -406,24 +407,19 @@ const safeName = escapeHtml(item.name).replace(/'/g, "\\'");
 }
 
 /* ======== 选择并使用词库 ======== */
-async function selectWordlist(wordlistId, wordlistName) {
-  // 1. 权限检查：免费用户不能切换
-  const { data: { session } } = await sb.auth.getSession();
-  if (session) {
-    const { data: profile } = await sb.from('profiles')
-      .select('is_unlocked').eq('id', session.user.id).single();
-    if (!profile || !profile.is_unlocked) {
-      showUpgradePrompt();
-      return;
-    }
+/* ======== 选择并使用词库（同步版，不卡顿） ======== */
+function selectWordlist(wordlistId, wordlistName) {
+  // 1. 权限检查：直接读缓存好的变量，不发网络请求！
+  if (!window.__isUnlocked) {
+    showVipModal(); // 免费用户弹升级引导
+    return;
   }
 
-  // 2. 存小纸条（用统一的键名）
+  // 2. 存小纸条
   localStorage.setItem('selected_wordlist_id', wordlistId);
   localStorage.setItem('selected_wordlist_name', wordlistName);
-  localStorage.removeItem('wq_wordlist_cache_v1');
 
-  // 3. 反馈并跳转游戏页
+  // 3. 反馈并跳转
   alert(`✅ 已选择词库：${wordlistName}，即将进入游戏...`);
   window.location.href = 'wordgame.html';
 }
