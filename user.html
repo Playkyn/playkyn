@@ -381,9 +381,14 @@ async function renderWordlists() {
             ${item.word_count || 0} 个词 · ${item.is_public ? '公开' : '私有'}
           </div>
         </div>
-        <button onclick="deleteWordlist('${item.id}')" style="background:#ff4d4f; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px; flex-shrink:0;">
-          🗑️ 删除
-        </button>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+          <button onclick="selectWordlist('${item.id}', '${item.name}')" style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
+            ▶️ 使用
+          </button>
+          <button onclick="deleteWordlist('${item.id}')" style="background:#ff4d4f; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
+            🗑️ 删除
+          </button>
+        </div>
       </div>
     `;
   });
@@ -673,6 +678,36 @@ async function deleteWordlist(wordlistId) {
     console.error('删除失败:', error);
     alert('删除失败：' + (error.message || '未知错误，请检查控制台'));
   }
+}
+/* ======== 选择并使用词库 ======== */
+async function selectWordlist(wordlistId, wordlistName) {
+  // 1. 从 Supabase 拉取这个词库的所有单词
+  const { data: words, error } = await sb
+    .from('words')
+    .select('*')
+    .eq('wordlist_id', wordlistId);
+
+  if (error || !words) {
+    alert('加载词库失败: ' + (error?.message || '未知错误'));
+    return;
+  }
+
+  if (words.length === 0) {
+    alert('这个词库是空的，请先上传单词！');
+    return;
+  }
+
+  // 2. TODO: 把你原来的“切换词库并进入游戏”的逻辑填在这里
+  // 例如：可能是修改 state 里的变量，然后跳转到游戏页面
+  // state.goal = { unit: wordlistName, groups: [] };
+  // state.words = words; // 或者存入本地缓存
+  // showGamesScreen(); // 跳转到游戏主页
+  
+  console.log(`成功加载词库：${wordlistName}，共 ${words.length} 个单词`);
+  alert(`已选择词库：${wordlistName}，即将进入游戏...`);
+
+  // 3. 跳转到游戏选择页面（假设你已经有了这个函数）
+  // showGamesScreen();
 }
 </script>
 
