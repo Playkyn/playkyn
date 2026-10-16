@@ -1100,6 +1100,7 @@ body.skin-boy .weak-tag{
         <button class="icon-btn accent" id="btnHomepage" title="返回主页">🏠</button>
         <button class="icon-btn accent" id="btnGames" title="游戏乐园">🎮</button>
         <button class="icon-btn accent" id="btnSwitchTopic" title="主题">📚</button>
+        <button class="icon-btn accent" id="btnListenShortcut" title="随心听">🎧</button>
         <button class="icon-btn" id="btnSound" title="声音">🔊</button>
         <button class="icon-btn" id="btnSkin" title="切换皮肤">🎨</button>
         <button class="icon-btn accent" id="btnAdmin" style="display:none" title="家长管理">👨‍👩‍👧</button>
@@ -1119,6 +1120,16 @@ body.skin-boy .weak-tag{
       <div class="small muted" style="text-align:center;margin-top:8px;font-weight:800" id="levelTitle">🌱 见习学徒</div>
     </div>
     <div class="card">
+      <h2>📋 今日任务</h2>
+      <div class="task-row">
+        <div class="task-item"><div class="num" id="dueNum">0</div><div class="lbl">待复习</div></div>
+        <div class="task-item"><div class="num" id="newNum">0</div><div class="lbl">新词</div></div>
+      </div>
+      <button class="btn primary" id="btnLearn">▶ 开始学习</button>
+<button class="btn ghost small" id="btnSprint" style="margin-top:10px;display:none">🚀 考前冲刺</button>
+
+    </div>
+    <div class="card">
       <div class="mascot-row">
         <div class="mascot-face" id="homeFace">🦊</div>
         <div class="speech" id="homeSpeech">今天也要加油哦！</div>
@@ -1127,15 +1138,60 @@ body.skin-boy .weak-tag{
 
 <div class="card pet-card" id="petCard"></div>
 
-   <!-- 随心听卡片 -->
-<div class="card" style="padding:14px 18px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(160deg, rgba(255,255,255,.95), rgba(230,245,255,.9));">
-  <div>
-    <div style="font-weight:900; font-size:15px; color:var(--text); margin-bottom:2px;">🎧 随心听</div>
-    <div class="muted small" style="font-weight:700;">走路、休息时也可以磨耳朵</div>
+<!-- 随心听 banner -->
+<div class="card" id="listenBanner" style="
+  padding:0; overflow:hidden; position:relative; cursor:pointer;
+  background:linear-gradient(120deg,var(--pink) 0%,var(--purple) 100%);
+  border:none;
+  box-shadow:0 8px 24px -8px var(--shadow);
+  transition:transform .2s;
+">
+  <!-- 浮动音符 -->
+  <div style="position:absolute;inset:0;overflow:hidden;pointer-events:none">
+    <span class="float-note" style="left:8%;top:20%;animation-delay:0s">♪</span>
+    <span class="float-note" style="left:22%;top:60%;animation-delay:.8s">♫</span>
+    <span class="float-note" style="left:78%;top:30%;animation-delay:1.6s">♬</span>
+    <span class="float-note" style="left:90%;top:70%;animation-delay:2.4s">♪</span>
   </div>
-  <button class="btn primary small" id="btnListenMode" style="width:auto; padding:10px 18px; font-weight:900;">开始播放</button>
+
+  <div style="padding:18px 20px; position:relative; z-index:2;
+    display:flex; align-items:center; gap:14px">
+    <div style="font-size:38px;line-height:1;flex-shrink:0;
+      filter:drop-shadow(0 4px 10px rgba(0,0,0,.2))">🎧</div>
+    <div style="flex:1;min-width:0">
+      <div style="font-size:16px;font-weight:900;color:#fff;
+        letter-spacing:.3px;text-shadow:0 2px 6px rgba(0,0,0,.15)">
+        随心听
+      </div>
+      <div style="font-size:11px;color:rgba(255,255,255,.85);
+        font-weight:700;margin-top:3px">
+        走路 · 睡前 · 磨耳朵，随时听
+      </div>
+    </div>
+    <button class="btn small" id="btnListenMode" style="
+      width:auto; padding:10px 16px; font-weight:900; font-size:13px;
+      background:rgba(255,255,255,.95); color:var(--pink);
+      border:none; border-radius:999px; flex-shrink:0;
+      box-shadow:0 4px 12px rgba(0,0,0,.15);
+    ">▶ 开始</button>
+  </div>
 </div>
 
+<style>
+@keyframes floatNote{
+  0%   { transform:translateY(0) scale(1); opacity:0; }
+  20%  { opacity:.55; }
+  80%  { opacity:.55; }
+  100% { transform:translateY(-40px) scale(1.3); opacity:0; }
+}
+.float-note{
+  position:absolute;
+  font-size:20px; color:#fff; font-weight:900;
+  animation:floatNote 4s ease-in-out infinite;
+  pointer-events:none;
+}
+#listenBanner:active{ transform:scale(.98); }
+</style>
 
 
  <div class="card">
@@ -1145,14 +1201,7 @@ body.skin-boy .weak-tag{
         <div class="legend" id="legend"></div>
       </div>
     </div>
-    <div class="card">
-      <h2>📋 今日任务</h2>
-      <div class="task-row">
-        <div class="task-item"><div class="num" id="dueNum">0</div><div class="lbl">待复习</div></div>
-        <div class="task-item"><div class="num" id="newNum">0</div><div class="lbl">新词</div></div>
-      </div>
-      <button class="btn primary" id="btnLearn">▶ 开始学习</button>
-    </div>
+    
     <div class="card">
       <h2>🎮 游戏乐园</h2>
       <button class="btn ghost small" id="btnHomeGames">进入游戏乐园 →</button>
@@ -1503,34 +1552,82 @@ function refreshMembershipCache(profile){
   _unlock.profile    = profile;
   _unlock.membership = parseMembership(profile);
 }
-/* ════════ 从数据库加载词库 ════════ */
+/* ════════ 从数据库加载词库（带缓存兜底）════════ */
 async function loadWordlist(){
   console.log('🌐 从数据库加载词库...');
 
-  // 读用户选中的词库（localStorage），没选过就用 PET
- const wordlistId = (localStorage.getItem('selected_wordlist_id') || 'bab0ed95-e126-48b3-9ab8-7e92c5da0e130').trim();
-  console.log('📚 使用词库 ID：', wordlistId);
+  const CACHE_KEY = 'wq_wordlist_cache_v2';
 
-  const { data, error } = await sb
-    .from('words')
-    .select('*')
-    .eq('wordlist_id', wordlistId);
+  let wordlistId = (localStorage.getItem('selected_wordlist_id') || '').trim();
 
-  if(error || !data || !data.length){
-    console.warn('⚠️ 数据库加载失败，回退到本地 w.js：', error);
-    return null;
+  // ① 没选过 → 找公开词库当默认
+  if(!wordlistId){
+    try{
+      const { data: pub } = await sb
+        .from('wordlists')
+        .select('id, name')
+        .eq('is_public', true)
+        .order('created_at', { ascending: true })
+        .limit(1)
+        .maybeSingle();
+      if(pub && pub.id){
+        wordlistId = pub.id;
+        console.log('📚 默认词库：', pub.name);
+      }
+    }catch(e){ console.warn('查询公开词库失败', e); }
   }
 
-  const words = data.map(r => ({
-    en: r.word,
-    zh: r.meaning,
-    ph: r.phonetic || '',
-    u: r.unit || '',
-    g: r.group || ''
-  }));
+  // ② 有了 wordlistId → 查词库内容
+  if(wordlistId){
+    try{
+      const { data, error } = await sb
+        .from('words')
+        .select('*')
+        .eq('wordlist_id', wordlistId);
 
-  console.log('✅ 从数据库加载词库：', words.length, '个词');
-  return words;
+      if(!error && data && data.length){
+        const words = data.map(r => ({
+          en: r.word,
+          zh: r.meaning,
+          ph: r.phonetic || '',
+          u: r.unit || '',
+          g: r.group || ''
+        }));
+
+        try{
+          localStorage.setItem(CACHE_KEY, JSON.stringify({
+            at: Date.now(),
+            wordlistId,
+            words
+          }));
+        }catch(e){}
+
+        console.log('✅ 从数据库加载词库：', words.length, '个词');
+        return words;
+      }
+
+      console.warn('⚠️ 数据库无数据或报错：', error?.message);
+    }catch(e){
+      console.warn('⚠️ 数据库请求异常：', e.message);
+    }
+  }
+
+  // ③ 数据库失败 → 用缓存兜底
+  try{
+    const raw = localStorage.getItem(CACHE_KEY);
+    if(raw){
+      const cached = JSON.parse(raw);
+      const age = Date.now() - cached.at;
+      if(age < 7 * 24 * 3600 * 1000){
+        console.log('📦 使用缓存词库', cached.words.length, '个词');
+        return cached.words;
+      }
+    }
+  }catch(e){}
+
+  // ④ 完全失败
+  console.error('❌ 无法加载词库：数据库请求失败，且无缓存可用');
+  return null;
 }
 
 
@@ -1707,7 +1804,7 @@ function getPhonetic(word){
   return w ? (w.ph || '') : '';
 }
 
-function renderWordCardBlock(word){
+function renderWordCardBlock(word, hideSpell){
  if(!word) return '';  // ★ 防崩补丁
   const ph = getPhonetic(word);
   const sylHTML = renderSyllablesHTML(word);
@@ -1721,7 +1818,8 @@ function renderWordCardBlock(word){
         <span><i class="blue"></i>蓝色=音标</span>
       </div>
       <div class="ph-tip">💡 一个音节一种颜色，读的时候按颜色分块记忆更轻松</div>
- <button class="btn ghost small" data-spell="${esc(word)}" style="margin-top:10px;width:auto;padding:6px 16px;display:inline-block;">🔤 拼读单词</button>
+ 
+${hideSpell ? '' : `<button class="btn ghost small" data-spell="${esc(word)}" style="margin-top:10px;width:auto;padding:6px 16px;display:inline-block;">🔤 拼读单词</button>`}
 
 
     </div>
@@ -3102,22 +3200,21 @@ function bankOf(en){
 
 function getPoolWords() {
   const unlocked = isUnlocked();
+  const clean = arr => arr.filter(w => w && w.en && w.zh);
 
-  // 无分类词库 → 返回全部词
-  const hasCategories = WORDS.some(w => (w.u && w.u.trim()) || (w.g && w.g.trim()));
+  const hasCategories = WORDS.some(w => w && w.u && w.u.trim()) || WORDS.some(w => w && w.g && w.g.trim());
   if(!hasCategories){
-    return WORDS;
+    return clean(WORDS);
   }
 
-  // 有分类 → 按单元/类别筛选
   if (!state.goal || !state.goal.unit) {
-    return unlocked ? WORDS : WORDS.filter(w => w.u === 'U1U2');
+    return clean(unlocked ? WORDS : WORDS.filter(w => w && w.u === 'U1U2'));
   }
   let unit = state.goal.unit;
   if (!unlocked && unit !== 'U1U2') unit = 'U1U2';
   const selectedGroups = state.goal.groups || [];
-  if (selectedGroups.length === 0) return WORDS.filter(w => w.u === unit);
-  return WORDS.filter(w => w.u === unit && selectedGroups.includes(w.g));
+  if (selectedGroups.length === 0) return clean(WORDS.filter(w => w && w.u === unit));
+  return clean(WORDS.filter(w => w && w.u === unit && selectedGroups.includes(w.g)));
 }
 
 
@@ -3417,7 +3514,7 @@ function showMasterPanel(){
    用户菜单
    ═══════════════════════════════════════════════════════════ */
 function openUserMenu(){
-  const adminBtn=isParent()?`<button class="btn primary small" id="menuAdmin" style="margin-bottom:10px">👨‍👩‍👧 家长管理</button>`:'';
+  const adminBtn = '';   // 家长模式已下线
   openModal(`
     <div style="text-align:center;margin-bottom:18px">
       <div style="font-size:56px;line-height:1">${esc(currentUser.avatar)}</div>
@@ -4064,7 +4161,7 @@ function renderHome(){
   
   $('#homeAvatar').textContent=currentUser.avatar;
   $('#homeName').textContent=currentUser.name;
-  $('#btnAdmin').style.display=isParent()?'block':'none';
+  $('#btnAdmin').style.display='none';   // 家长模式已下线;
 
   // ★ 鼠标悬停昵称显示会员状态
   const __m = getMembership();
@@ -4132,6 +4229,18 @@ function renderHome(){
     speech.textContent=t>15?`今天有 ${t} 个词哦，加油！💪`
       :t>8?`今天有 ${t} 个词，很快就完成了！`:`只有 ${t} 个词，轻松搞定！`;
   }
+  // ★ 考前冲刺按钮
+const sprintBtn = $('#btnSprint');
+if(sprintBtn){
+  const freshCount = getPoolWords().filter(w => !state.bank[w.en] || state.bank[w.en].seen === 0).length;
+  if(freshCount === 0 && due.length === 0){
+    sprintBtn.style.display = 'none';
+  } else {
+    sprintBtn.style.display = 'inline-flex';
+    sprintBtn.textContent = `🚀 考前冲刺（还剩 ${freshCount} 词未学）`;
+    sprintBtn.onclick = () => { Sfx.click(); showSprintDialog(); };
+  }
+}
  renderAchWall();renderTimeline();renderWeakness();updateXpBar();renderPetCard();
 
 }
@@ -4234,7 +4343,7 @@ function openWeakWordStudy(en){
   openModal(`
     <div class="modal-title">🎯 强化学习 · 易错词</div>
    <div style="text-align:center;margin-bottom:14px"> 
-      ${renderWordCardBlock(w.en)}
+      ${renderWordCardBlock(w.en, true)}
      
       <button class="btn ghost small" id="weakSpeakBtn" style="margin-top:10px;width:auto;padding:8px 16px;margin-left:auto;margin-right:auto;display:inline-block">🔊 听发音</button>
     </div>
@@ -4316,6 +4425,9 @@ $('#btnSound').onclick=()=>{
   try{ localStorage.setItem(LS_SOUND,soundOn?'on':'off'); }catch(e){}
   if(soundOn){ Sfx.unlock();Sfx.correct();Speaker.speak('Hello'); }
 };
+// ★ 新增：随心听快捷入口
+const __lsBtn = $('#btnListenShortcut');
+if(__lsBtn) __lsBtn.onclick = (e) => { e.stopPropagation(); Sfx.click(); startListenMode(); };
 $('#btnSkin').onclick=()=>{
   Sfx.click();
   currentSkin = (currentSkin==='boy') ? 'girl' : 'boy';
@@ -6489,22 +6601,197 @@ function currentQuestion(){
 /* ═══════════════════════════════════════════════════════════
    学习会话
    ═══════════════════════════════════════════════════════════ */
-let session=null;
-function startSession(){
-  const due=dueWords().sort((a,b)=>state.bank[a.en].next-state.bank[b.en].next);
-  const fresh=freshWords(getDailyNew());
-  const queue=[];
-  const maxLen=Math.max(due.length,fresh.length);
-  for(let i=0;i<maxLen;i++){
-    if(due[i]) queue.push({en:due[i].en,isNew:false,q:null,previewed:true});
-    if(fresh[i]) queue.push({en:fresh[i].en,isNew:true,q:null,previewed:false});
+   /* ════════ 考前冲刺 · 配置弹窗 ════════ */
+function showSprintDialog(){
+  const currentPool = getPoolWords();
+  const allPool = WORDS;
+
+  openModal(`
+    <div class="modal-title">🚀 考前冲刺</div>
+    <div class="tip" style="background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.3)">
+      考试前突击复习，把选中的词库完整过一遍或多遍。<br>
+      <span style="font-size:11px;color:var(--muted)">💡 冲刺不记入日常学习曲线，放心用</span>
+    </div>
+
+    <div class="field">
+      <label>复习范围</label>
+      <div id="sprintScope" style="display:grid;gap:8px">
+        <button class="btn ghost small" data-scope="current" style="text-align:left;padding:12px">
+          🎯 当前主题 · <b>${currentPool.length}</b> 词
+        </button>
+        <button class="btn ghost small" data-scope="all" style="text-align:left;padding:12px">
+          📚 全部词库 · <b>${allPool.length}</b> 词
+        </button>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px">
+      <label>过几遍</label>
+      <div id="sprintRounds" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+        <button class="btn ghost small" data-r="1" style="padding:12px">1 遍</button>
+        <button class="btn ghost small" data-r="2" style="padding:12px">2 遍</button>
+        <button class="btn ghost small" data-r="3" style="padding:12px">3 遍</button>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px">
+  <label>每批题数（做完一批休息一下）</label>
+  <div id="sprintBatch" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px">
+    <button class="btn ghost small" data-b="20" style="padding:10px;font-size:13px">20 题</button>
+    <button class="btn ghost small" data-b="50" style="padding:10px;font-size:13px">50 题</button>
+    <button class="btn ghost small" data-b="100" style="padding:10px;font-size:13px">100 题</button>
+    <button class="btn ghost small" data-b="0" style="padding:10px;font-size:13px">不限</button>
+  </div>
+</div>
+
+    <div id="sprintPreview" style="font-size:13px;color:var(--muted);
+      font-weight:800;text-align:center;margin:18px 0"></div>
+
+    <button class="btn primary" id="btnSprintGo">开始冲刺</button>
+    <button class="btn ghost small" id="btnSprintCancel" style="margin-top:10px">取消</button>
+  `);
+
+ let scope = 'current', rounds = 1, batch = 100;
+
+  function updatePreview(){
+    const pool = scope === 'current' ? currentPool : allPool;
+    const total = pool.length * rounds;
+    const mins = Math.max(1, Math.round(total * 0.25));
+    $('#sprintPreview').innerHTML =
+      `共 <b style="color:var(--pink)">${total}</b> 道题，预计 <b style="color:var(--pink)">${mins}</b> 分钟`;
   }
-  if(!queue.length)return;
-  const now=Date.now();
-  session={queue,idx:0,correct:0,wrong:0,combo:0,maxCombo:0,
-    requeue:[],locked:false,newCount:fresh.length,coinsEarned:0,
-    startTime:now,lastActivity:now};
-  showScreen('s-learn');renderLearn();
+
+  function setActive(selector, btn){
+    document.querySelectorAll(selector + ' button').forEach(x => {
+      const on = x === btn;
+      x.style.background = on ? 'linear-gradient(120deg,var(--pink),var(--orange))' : '';
+      x.style.color = on ? '#fff' : '';
+      x.style.borderColor = on ? 'transparent' : '';
+    });
+  }
+
+ // 事件委托：绑定到父容器，不绑每个按钮
+const __scopeBox = document.getElementById('sprintScope');
+if(__scopeBox){
+  __scopeBox.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-scope]');
+    if(!btn) return;
+    Sfx.click();
+    scope = btn.dataset.scope;
+    setActive('#sprintScope', btn);
+    updatePreview();
+  });
+}
+
+const __roundsBox = document.getElementById('sprintRounds');
+if(__roundsBox){
+  __roundsBox.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-r]');
+    if(!btn) return;
+    Sfx.click();
+    rounds = +btn.dataset.r;
+    setActive('#sprintRounds', btn);
+    updatePreview();
+  });
+}
+
+const __batchBox = document.getElementById('sprintBatch');
+if(__batchBox){
+  __batchBox.addEventListener('click', (e) => {
+    const btn = e.target.closest('button[data-b]');
+    if(!btn) return;
+    Sfx.click();
+    batch = +btn.dataset.b;
+    setActive('#sprintBatch', btn);
+    updatePreview();
+  });
+}
+  // 初始化默认选中
+  const __defScope = document.querySelector('#sprintScope [data-scope="current"]');
+  const __defRound = document.querySelector('#sprintRounds [data-r="1"]');
+  const __defBatch = document.querySelector('#sprintBatch [data-b="100"]');
+  if(__defScope) setActive('#sprintScope', __defScope);
+  if(__defRound) setActive('#sprintRounds', __defRound);
+  if(__defBatch) setActive('#sprintBatch', __defBatch);
+  updatePreview();
+
+  // 用 modalCard 做事件委托（按钮在弹窗里，点击会冒泡到 modalCard）
+  const __modalCard = document.getElementById('modalCard');
+  if(__modalCard){
+    __modalCard.addEventListener('click', function(e){
+      if(e.target.closest('#btnSprintGo')){
+        e.preventDefault();
+        e.stopPropagation();
+        Sfx.click();
+        closeModal();
+        launchSprint(scope, rounds, batch);
+        return;
+      }
+      if(e.target.closest('#btnSprintCancel')){
+        e.preventDefault();
+        e.stopPropagation();
+        Sfx.click();
+        closeModal();
+        return;
+      }
+    });
+  }
+
+}
+
+/* ════════ 启动冲刺 ════════ */
+function launchSprint(scope, rounds, batch){
+  const raw = scope === 'current' ? getPoolWords() : WORDS.slice();
+  const pool = raw.filter(w => w && w.en && w.zh);
+  if(raw.length !== pool.length){
+    console.warn(`⚠️ 过滤了 ${raw.length - pool.length} 条无效词条`);
+  }
+  if(!pool.length){ alert('没有可复习的词'); return; }
+
+  const queue = [];
+  for(let r = 0; r < rounds; r++){
+    const shuffled = shuffle(pool.slice());
+    shuffled.forEach(w => {
+      const bankItem = state.bank[w.en];
+      const isNew = !bankItem || bankItem.seen === 0;
+      queue.push({
+        en: w.en,
+        isNew: isNew && r === 0,
+        q: null,
+        previewed: true
+      });
+    });
+  }
+
+  console.log(`🚀 冲刺：${pool.length} 词 × ${rounds} 遍 = ${queue.length} 题`);
+  window.__sprintBatch = batch || 0;
+  startSession(queue);
+}
+let session=null;
+function startSession(customQueue){
+  let queue;
+  if(customQueue && customQueue.length){
+    queue = customQueue;
+  } else {
+    const due = dueWords().sort((a,b)=>state.bank[a.en].next-state.bank[b.en].next);
+    const fresh = freshWords(getDailyNew());
+    queue = [];
+    const maxLen = Math.max(due.length, fresh.length);
+    for(let i=0;i<maxLen;i++){
+      if(due[i])  queue.push({en:due[i].en, isNew:false, q:null, previewed:true});
+      if(fresh[i]) queue.push({en:fresh[i].en, isNew:true, q:null, previewed:false});
+    }
+  }
+  if(!queue.length) return;
+  const now = Date.now();
+  const newCount = queue.filter(x => x.isNew).length;
+  session = {
+    queue, idx:0, correct:0, wrong:0, combo:0, maxCombo:0,
+    requeue:[], locked:false, newCount, coinsEarned:0,
+    startTime:now, lastActivity:now,
+    isSprint: !!customQueue,
+    batchSize: customQueue ? (window.__sprintBatch || 100) : 0
+  };
+  showScreen('s-learn'); renderLearn();
 }
 const CORRECT_PHRASES=['太棒了！','答对啦！','真厉害！','正确！','漂亮！','好样的！'];
 const COMBO_PHRASES=['连击好爽！','你太强了！','无人能挡！','继续冲！','超神了！'];
@@ -6657,12 +6944,57 @@ function answerQuestion(ok){
   save();
   setTimeout(()=>{ session.locked=false;nextQuestion(); }, ok?820:1500);
 }
+/* ════════ 冲刺 · 批次休息弹窗 ════════ */
+function showBatchBreak(doneCount){
+  const total = session.queue.length;
+  const remaining = total - doneCount;
+  const nextBatch = Math.min(session.batchSize, remaining);
+  const mins = Math.max(1, Math.round(nextBatch * 0.25));
+
+  Sfx.finish();
+  openModal(`
+    <div style="text-align:center">
+      <div style="font-size:60px;margin-bottom:6px">☕</div>
+      <div style="font-size:20px;font-weight:900;margin:10px 0">休息一下</div>
+      <div style="font-size:14px;color:var(--muted);font-weight:700;line-height:1.8;margin-top:6px">
+        已完成 <b style="color:var(--pink)">${doneCount}</b> / ${total} 题<br>
+        还剩 <b style="color:var(--pink)">${remaining}</b> 题
+      </div>
+      <button class="btn primary" id="btnBatchNext" style="margin-top:22px">
+        继续下一批（${nextBatch} 题 · 约 ${mins} 分钟）
+      </button>
+      <button class="btn ghost small" id="btnBatchQuit" style="margin-top:10px">
+        暂停，下次再继续
+      </button>
+    </div>
+  `);
+
+  $('#btnBatchNext').onclick = ()=>{
+    Sfx.click();
+    closeModal();
+    renderLearn();
+  };
+  $('#btnBatchQuit').onclick = ()=>{
+    Sfx.click();
+    closeModal();
+    session = null;
+    goHome();
+  };
+}
+
 function nextQuestion(){
   session.idx++;
   if(session.idx>=session.queue.length && session.requeue.length){
     session.queue.push(...session.requeue);session.requeue=[];
   }
   if(session.idx>=session.queue.length){ finishSession();return; }
+
+  // ★ 冲刺分批：每 100 题弹"休息一下"
+  if(session.isSprint && session.batchSize && session.idx % session.batchSize === 0){
+    showBatchBreak(session.idx);
+    return;
+  }
+
   renderLearn();
 }
 function calcStreak(){
@@ -6696,7 +7028,7 @@ function trackGamePlayed(type){
 
 
 function finishSession(){
-  recordSession();
+  if(!session.isSprint) recordSession();
   const total=session.correct+session.wrong;
   const acc=total?Math.round(session.correct/total*100):0;
 
@@ -6750,7 +7082,8 @@ function finishSession(){
 $('#btnLearnBack').onclick=()=>{
   if(confirm('当前学习进度已保存，确定退出本轮学习吗？')){
     Sfx.click();Speaker.stop();
-    recordSession();session=null;goHome();
+    if(session && !session.isSprint) recordSession();
+    session=null;goHome();
   }
 };
 $('#btnBackHome').onclick=()=>{ Sfx.click();goHome(); };
@@ -6856,7 +7189,16 @@ function pauseListenMode() {
 }
 
 // 绑定按钮事件
-$('#btnListenMode').onclick = () => { Sfx.click(); startListenMode(); };
+const __listenBtn = $('#btnListenMode');
+if(__listenBtn) __listenBtn.onclick = (e) => { e.stopPropagation(); Sfx.click(); startListenMode(); };
+
+$('#btnListenShortcut').onclick = (e) => { e.stopPropagation(); Sfx.click(); startListenMode(); };
+
+$('#listenBanner').onclick = (e) => {
+  if(e.target.closest('#btnListenMode')) return;  // 避免双击触发
+  Sfx.click();
+  startListenMode();
+};
 $('#btnListenBack').onclick = () => { Sfx.click(); pauseListenMode(); goHome(); };
 
 $('#btnLmToggle').onclick = () => {
@@ -6945,6 +7287,31 @@ $('#btnLmPrev').onclick = () => {
   } else {
     console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自本地 w.js）');
   }
+  // ★ 词库完全加载失败时，明确提示用户
+if(!WORDS.length){
+  console.error('❌ 词库为空，无法启动');
+  document.body.innerHTML = `
+    <div style="min-height:100vh;display:flex;align-items:center;
+      justify-content:center;padding:24px;text-align:center;
+      font-family:-apple-system,'PingFang SC',sans-serif">
+      <div>
+        <div style="font-size:56px;margin-bottom:12px">🌐</div>
+        <div style="font-size:18px;font-weight:900;color:#3d2463;
+          margin-bottom:8px">网络异常</div>
+        <div style="font-size:14px;color:#8b7aa8;line-height:1.7;
+          margin-bottom:20px">
+          词库加载失败，请检查网络后重试
+        </div>
+        <button onclick="location.reload()"
+          style="padding:12px 28px;background:#ff6b9d;color:#fff;
+          border:none;border-radius:10px;font-size:15px;
+          font-weight:900;cursor:pointer">
+          重新加载
+        </button>
+      </div>
+    </div>`;
+  return;
+}
 
   // 4. 一切就绪，启动游戏页面！
   initPage();
@@ -6996,7 +7363,26 @@ sb.auth.getSession().then(async ({data:{session}})=>{
     currentAccount = { id: user.id, name: name, avatar: '🦊', role: 'student', pwd: '' };
     currentUser = rtUser;
     state = currentUser.state;
-
+// ★ 从 Supabase 读每日新词量（覆盖本地）
+try{
+  const { data: __p } = await sb.from('profiles')
+    .select('daily_new').eq('id', user.id).single();
+  if(__p && typeof __p.daily_new === 'number'){
+    if(!currentUser.settings) currentUser.settings = {};
+    currentUser.settings.dailyNew = __p.daily_new;
+    // 顺便写回本地，保持一致
+    try{
+      const KEY = 'wq_runtime_v5_' + user.id;
+      const raw = localStorage.getItem(KEY);
+      if(raw){
+        const p = JSON.parse(raw);
+        if(!p.settings) p.settings = {};
+        p.settings.dailyNew = __p.daily_new;
+        localStorage.setItem(KEY, JSON.stringify(p));
+      }
+    }catch(e){}
+  }
+}catch(e){ /* 忽略 */ }
     if(!state.game) state.game = defaultState().game;
     if(!state.game.achievements) state.game.achievements = {};
     if(!state.groupStats) state.groupStats = {};
@@ -7038,6 +7424,7 @@ sb.auth.getSession().then(async ({data:{session}})=>{
 }
 window.addEventListener('beforeunload',()=>{ try{ saveRuntime(); }catch(e){} });
 window.addEventListener('pagehide',()=>{ try{ saveRuntime(); }catch(e){} });
+
 </script>
 </body>
 </html>

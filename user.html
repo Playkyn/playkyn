@@ -361,7 +361,80 @@ let __currentUser = null;
     }
     openUploadModal();
   };
+// ★ 渲染学习报告 + 学习设置
+document.getElementById('content').insertAdjacentHTML('beforeend',
+  renderStudyReport(user.id) + renderSettingsCard(profile)
+);
 
+// ★ 绑定设置卡片的事件
+const rng = document.getElementById('dailyRange');
+const valEl = document.getElementById('dailyVal');
+if(rng){
+  rng.oninput = () => { valEl.textContent = rng.value; };
+  rng.onchange = async () => {
+    const v = +rng.value;
+    const { error } = await sb.from('profiles')
+      .update({ daily_new: v }).eq('id', user.id);
+    if(error){ alert('保存失败：' + error.message); return; }
+
+    // 同步到本地（这样游戏页下次会读到新值）
+    try{
+      const KEY = 'wq_runtime_v5_' + user.id;
+      const raw = localStorage.getItem(KEY);
+      if(raw){
+        const p = JSON.parse(raw);
+        if(!p.settings) p.settings = {};
+        p.settings.dailyNew = v;
+        localStorage.setItem(KEY, JSON.stringify(p));
+      }
+    }catch(e){}
+
+    // 提示
+    const t = document.createElement('div');
+    t.textContent = '✅ 已保存';
+    t.style.cssText = 'position:fixed;left:50%;top:50%;' +
+      'transform:translate(-50%,-50%);background:#0A0A0A;color:#fff;' +
+      'padding:10px 20px;border-radius:10px;z-index:99999;' +
+      'font-weight:700;font-size:13px';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1200);
+  };
+}
+
+
+// ★ 绑定设置卡片事件
+const __rng = document.getElementById('dailyRange');
+const __valEl = document.getElementById('dailyVal');
+if(__rng){
+  __rng.oninput = () => { __valEl.textContent = __rng.value; };
+  __rng.onchange = async () => {
+    const v = +__rng.value;
+    const { error } = await sb.from('profiles')
+      .update({ daily_new: v }).eq('id', user.id);
+    if(error){ alert('保存失败：' + error.message); return; }
+
+    // 同步到本地（游戏页下次会读到新值）
+    try{
+      const KEY = 'wq_runtime_v5_' + user.id;
+      const raw = localStorage.getItem(KEY);
+      if(raw){
+        const p = JSON.parse(raw);
+        if(!p.settings) p.settings = {};
+        p.settings.dailyNew = v;
+        localStorage.setItem(KEY, JSON.stringify(p));
+      }
+    }catch(e){}
+
+    const t = document.createElement('div');
+    t.textContent = '✅ 已保存';
+    t.style.cssText = 'position:fixed;left:50%;top:50%;' +
+      'transform:translate(-50%,-50%);background:#0A0A0A;color:#fff;' +
+      'padding:10px 20px;border-radius:10px;z-index:99999;' +
+      'font-weight:700;font-size:13px';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1200);
+  };
+}
   await renderWordlists();
 })();
 
@@ -849,6 +922,366 @@ async function editNickname(){
     msg.style.color = '#16a34a';
     setTimeout(()=>{ document.getElementById('nickOverlay').remove(); location.reload(); }, 800);
   };
+}
+/* ════════ 读本地学习数据 ════════ */
+function loadStudyData(userId){
+  try{
+    const raw = localStorage.getItem('wq_runtime_v5_' + userId);
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    return p.state || null;
+  }catch(e){ return null; }
+}
+
+/* ════════ 渲染学习报告卡片 ════════ */
+function renderStudyReport(userId){
+  const state = loadStudyData(userId);
+
+  if(!state || !state.history || state.history.length === 0){
+    return `
+      <div style="border:1px solid #EBEBEB;border-radius:14px;
+        padding:24px;background:#fff;margin-top:24px;text-align:center">
+        <div style="font-size:42px;margin-bottom:8px">📊</div>
+        <div style="font-size:15px;font-weight:900;color:#0A0A0A;
+          margin-bottom:6px">学习报告</div>
+        <div style="font-size:13px;color:#8A8A8A;line-height:1.6">
+          还没有学习记录，去游戏里学一轮吧～
+        </div>
+      </div>`;
+  }
+
+  const history = state.history || [];
+  const bank = state.bank || {};
+  const today = new Date().toISOString().slice(0,10);
+  const todayRecs = history.filter(r => r.date === today);
+  const todayDur = todayRecs.reduce((a,r) => a + r.duration, 0);
+  const todayTotal = todayRecs.reduce((a,r) => a + r.total, 0);
+  const todayCorrect = todayRecs.reduce((a,r) => a + r.correct, 0);
+  const todayNew = todayRecs.reduce((a,r) => a + r.newCount, 0);
+
+  // 近 7 天
+  const days = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().slice(0,10);
+    const recs = history.filter(r => r.date === ds);
+    days.push({
+      label: (d.getMonth()+1) + '/' + d.getDate(),
+      dur: recs.reduce((a,r) => a + r.duration, 0)
+    });
+  }
+  const maxDur = Math.max(1, ...days.map(d => d.dur));
+  const weekDur = days.reduce((a,d) => a + d.dur, 0);
+
+  // 掌握度
+  const learned = Object.values(bank).filter(b => b.seen > 0).length;
+  const mastered = Object.values(bank).filter(b => b.m >= 0.7).length;
+  const weak = Object.values(bank).filter(b => b.seen > 0 && b.m < 0.4).length;
+
+  const fmtDur = ms => {
+    if(!ms || ms < 0) return '0 分';
+    const m = Math.round(ms / 60000);
+    if(m < 1) return '<1 分';
+    if(m < 60) return m + ' 分';
+    return Math.floor(m/60) + 'h' + (m%60 ? m%60 + 'm' : '');
+  };
+
+  return `
+    <div style="border:1px solid #EBEBEB;border-radius:14px;
+      padding:24px;background:#fff;margin-top:24px">
+      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">
+        📊 学习报告
+      </h3>
+
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
+        margin-bottom:10px">今日</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;
+        gap:10px;margin-bottom:20px">
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
+          text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
+            ${todayDur > 0 ? fmtDur(todayDur) : '—'}
+          </div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
+            margin-top:4px">⏱️ 学习时长</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
+          text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
+            ${todayTotal}
+          </div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
+            margin-top:4px">📝 答题数</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
+          text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
+            ${todayTotal ? Math.round(todayCorrect/todayTotal*100) + '%' : '—'}
+          </div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
+            margin-top:4px">🎯 正确率</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
+          text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
+            ${todayNew}
+          </div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
+            margin-top:4px">✨ 新学词</div>
+        </div>
+      </div>
+
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
+        margin-bottom:10px">近 7 天（共 ${fmtDur(weekDur)}）</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;
+        height:80px;padding:6px 0;margin-bottom:20px">
+        ${days.map(d => {
+          const h = Math.max(4, (d.dur / maxDur) * 100);
+          return `
+            <div style="flex:1;display:flex;flex-direction:column;
+              align-items:center;justify-content:flex-end;height:100%">
+              <div style="width:100%;height:${h}%;
+                background:${d.dur > 0 ? 'linear-gradient(180deg,#FFA751,#FF4D8D)' : '#F0F0F0'};
+                border-radius:6px 6px 2px 2px;min-height:4px"></div>
+              <div style="font-size:9px;color:#8A8A8A;font-weight:700;
+                margin-top:4px">${d.label}</div>
+            </div>`;
+        }).join('')}
+      </div>
+
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
+        margin-bottom:10px">累计</div>
+      <div style="display:flex;gap:10px;font-size:13px">
+        <div style="flex:1;text-align:center">
+          <div style="font-size:18px;font-weight:900;color:#0A0A0A">
+            ${learned}
+          </div>
+          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
+            margin-top:2px">已学单词</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div style="font-size:18px;font-weight:900;color:#22c55e">
+            ${mastered}
+          </div>
+          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
+            margin-top:2px">已掌握</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div style="font-size:18px;font-weight:900;color:#ef4444">
+            ${weak}
+          </div>
+          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
+            margin-top:2px">需加强</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ════════ 渲染学习设置卡片 ════════ */
+function renderSettingsCard(profile){
+  const daily = (profile && profile.daily_new) || 10;
+  return `
+    <div style="border:1px solid #EBEBEB;border-radius:14px;
+      padding:24px;background:#fff;margin-top:24px">
+      <h3 style="margin:0 0 6px;font-size:16px;font-weight:700">
+        ⚙️ 学习设置
+      </h3>
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
+        margin-bottom:14px">设置会同步到账号，换设备也生效</div>
+
+      <div style="display:flex;justify-content:space-between;
+        align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:#525252">
+          每日新词量
+        </span>
+        <span id="dailyVal" style="font-size:16px;font-weight:900;
+          color:#FF4D8D">${daily}</span>
+      </div>
+      <input type="range" id="dailyRange" min="3" max="20"
+        value="${daily}" style="width:100%">
+      <div style="font-size:11px;color:#8A8A8A;margin-top:6px;
+        font-weight:600">建议从每天 10 个开始，坚持比数量更重要</div>
+    </div>`;
+}
+/* ════════ 读本地学习数据 ════════ */
+function loadStudyData(userId){
+  try{
+    const raw = localStorage.getItem('wq_runtime_v5_' + userId);
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    return p.state || null;
+  }catch(e){ return null; }
+}
+
+/* ════════ 学习报告卡片 ════════ */
+function renderStudyReport(userId){
+  const state = loadStudyData(userId);
+
+  if(!state || !state.history || state.history.length === 0){
+    return `
+      <div style="border:1px solid #EBEBEB;border-radius:14px;
+        padding:24px;background:#fff;margin-top:24px;text-align:center">
+        <div style="font-size:42px;margin-bottom:8px">📊</div>
+        <div style="font-size:15px;font-weight:900;color:#0A0A0A;
+          margin-bottom:6px">学习报告</div>
+        <div style="font-size:13px;color:#8A8A8A;line-height:1.6">
+          还没有学习记录，去游戏里学一轮吧～
+        </div>
+      </div>`;
+  }
+
+  const history = state.history || [];
+  const bank = state.bank || {};
+  const today = new Date().toISOString().slice(0,10);
+  const todayRecs = history.filter(r => r.date === today);
+  const todayDur = todayRecs.reduce((a,r) => a + r.duration, 0);
+  const todayTotal = todayRecs.reduce((a,r) => a + r.total, 0);
+  const todayCorrect = todayRecs.reduce((a,r) => a + r.correct, 0);
+  const todayNew = todayRecs.reduce((a,r) => a + r.newCount, 0);
+
+  const days = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().slice(0,10);
+    const recs = history.filter(r => r.date === ds);
+    days.push({
+      label: (d.getMonth()+1) + '/' + d.getDate(),
+      dur: recs.reduce((a,r) => a + r.duration, 0)
+    });
+  }
+  const maxDur = Math.max(1, ...days.map(d => d.dur));
+  const weekDur = days.reduce((a,d) => a + d.dur, 0);
+
+  const learned = Object.values(bank).filter(b => b.seen > 0).length;
+  const mastered = Object.values(bank).filter(b => b.m >= 0.7).length;
+  const weak = Object.values(bank).filter(b => b.seen > 0 && b.m < 0.4).length;
+
+  const fmtDur = ms => {
+    if(!ms || ms < 0) return '0 分';
+    const m = Math.round(ms / 60000);
+    if(m < 1) return '<1 分';
+    if(m < 60) return m + ' 分';
+    return Math.floor(m/60) + 'h' + (m%60 ? m%60 + 'm' : '');
+  };
+
+  return `
+    <div style="border:1px solid #EBEBEB;border-radius:14px;
+      padding:24px;background:#fff;margin-top:24px">
+      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">
+        📊 学习报告
+      </h3>
+
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
+        margin-bottom:10px">今日</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;
+        gap:10px;margin-bottom:20px">
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
+          text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
+            ${todayDur > 0 ? fmtDur(todayDur) : '—'}
+          </div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
+            margin-top:4px">⏱️ 学习时长</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
+          text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
+            ${todayTotal}
+          </div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
+            margin-top:4px">📝 答题数</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
+          text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
+            ${todayTotal ? Math.round(todayCorrect/todayTotal*100) + '%' : '—'}
+          </div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
+            margin-top:4px">🎯 正确率</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
+          text-align:center">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
+            ${todayNew}
+          </div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
+            margin-top:4px">✨ 新学词</div>
+        </div>
+      </div>
+
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
+        margin-bottom:10px">近 7 天（共 ${fmtDur(weekDur)}）</div>
+      <div style="display:flex;align-items:flex-end;gap:6px;
+        height:80px;padding:6px 0;margin-bottom:20px">
+        ${days.map(d => {
+          const h = Math.max(4, (d.dur / maxDur) * 100);
+          return `
+            <div style="flex:1;display:flex;flex-direction:column;
+              align-items:center;justify-content:flex-end;height:100%">
+              <div style="width:100%;height:${h}%;
+                background:${d.dur > 0 ? 'linear-gradient(180deg,#FFA751,#FF4D8D)' : '#F0F0F0'};
+                border-radius:6px 6px 2px 2px;min-height:4px"></div>
+              <div style="font-size:9px;color:#8A8A8A;font-weight:700;
+                margin-top:4px">${d.label}</div>
+            </div>`;
+        }).join('')}
+      </div>
+
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
+        margin-bottom:10px">累计</div>
+      <div style="display:flex;gap:10px;font-size:13px">
+        <div style="flex:1;text-align:center">
+          <div style="font-size:18px;font-weight:900;color:#0A0A0A">
+            ${learned}
+          </div>
+          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
+            margin-top:2px">已学单词</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div style="font-size:18px;font-weight:900;color:#22c55e">
+            ${mastered}
+          </div>
+          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
+            margin-top:2px">已掌握</div>
+        </div>
+        <div style="flex:1;text-align:center">
+          <div style="font-size:18px;font-weight:900;color:#ef4444">
+            ${weak}
+          </div>
+          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
+            margin-top:2px">需加强</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ════════ 学习设置卡片 ════════ */
+function renderSettingsCard(profile){
+  const daily = (profile && profile.daily_new) || 10;
+  return `
+    <div style="border:1px solid #EBEBEB;border-radius:14px;
+      padding:24px;background:#fff;margin-top:24px">
+      <h3 style="margin:0 0 6px;font-size:16px;font-weight:700">
+        ⚙️ 学习设置
+      </h3>
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
+        margin-bottom:14px">设置会同步到账号，换设备也生效</div>
+
+      <div style="display:flex;justify-content:space-between;
+        align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:#525252">
+          每日新词量
+        </span>
+        <span id="dailyVal" style="font-size:16px;font-weight:900;
+          color:#FF4D8D">${daily}</span>
+      </div>
+      <input type="range" id="dailyRange" min="3" max="20"
+        value="${daily}" style="width:100%">
+      <div style="font-size:11px;color:#8A8A8A;margin-top:6px;
+        font-weight:600">建议从每天 10 个开始，坚持比数量更重要</div>
+    </div>`;
 }
 </script>
 
