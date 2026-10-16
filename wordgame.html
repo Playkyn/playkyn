@@ -6873,80 +6873,114 @@ $('#btnLmPrev').onclick = () => {
    ═══════════════════════════════════════════════════════════ */
 (function init(){
   /* 先查解锁状态，再启动页面 */
-  Promise.all([checkUnlock(), loadWordlist()]).then(([_, dbWords])=>{
-  // 如果数据库有词库，替换掉 w.js 里的
-  if(dbWords && dbWords.length){
-    WORDS.length = 0;
-    WORDS.push(...dbWords);
-    console.log('🎮 词库已就绪，共', WORDS.length, '个词（来自数据库）');
-  } else {
-    console.log('🎮 词库已就绪，共', WORDS.length, '个词（来自本地 w.js）');
-  }
-  initPage();
-});
+  
+  // 1. 先从小纸条（localStorage）里查，看用户有没有在“我的词库”选过词库
+  const savedWordlistId = localStorage.getItem('selected_wordlist_id');
 
-  function initPage(){
-    try{
-      const s=localStorage.getItem(LS_SOUND);
-      if(s==='off') soundOn=false;
-      const sk=localStorage.getItem(LS_SKIN);
-      if(sk==='boy'||sk==='girl') currentSkin=sk;
-    }catch(e){}
-    applySound();
-    applySkin();
-    buildRuntimeUsers();
+  // 2. 如果用户选过，我们就去 Supabase 拉他选的那个词库
+  const loadCustomWords = savedWordlistId 
+    ? sb.from('words').select('*').eq('wordlist_id', savedWordlistId).then(res => res.data)
+    : Promise.resolve(null);
 
-    /* ★ 检查 Supabase 登录状态 */
-    sb.auth.getSession().then(({data:{session}})=>{
-      if(!session){
-        window.location.href = 'index.html';
-        return;
-      }
+  // 3. 同时执行：检查解锁状态、拉取默认词库、拉取选中的自定义词库
+  Promise.all([checkUnlock(), loadWordlist(), loadCustomWords]).then(([_, dbWords, customWords]) => {
+    
+    let finalWords = dbWords; // 默认先用原有的数据库词库
 
-      const user = session.user;
-      const email = user.email || '';
-      const name = email.split('@')[0] || '用户';
+    // 4. 如果咱们成功拿到了自定义词库，就优先用它！
+    if (customWords && customWords.length > 0) {
+      finalWords = customWords;
+      console.log('🔥 检测到自定义词库，正在加载...');
+    }
 
-      let rtUser = runtimeUsers.find(u => u.id === user.id);
-      if(!rtUser){
-        const r = loadRuntime(user.id, {dailyNew:10, allowedGroups:null});
-        rtUser = {
-          id: user.id,
-          name: name,
-          avatar: '🦊',
-          role: 'student',
-          pwd: '',
-          isCustom: true,
-          state: r.state,
-          settings: r.settings
-        };
-        runtimeUsers.push(rtUser);
-      }
+    // 5. 把最终确定的词库塞进 WORDS 里
+    if (finalWords && finalWords.length) {
+      WORDS.length = 0; // 清空旧数据
 
-      currentAccount = { id: user.id, name: name, avatar: '🦊', role: 'student', pwd: '' };
-      currentUser = rtUser;
-      state = currentUser.state;
-
-      if(!state.game) state.game = defaultState().game;
-      if(!state.game.achievements) state.game.achievements = {};
-      if(!state.groupStats) state.groupStats = {};
-      if(!state.clock) state.clock = { realStart: Date.now(), virtualStart: Date.now(), scale: 1 };
-      if(!state.bank) state.bank = {};
-      if(!state.history) state.history = [];
-      if(!state.pet) state.pet = { xp:0, equipped:null, owned:{}, lastStage:0 };
-
-      if(state.goal && state.goal.unit){
-        goHome();
+      // ⚠️ 关键：要把数据库的字段（word, meaning...）转换成游戏需要的格式（en, zh...）
+      if (customWords && customWords.length > 0) {
+        WORDS.push(...customWords.map(w => ({
+          en: w.word,
+          zh: w.meaning,
+          ph: w.phonetic || '',
+          u: w.unit || '',
+          g: w.group || ''
+        })));
+        console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自自定义词库）');
       } else {
-        if(!state.goal) state.goal = {};
-        state.goal.unit = null;
-        state.goal.groups = [];
-        renderGoal();
-        showScreen('s-goal');
+        WORDS.push(...finalWords);
+        console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自数据库）');
       }
-    });
-  }
+    } else {
+      console.log('✅ 词库已就绪，共', WORDS.length, '个词（来自本地 w.js）');
+    }
+
+    // 6. 一切就绪，启动游戏页面！
+    initPage();
+  });
 })();
+
+function initPage(){
+  try{
+    const s=localStorage.getItem(LS_SOUND);
+    if(s==='off') soundOn=false;
+    const sk=localStorage.getItem(LS_SKIN);
+    if(sk==='boy'||sk==='girl') currentSkin=sk;
+  }catch(e){}
+  applySound();
+  applySkin();
+  buildRuntimeUsers();
+
+  /* ★ 检查 Supabase 登录状态 */
+  sb.auth.getSession().then(({data:{session}})=>{
+    if(!session){
+      window.location.href = 'index.html';
+      return;
+    }
+
+    const user = session.user;
+    const email = user.email || '';
+    const name = email.split('@')[0] || '用户';
+
+    let rtUser = runtimeUsers.find(u => u.id === user.id);
+    if(!rtUser){
+      const r = loadRuntime(user.id, {dailyNew:10, allowedGroups:null});
+      rtUser = {
+        id: user.id,
+        name: name,
+        avatar: '🦊',
+        role: 'student',
+        pwd: '',
+        isCustom: true,
+        state: r.state,
+        settings: r.settings
+      };
+      runtimeUsers.push(rtUser);
+    }
+
+    currentAccount = { id: user.id, name: name, avatar: '🦊', role: 'student', pwd: '' };
+    currentUser = rtUser;
+    state = currentUser.state;
+
+    if(!state.game) state.game = defaultState().game;
+    if(!state.game.achievements) state.game.achievements = {};
+    if(!state.groupStats) state.groupStats = {};
+    if(!state.clock) state.clock = { realStart: Date.now(), virtualStart: Date.now(), scale: 1 };
+    if(!state.bank) state.bank = {};
+    if(!state.history) state.history = [];
+    if(!state.pet) state.pet = { xp:0, equipped:null, owned:{}, lastStage:0 };
+
+    if(state.goal && state.goal.unit){
+      goHome();
+    } else {
+      if(!state.goal) state.goal = {};
+      state.goal.unit = null;
+      state.goal.groups = [];
+      renderGoal();
+      showScreen('s-goal');
+    }
+  });
+}
 
 window.addEventListener('beforeunload',()=>{ try{ saveRuntime(); }catch(e){} });
 window.addEventListener('pagehide',()=>{ try{ saveRuntime(); }catch(e){} });
