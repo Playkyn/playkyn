@@ -1452,6 +1452,7 @@ body.skin-boy .weak-tag{
 
 <script src="w.js"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="membership.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
    ★ 系统预设账号（不可删除）
@@ -1467,7 +1468,7 @@ const WORDLIST_CACHE_KEY = 'wq_wordlist_cache_v1';
 const CACHE_MAX_AGE = 24 * 3600 * 1000; // 24 小时
 
 /* 解锁状态缓存：页面启动时查一次，之后同步读取 */
-const _unlock = { loaded:false, unlocked:false, checking:null };
+const _unlock = { loaded:false, unlocked:false, checking:null, profile:null, membership:null };
 
 async function checkUnlock(){
   if(_unlock.loaded) return _unlock.unlocked;
@@ -1477,17 +1478,30 @@ async function checkUnlock(){
     try{
       const { data: { session } } = await sb.auth.getSession();
       if(!session){ _unlock.loaded = true; return false; }
+
+      // ★ 查整行 profile（不只 is_unlocked）
       const { data, error } = await sb.from('profiles')
-        .select('is_unlocked')
-        .eq('id', session.user.id)
-        .single();
-      _unlock.unlocked = !error && !!(data && data.is_unlocked);
-    }catch(e){ _unlock.unlocked = false; }
+        .select('*').eq('id', session.user.id).single();
+
+      _unlock.unlocked   = !error && !!(data && data.is_unlocked);
+      _unlock.profile    = data || null;
+      _unlock.membership = parseMembership(data);
+    }catch(e){
+      _unlock.unlocked = false;
+      _unlock.membership = parseMembership(null);
+    }
     _unlock.loaded = true;
     return _unlock.unlocked;
   })();
 
   return _unlock.checking;
+}
+
+/* ★ 新增：同步读取会员状态 */
+function getMembership(){ return _unlock.membership || parseMembership(null); }
+function refreshMembershipCache(profile){
+  _unlock.profile    = profile;
+  _unlock.membership = parseMembership(profile);
 }
 /* ════════ 从数据库加载词库 ════════ */
 async function loadWordlist(){
@@ -4047,9 +4061,23 @@ function petStageUp(idx){
 
 
 function renderHome(){
+  
   $('#homeAvatar').textContent=currentUser.avatar;
   $('#homeName').textContent=currentUser.name;
   $('#btnAdmin').style.display=isParent()?'block':'none';
+
+  // ★ 鼠标悬停昵称显示会员状态
+  const __m = getMembership();
+  const hName = $('#homeName');
+  if(hName){
+    if(__m.isVip){
+      hName.title = `${__m.tierName} · 剩 ${__m.daysLeft} 天 · 剩 ${__m.quotaRemaining} 词额度`;
+    } else if(__m.credits > 0){
+      hName.title = `剩余 ${__m.credits} 词永久额度`;
+    } else {
+      hName.title = '免费版';
+    }
+  }
   const gs=state.goal.groups;
   const hg=$('#homeGoal');
 
@@ -6871,7 +6899,7 @@ $('#btnLmPrev').onclick = () => {
 /* ═══════════════════════════════════════════════════════════
    启动
    ═══════════════════════════════════════════════════════════ */
-(async function init() {
+  (async function init() {
   const savedWordlistId = localStorage.getItem('selected_wordlist_id')?.trim();
 
   // 1. 同时执行：检查解锁状态、拉取默认词库、拉取选中的自定义词库
@@ -6934,7 +6962,7 @@ function initPage(){
   buildRuntimeUsers();
 
   /* ★ 检查 Supabase 登录状态 */
-  sb.auth.getSession().then(({data:{session}})=>{
+sb.auth.getSession().then(async ({data:{session}})=>{
     if(!session){
       window.location.href = 'index.html';
       return;
@@ -6942,8 +6970,13 @@ function initPage(){
 
     const user = session.user;
     const email = user.email || '';
-    const name = email.split('@')[0] || '用户';
-
+    let name = email.split('@')[0] || '用户';
+    // 尝试读昵称（异步，不阻塞）
+    try{
+      const { data: __p } = await sb.from('profiles')
+        .select('display_name').eq('id', user.id).single();
+      if(__p && __p.display_name) name = __p.display_name;
+    }catch(e){}
     let rtUser = runtimeUsers.find(u => u.id === user.id);
     if(!rtUser){
       const r = loadRuntime(user.id, {dailyNew:10, allowedGroups:null});
@@ -6972,18 +7005,37 @@ function initPage(){
     if(!state.history) state.history = [];
     if(!state.pet) state.pet = { xp:0, equipped:null, owned:{}, lastStage:0 };
 
-    if(state.goal && state.goal.unit){
-      goHome();
-    } else {
-      if(!state.goal) state.goal = {};
-      state.goal.unit = null;
-      state.goal.groups = [];
-      renderGoal();
-      showScreen('s-goal');
-    }
+   // ★ 惰性结算 + 刷新会员缓存（放在 goHome 之前）
+    (async ()=>{
+      try{
+        const freshProfile = await settleAndLoad(sb, user.id);
+        refreshMembershipCache(freshProfile);
+        // 刷新后再进主页，确保能取到最新状态
+        if(state.goal && state.goal.unit){
+          goHome();
+        } else {
+          if(!state.goal) state.goal = {};
+          state.goal.unit = null;
+          state.goal.groups = [];
+          renderGoal();
+          showScreen('s-goal');
+        }
+      }catch(e){
+        console.warn('会员状态刷新失败', e);
+        // 兜底：即使失败也照常进主页
+        if(state.goal && state.goal.unit){
+          goHome();
+        } else {
+          if(!state.goal) state.goal = {};
+          state.goal.unit = null;
+          state.goal.groups = [];
+          renderGoal();
+          showScreen('s-goal');
+        }
+      }
+    })();
   });
 }
-
 window.addEventListener('beforeunload',()=>{ try{ saveRuntime(); }catch(e){} });
 window.addEventListener('pagehide',()=>{ try{ saveRuntime(); }catch(e){} });
 </script>

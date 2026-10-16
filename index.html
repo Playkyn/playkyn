@@ -719,6 +719,7 @@ body{
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="membership.js"></script>
 <script>
 /* ════════ Supabase 初始化 ════════ */
 const supabaseUrl = 'https://zuhymqoxyqgpkxoaygtl.supabase.co';
@@ -849,9 +850,25 @@ async function refreshNavAuth(){
       navRegister.style.display = 'none';
       navUser.style.display = 'inline-flex';
       navLogout.style.display = 'inline-flex';
-      const email = session.user.email || '';
+
+            const email = session.user.email || '';
       const shortName = email.split('@')[0];
-      navUser.textContent = shortName.length > 10 ? shortName.slice(0,10) + '…' : shortName;
+
+      // ★ 拉会员状态 + 显示标记
+      let tierTag = '';
+      let nickname = shortName;
+      try{
+        const profile = await settleAndLoad(sb, session.user.id);
+        const m = parseMembership(profile);
+        if(m.isVip)         tierTag = ' · ' + m.tierName;
+        else if(m.credits)  tierTag = ' · ' + m.credits + '词';
+        if(profile && profile.display_name){
+          nickname = profile.display_name;
+        }
+      }catch(e){ /* 忽略 */ }
+
+      const displayName = nickname.length > 10 ? nickname.slice(0,10) + '…' : nickname;
+      navUser.textContent = displayName + tierTag;
       navUser.title = email;
       navUser.onclick = ()=>{ window.location.href = 'user.html'; };
     } else {

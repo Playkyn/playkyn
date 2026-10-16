@@ -129,7 +129,7 @@ body{
   font-size:13px;
 }
 
-/* ════════ 解锁提示（免费用户） ════════ */
+/* ════════ 解锁提示 ════════ */
 .upgrade-card{
   border:1px solid var(--border);
   border-radius:14px;padding:24px;
@@ -144,14 +144,6 @@ body{
 .upgrade-desc{
   font-size:14px;color:var(--text-2);line-height:1.7;
   margin-bottom:16px;
-}
-.upgrade-contacts{
-  display:flex;flex-direction:column;gap:8px;
-  font-size:14px;font-weight:600;
-}
-.upgrade-contacts a{
-  color:var(--text);text-decoration:none;
-  display:flex;align-items:center;gap:8px;
 }
 
 /* ════════ 操作按钮组 ════════ */
@@ -242,6 +234,7 @@ body{
 </div>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="membership.js"></script>
 <script>
 const supabaseUrl = 'https://zuhymqoxyqgpkxoaygtl.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1aHltcW94eXFncGt4b2F5Z3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4OTkwOTgsImV4cCI6MjEwNzQ3NTA5OH0.T5-KpCzs69mh3K6DNvwo_LdgLnKbos6PoaI7j9tgVZE';
@@ -283,25 +276,41 @@ let __currentUser = null;
   __currentUser = session.user;
   const user = session.user;
 
-  const { data: profile } = await sb.from('profiles').select('*').eq('id', user.id).single();
+  // ★ 惰性结算 + 拉最新 profile（会按 50% 折算到期额度）
+  const profile = await settleAndLoad(sb, user.id);
+  const m = parseMembership(profile);
+  window.__membership = m;
+  window.__isUnlocked = m.canUpload;
 
   const email = user.email || '';
   const shortName = email.split('@')[0] || '用户';
   const displayName = (profile && profile.display_name) || shortName;
   const initial = (displayName[0] || 'U').toUpperCase();
-  const isUnlocked = !!(profile && profile.is_unlocked);
-  window.__isUnlocked = isUnlocked; // 👈 新增：缓存到全局，供 selectWordlist 用
   const registeredAt = user.created_at;
-  const unlockedAt = profile && profile.unlocked_at;
-  const unlockCode = profile && profile.unlock_code;
 
-const upgradeHtml = isUnlocked ? '' : `
-  <div style="text-align:center; margin:20px 0;">
-    <button onclick="showVipModal()" style="padding:12px 24px; background:#fff; color:#ff4d4f; border:1.5px solid #ff4d4f; border-radius:24px; font-weight:bold; font-size:14px; cursor:pointer; box-shadow: 0 4px 12px rgba(255,77,79,0.15); transition: all 0.2s;">
-      🔒 解锁完整版（内测中）
-    </button>
-  </div>
-`;
+  const badgeHtml = renderMembershipBadge(m);
+
+  const upgradeHtml = m.isVip ? `
+    <div style="text-align:center; margin:20px 0;">
+      <button onclick="showRedeemModal()" style="padding:10px 22px; background:#fff; color:#FF4D8D; border:1.5px solid #FF4D8D; border-radius:24px; font-weight:bold; font-size:13px; cursor:pointer;">
+        🎟️ 续费 / 兑换解锁码
+      </button>
+    </div>
+  ` : `
+    <div style="text-align:center; margin:20px 0;">
+      <button onclick="showUpgradeModal()" style="padding:12px 24px; background:#fff; color:#FF4D8D; border:1.5px solid #FF4D8D; border-radius:24px; font-weight:bold; font-size:14px; cursor:pointer; box-shadow: 0 4px 12px rgba(255,77,79,0.15);">
+        🔓 升级会员 / 兑换解锁码
+      </button>
+    </div>
+  `;
+
+  const statusText = m.isVip
+    ? `${m.tierName}（${m.expiresAtStr} 到期）`
+    : (m.credits > 0 ? '体验版' : '免费版');
+
+  const quotaText = m.isVip
+    ? `${m.quotaRemaining} / ${m.quotaTotal} 词（本周期）`
+    : `${m.credits} 词（永久）`;
 
   document.getElementById('content').innerHTML = `
     <div class="user-card">
@@ -310,20 +319,26 @@ const upgradeHtml = isUnlocked ? '' : `
         <div class="user-info">
           <div class="user-name">
             ${escapeHtml(displayName)}
-            ${isUnlocked ? '<span class="badge pro">完整版</span>' : '<span class="badge free">免费版</span>'}
+            <button onclick="editNickname()" title="修改昵称"
+              style="background:none;border:none;cursor:pointer;padding:0;
+              font-size:14px;color:#8A8A8A;line-height:1">✏️</button>
+            ${badgeHtml}
           </div>
           <div class="user-email">${escapeHtml(email)}</div>
         </div>
-      </div>
-      <div class="info-list">
-        <div class="info-row"><span class="info-label">账号状态</span><span class="info-value">${isUnlocked ? '已解锁完整版' : '免费体验版'}</span></div>
+
+      ${renderQuotaBar(m)}
+
+      <div class="info-list" style="margin-top:16px">
+        <div class="info-row"><span class="info-label">账号状态</span><span class="info-value">${statusText}</span></div>
+        <div class="info-row"><span class="info-label">可用词额度</span><span class="info-value">${quotaText}</span></div>
         <div class="info-row"><span class="info-label">注册时间</span><span class="info-value">${fmtDate(registeredAt)}</span></div>
-        <div class="info-row"><span class="info-label">可用单元</span><span class="info-value">${isUnlocked ? '全部单元' : 'PET U1U2'}</span></div>
-        ${unlockedAt ? `<div class="info-row"><span class="info-label">解锁时间</span><span class="info-value">${fmtDateTime(unlockedAt)}</span></div>` : ''}
-        ${unlockCode ? `<div class="info-row"><span class="info-label">解锁码</span><span class="info-value mono">${escapeHtml(unlockCode)}</span></div>` : ''}
       </div>
     </div>
+
+    ${renderExpiryWarning(m)}
     ${upgradeHtml}
+
     <div class="action-group">
       <a href="wordgame.html" class="btn primary">开始学习 →</a>
       <button class="btn ghost" id="btnUpload">📤 上传我的词表</button>
@@ -340,12 +355,12 @@ const upgradeHtml = isUnlocked ? '' : `
     document.getElementById('navLogout').click();
   };
   document.getElementById('btnUpload').onclick = ()=>{
-  if(!isUnlocked){
-    showUpgradePrompt();
-    return;
-  }
-  openUploadModal();
-};
+    if(!m.canUpload){
+      showUpgradeModal();
+      return;
+    }
+    openUploadModal();
+  };
 
   await renderWordlists();
 })();
@@ -370,13 +385,11 @@ async function renderWordlists() {
     return;
   }
 
-  // 渲染列表
   let html = '';
   const currentWordlistId = localStorage.getItem('selected_wordlist_id');
 
   data.forEach(item => {
     const isSelected = (item.id === currentWordlistId);
-const safeName = escapeHtml(item.name).replace(/'/g, "\\'"); 
     html += `
       <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid ${isSelected ? '#1677FF' : '#eee'}; border-radius:8px; margin-bottom:8px; background:${isSelected ? '#f0f7ff' : 'transparent'};">
         <div style="flex:1; overflow:hidden;">
@@ -389,12 +402,8 @@ const safeName = escapeHtml(item.name).replace(/'/g, "\\'");
         </div>
         <div style="display:flex; gap:8px; flex-shrink:0;">
           ${isSelected 
-            ? `<button disabled style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:12px; opacity:0.8; cursor:not-allowed;">
-                 ✅ 当前选择
-               </button>`
-            : `<button onclick="selectWordlist('${item.id}', '${item.name}')" style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
-                 ▶️ 使用
-               </button>`
+            ? `<button disabled style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:12px; opacity:0.8; cursor:not-allowed;">✅ 当前选择</button>`
+            : `<button onclick="selectWordlist('${item.id}', '${escapeHtml(item.name).replace(/'/g, "\\'")}')" style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">▶️ 使用</button>`
           }
           <button onclick="deleteWordlist('${item.id}')" style="background:#ff4d4f; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">
             🗑️ 删除
@@ -406,20 +415,15 @@ const safeName = escapeHtml(item.name).replace(/'/g, "\\'");
   body.innerHTML = html;
 }
 
-/* ======== 选择并使用词库 ======== */
-/* ======== 选择并使用词库（同步版，不卡顿） ======== */
+/* ======== 选择词库 ======== */
 function selectWordlist(wordlistId, wordlistName) {
-  // 1. 权限检查：直接读缓存好的变量，不发网络请求！
-  if (!window.__isUnlocked) {
-    showVipModal(); // 免费用户弹升级引导
+  const m = window.__membership;
+  if (!m || (!m.isVip && m.credits <= 0)) {
+    showUpgradeModal();
     return;
   }
-
-  // 2. 存小纸条
   localStorage.setItem('selected_wordlist_id', String(wordlistId).trim());
-localStorage.setItem('selected_wordlist_name', String(wordlistName).trim());
-
-  // 3. 反馈并跳转
+  localStorage.setItem('selected_wordlist_name', String(wordlistName).trim());
   alert(`✅ 已选择词库：${wordlistName}，即将进入游戏...`);
   window.location.href = 'wordgame.html';
 }
@@ -477,6 +481,22 @@ function openUploadModal(){
         return;
       }
 
+      // ★ 额度预检
+      const fresh = await loadMembership(sb, __currentUser.id, true);
+      const m2 = parseMembership(fresh);
+      window.__membership = m2;
+
+      if(words.length > m2.totalAvailable){
+        const need = words.length - m2.totalAvailable;
+        status.innerHTML = `⚠️ 额度不足：本次需 ${words.length} 词，当前可用 ${m2.totalAvailable} 词，还差 <b>${need}</b> 词`;
+        status.style.color = '#dc2626';
+        setTimeout(()=>{
+          modal.remove();
+          showUpgradeModal();
+        }, 1600);
+        return;
+      }
+
       status.textContent = `解析到 ${words.length} 个单词，正在上传...`;
 
       const { data: wl, error: e1 } = await sb.from('wordlists').insert({
@@ -506,11 +526,23 @@ function openUploadModal(){
 
       await sb.from('wordlists').update({ word_count: words.length }).eq('id', wl.id);
 
+      // ★ 扣减额度
+      try{
+        await consumeQuota(sb, __currentUser.id, words.length);
+        const updated = await loadMembership(sb, __currentUser.id, true);
+        window.__membership = parseMembership(updated);
+      }catch(err){
+        status.textContent = '⚠️ 扣减额度失败：' + err.message;
+        status.style.color = '#dc2626';
+        return;
+      }
+
       status.textContent = `✅ 上传成功！共 ${words.length} 个单词`;
       status.style.color = '#22c55e';
       setTimeout(()=>{
         modal.remove();
-        renderWordlists(); // 👈 改成这个，页面不会闪
+        // 刷新页面，让额度条立即更新
+        window.location.reload();
       }, 1500);
 
     }catch(e){
@@ -571,119 +603,253 @@ function parseLine(line){
   result.push(cur);
   return result;
 }
-/* ════════ 付费引导 ════════ */
-function showUpgradePrompt(){
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:14px;padding:28px;max-width:400px;width:100%">
-      <div style="text-align:center;font-size:48px;line-height:1;margin-bottom:12px">🔒</div>
-      <h3 style="text-align:center;font-size:18px;margin:0 0 10px">升级完整版</h3>
-      <p style="text-align:center;color:#666;font-size:14px;line-height:1.7;margin:0 0 20px">
-        上传自定义词表、切换词库<br>
-        是完整版专享功能。
-      </p>
-      <div style="background:#FFF0F5;border-radius:10px;padding:16px;margin-bottom:20px">
-        <div style="font-size:13px;font-weight:600;color:#0A0A0A;margin-bottom:8px">💬 联系客服升级</div>
-        <div style="font-size:13px;color:#525252;line-height:1.8">
-          微信号：<b>Playkyn</b><br>
-          邮箱：<b>495493831@qq.com</b>
-        </div>
-      </div>
-      <button id="upgradeClose" style="width:100%;padding:12px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer">知道了</button>
-    </div>
-  `;
-  document.body.appendChild(modal);
-  modal.querySelector('#upgradeClose').onclick = ()=> modal.remove();
-  modal.onclick = (e)=>{ if(e.target === modal) modal.remove(); };
-}
-function showVipModal() {
-  // 防止重复弹出
-  if (document.getElementById('vipModalOverlay')) return;
 
-  const modalHtml = `
-    <div id="vipModalOverlay" style="position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:99999; display:flex; align-items:center; justify-content:center; backdrop-filter: blur(2px);">
-      <div style="background:#fff; padding:24px; border-radius:16px; width:320px; box-shadow:0 20px 40px rgba(0,0,0,0.2); text-align:center; position:relative; animation: popIn 0.2s ease-out;">
-        
-        <!-- 关闭按钮 -->
-        <button onclick="document.getElementById('vipModalOverlay').remove()" style="position:absolute; top:10px; right:14px; background:none; border:none; font-size:22px; color:#aaa; cursor:pointer;">✕</button>
-        
-        <div style="font-size:40px; margin-bottom:8px;">🔒</div>
-        <div style="font-size:18px; font-weight:900; color:#333; margin-bottom:6px;">升级完整版（内测中）</div>
-        <div style="font-size:13px; color:#666; font-weight:700; margin-bottom:20px; line-height:1.5;">
-          免费版可体验 PET U1U2 全部内容。<br>升级后解锁全部单元与后续更新。
-        </div>
-
-                <!-- 二维码区域 -->
-        <div style="display:flex; justify-content:center; gap:16px; margin-bottom:16px;">
-          <!-- 微信 -->
-          <div style="flex: 1; max-width: 130px; text-align:center;">
-            <img src="./wechat-qr.png" style="width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain; border-radius:8px; border:1px solid #eee;" />
-            <div style="font-size:12px; color:#07C160; font-weight:bold; margin-top:4px;">微信扫码</div>
-          </div>
-          <!-- 支付宝 -->
-          <div style="flex: 1; max-width: 130px; text-align:center;">
-            <img src="./alipay-qr.png" style="width: 100%; height: auto; aspect-ratio: 1 / 1; object-fit: contain; border-radius:8px; border:1px solid #eee;" />
-            <div style="font-size:12px; color:#1677FF; font-weight:bold; margin-top:4px;">支付宝扫码</div>
-          </div>
-        </div>
-
-        <!-- 联系方式 -->
-        <div style="font-size:13px; color:#666; line-height:1.8; text-align:left; background:#f8f9fa; padding:12px; border-radius:8px;">
-          <div>💬 微信号：<b>Playkyn</b>（点击复制）</div>
-          <div>📧 邮箱：495493831@qq.com</div>
-        </div>
-
-        <!-- 底部按钮 -->
-        <button onclick="document.getElementById('vipModalOverlay').remove()" style="margin-top:20px; width:100%; padding:12px; background:#f0f0f0; color:#666; border:none; border-radius:12px; font-weight:bold; font-size:14px; cursor:pointer;">
-          以后再说
-        </button>
-      </div>
-    </div>
-    <style>
-      @keyframes popIn {
-        0% { transform: scale(0.9); opacity: 0; }
-        100% { transform: scale(1); opacity: 1; }
-      }
-    </style>
-  `;
-
-  document.body.insertAdjacentHTML('beforeend', modalHtml);
-}
-/* ======== 删除词库 ======== */
+/* ════════ 删除词库 ════════ */
 async function deleteWordlist(wordlistId) {
   if (!confirm('确定要删除这个词库吗？里面的所有单词也会被一起删除，且无法恢复！')) {
     return;
   }
-
   try {
-    // 1. 先删子表（单词）
-    const { error: wordsError } = await sb
-      .from('words')
-      .delete()
-      .eq('wordlist_id', wordlistId);
-
+    const { error: wordsError } = await sb.from('words').delete().eq('wordlist_id', wordlistId);
     if (wordsError) throw wordsError;
-
-    // 2. 再删主表（词库）
-    const { error: listError } = await sb
-      .from('wordlists')
-      .delete()
-      .eq('id', wordlistId);
-
+    const { error: listError } = await sb.from('wordlists').delete().eq('id', wordlistId);
     if (listError) throw listError;
-
     alert('删除成功！');
-    renderWordlists(); // 刷新列表，无需刷新整个页面
-    
+    renderWordlists();
   } catch (error) {
     console.error('删除失败:', error);
     alert('删除失败：' + (error.message || '未知错误，请检查控制台'));
   }
 }
 
-</script>
+/* ═══════════════════════════════════════════════════
+   升级 / 兑换弹窗
+   ═══════════════════════════════════════════════════ */
 
+/* ── 升级弹窗（3 档对比）── */
+function showUpgradeModal(){
+  if(document.getElementById('vipModalOverlay')) return;
+
+  const rows = Object.entries(MEMBERSHIP_TIERS).map(([key,t])=>{
+    const hot = key === 'quarterly';
+    return `
+      <div style="border:2px solid ${hot?'#FF4D8D':'#EBEBEB'};
+        border-radius:12px;padding:14px;margin-bottom:10px;
+        position:relative;background:${hot?'#FFF8FB':'#fff'}">
+        ${hot?`<div style="position:absolute;top:-8px;right:12px;
+          background:#FF4D8D;color:#fff;font-size:10px;font-weight:900;
+          padding:2px 8px;border-radius:99px">推荐</div>`:''}
+        <div style="display:flex;justify-content:space-between;
+          align-items:center;gap:10px">
+          <div>
+            <div style="font-size:15px;font-weight:900;color:#0A0A0A">${t.name}</div>
+            <div style="font-size:11px;color:#8A8A8A;margin-top:2px">
+              ${t.quota} 词 · ${t.days} 天
+            </div>
+          </div>
+          <div style="font-size:22px;font-weight:900;color:#FF4D8D">
+            ¥${t.price}
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="vipModalOverlay" style="position:fixed;inset:0;
+      background:rgba(0,0,0,.55);z-index:99999;display:flex;
+      align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px">
+      <div style="background:#fff;border-radius:16px;padding:24px;
+        width:100%;max-width:380px;max-height:85vh;overflow-y:auto;
+        position:relative;animation:popIn .2s ease-out">
+        <button onclick="document.getElementById('vipModalOverlay').remove()"
+          style="position:absolute;top:10px;right:14px;background:none;
+          border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button>
+
+        <div style="font-size:18px;font-weight:900;color:#0A0A0A;
+          margin-bottom:6px">升级 Playkyn 会员</div>
+        <div style="font-size:12px;color:#8A8A8A;line-height:1.6;
+          margin-bottom:16px">
+          有效期内可用固定词数额度定制词库；<br>
+          额度用完不结转，到期未用按 50% 转永久。
+        </div>
+
+        ${rows}
+
+        <div style="font-size:12px;color:#8A8A8A;text-align:center;
+          margin:14px 0 10px;line-height:1.6">
+          也可以按 ¥0.3/词 单独购买，永久有效
+        </div>
+
+        <button onclick="document.getElementById('vipModalOverlay').remove();showRedeemModal()"
+          style="width:100%;padding:12px;background:#0A0A0A;color:#fff;
+          border:none;border-radius:10px;font-size:14px;font-weight:900;
+          cursor:pointer;margin-bottom:8px">
+          🎟️ 我已购买，输入解锁码
+        </button>
+
+        <div style="font-size:11px;color:#8A8A8A;text-align:center;
+          line-height:1.7;border-top:1px dashed #EBEBEB;padding-top:12px;
+          margin-top:8px">
+          客服微信：<b style="color:#0A0A0A">Playkyn</b><br>
+          邮箱：<b style="color:#0A0A0A">495493831@qq.com</b>
+        </div>
+      </div>
+    </div>
+    <style>@keyframes popIn{
+      0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}
+    }</style>
+  `);
+}
+
+/* ── 兑换解锁码弹窗 ── */
+function showRedeemModal(){
+  if(document.getElementById('redeemOverlay')) return;
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="redeemOverlay" style="position:fixed;inset:0;
+      background:rgba(0,0,0,.55);z-index:100000;display:flex;
+      align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px">
+      <div style="background:#fff;border-radius:16px;padding:26px;
+        width:100%;max-width:360px;position:relative;animation:popIn .2s ease-out">
+        <button onclick="document.getElementById('redeemOverlay').remove()"
+          style="position:absolute;top:10px;right:14px;background:none;
+          border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button>
+
+        <div style="text-align:center;font-size:36px;margin-bottom:8px">🎟️</div>
+        <div style="font-size:17px;font-weight:900;text-align:center;
+          color:#0A0A0A;margin-bottom:6px">输入解锁码</div>
+        <div style="font-size:12px;color:#8A8A8A;text-align:center;
+          line-height:1.6;margin-bottom:20px">
+          从客服获取的解锁码，输入即可开通
+        </div>
+
+        <input id="redeemInput" type="text" placeholder="PLAY-XXXX-XXXX"
+          style="width:100%;padding:14px;border:1.5px solid #EBEBEB;
+          border-radius:10px;font-size:16px;text-align:center;
+          font-family:monospace;letter-spacing:1px;font-weight:700;
+          outline:none;box-sizing:border-box;text-transform:uppercase">
+
+        <div id="redeemMsg" style="font-size:13px;text-align:center;
+          margin:12px 0;min-height:20px;font-weight:700"></div>
+
+        <button id="btnDoRedeem"
+          style="width:100%;padding:13px;background:#0A0A0A;color:#fff;
+          border:none;border-radius:10px;font-size:15px;font-weight:900;
+          cursor:pointer">
+          立即兑换
+        </button>
+      </div>
+    </div>
+  `);
+
+  const input = document.getElementById('redeemInput');
+  const msg   = document.getElementById('redeemMsg');
+  const btn   = document.getElementById('btnDoRedeem');
+
+  setTimeout(()=>input.focus(), 120);
+
+  const doRedeem = async ()=>{
+    const code = input.value.trim();
+    if(!code){ msg.textContent='请输入解锁码'; msg.style.color='#DC2626'; return; }
+
+    btn.disabled = true;
+    btn.textContent = '兑换中...';
+    msg.textContent = '';
+
+    const res = await redeemCode(sb, code);
+
+    if(res && res.ok){
+      msg.textContent = '🎉 ' + (res.msg || '兑换成功');
+      msg.style.color = '#16a34a';
+      btn.textContent = '完成';
+      setTimeout(()=>{
+        document.getElementById('redeemOverlay').remove();
+        location.reload();
+      }, 1200);
+    } else {
+      msg.textContent = '❌ ' + ((res && res.msg) || '兑换失败');
+      msg.style.color = '#DC2626';
+      btn.disabled = false;
+      btn.textContent = '立即兑换';
+    }
+  };
+
+  btn.onclick = doRedeem;
+  input.onkeydown = e => { if(e.key === 'Enter') doRedeem(); };
+}
+/* ════════ 修改昵称 ════════ */
+async function editNickname(){
+  if(document.getElementById('nickOverlay')) return;
+
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session) return;
+  const { data: profile } = await sb.from('profiles')
+    .select('display_name').eq('id', session.user.id).single();
+  const current = (profile && profile.display_name) || '';
+
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="nickOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);
+      z-index:100000;display:flex;align-items:center;justify-content:center;
+      backdrop-filter:blur(4px);padding:20px">
+      <div style="background:#fff;border-radius:16px;padding:26px;
+        width:100%;max-width:360px;position:relative">
+        <button onclick="document.getElementById('nickOverlay').remove()"
+          style="position:absolute;top:10px;right:14px;background:none;
+          border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button>
+
+        <div style="font-size:17px;font-weight:900;text-align:center;
+          color:#0A0A0A;margin-bottom:6px">修改昵称</div>
+        <div style="font-size:12px;color:#8A8A8A;text-align:center;
+          line-height:1.6;margin-bottom:20px">
+          别人在排行榜、成就页看到的就是这个名字
+        </div>
+
+        <input id="nickInput" type="text" maxlength="12"
+          value="${escapeHtml(current)}"
+          placeholder="比如：小明 / 单词侠 / 球球"
+          style="width:100%;padding:14px;border:1.5px solid #EBEBEB;
+          border-radius:10px;font-size:16px;text-align:center;
+          font-weight:700;outline:none;box-sizing:border-box">
+
+        <div id="nickMsg" style="font-size:12px;text-align:center;
+          margin:10px 0;min-height:18px;color:#8A8A8A;font-weight:700">
+          最多 12 个字
+        </div>
+
+        <button id="btnSaveNick"
+          style="width:100%;padding:13px;background:#0A0A0A;color:#fff;
+          border:none;border-radius:10px;font-size:15px;font-weight:900;
+          cursor:pointer">
+          保存
+        </button>
+      </div>
+    </div>
+  `);
+
+  const input = document.getElementById('nickInput');
+  setTimeout(()=>input.focus(), 120);
+
+  document.getElementById('btnSaveNick').onclick = async ()=>{
+    const v = input.value.trim();
+    const msg = document.getElementById('nickMsg');
+    if(!v){
+      msg.textContent = '不能为空';
+      msg.style.color = '#DC2626';
+      return;
+    }
+    const { error } = await sb.from('profiles')
+      .update({ display_name: v }).eq('id', session.user.id);
+    if(error){
+      msg.textContent = '保存失败：' + error.message;
+      msg.style.color = '#DC2626';
+      return;
+    }
+    msg.textContent = '✅ 保存成功';
+    msg.style.color = '#16a34a';
+    setTimeout(()=>{ document.getElementById('nickOverlay').remove(); location.reload(); }, 800);
+  };
+}
+</script>
 
 </body>
 </html>
