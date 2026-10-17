@@ -821,6 +821,27 @@ input[type=range]:disabled::-webkit-slider-thumb{background:#ccc;cursor:not-allo
   box-shadow:0 2px 10px rgba(120,105,95,.08),inset 0 1px 0 rgba(255,255,255,.6);
   position:relative;overflow:hidden;
 }
+/* 可点击的单词 */
+.clickable-word {
+  cursor: pointer;
+  display: inline-block;
+  transition: transform 0.1s, color 0.1s;
+}
+.clickable-word:active {
+  transform: scale(0.9);
+  color: var(--pink) !important;
+}
+/* 普通单词的暗示线 */
+.normal-word {
+  border-bottom: 1px dashed rgba(107, 203, 255, 0.4);
+  padding-bottom: 1px;
+}
+/* 保留重点词原有的高亮背景 */
+.key-word {
+  color:#6B5B7B; font-weight:900;
+  background:linear-gradient(180deg,transparent 62%,rgba(180,168,200,.45) 62%);
+  padding:0 4px; border-radius:4px;
+}
 .word-sent::before{
   content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
   background:linear-gradient(180deg,#B8A99A,#A8B5A0,#A3B5C4);
@@ -2701,112 +2722,96 @@ const Speaker=(function(){
                   /Macintosh/.test(navigator.userAgent);
 
   function youdaoUrl(text, type){
-    return 'https://dict.youdao.com/dictvoice?audio='
-      + encodeURIComponent(text) + '&type=' + (type||2);
+    return 'https://dict.youdao.com/dictvoice?audio=' + encodeURIComponent(text) + '&type=' + (type||2);
   }
   function baiduUrl(text){
-    return 'https://fanyi.baidu.com/gettts?lan=en&text='
-      + encodeURIComponent(text) + '&spd=3&source=web';
+    return 'https://fanyi.baidu.com/gettts?lan=en&text=' + encodeURIComponent(text) + '&spd=3&source=web';
   }
 
-  function playMp3(url, onFail){
+  // 播放 MP3（带超时和状态清理）
+  function playMp3(url, onSuccess, onFail){
     try{
       if(currentAudio){ try{currentAudio.pause();}catch(e){} currentAudio=null; }
       const audio = new Audio(url);
       audio.volume = 1;
-      audio.preload = 'auto';
-      audio.onerror = ()=>{ if(onFail) onFail(); };
+      
+      let settled = false;
+      const timeout = setTimeout(() => {
+        if(!settled) { settled = true; audio.pause(); if(onFail) onFail(); }
+      }, 1500); 
+
+      audio.oncanplaythrough = () => {
+        if(settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        if(onSuccess) onSuccess();
+      };
+
+      audio.onerror = () => { 
+        if(settled) return;
+        settled = true;
+        clearTimeout(timeout);
+        if(onFail) onFail(); 
+      };
+
       const p = audio.play();
-      if(p && p.catch){ p.catch(()=>{ if(onFail) onFail(); }); }
+      if(p && p.catch){ 
+        p.catch(()=>{ 
+          if(settled) return;
+          settled = true;
+          clearTimeout(timeout);
+          if(onFail) onFail(); 
+        }); 
+      }
       currentAudio = audio;
-      return true;
     }catch(e){
       if(onFail) onFail();
-      return false;
     }
   }
 
- function speakNativeChecked(text, rate, onFail){
-    if(!supported || !text){ onFail && onFail(); return; }
+  // 原生 TTS（带静默失败检测）
+  function speakNative(text, rate, onFail){
+    if(!supported || !text){ if(onFail) onFail(); return; }
     try{
-      speechSynthesis.cancel();
+      speechSynthesis.cancel(); 
       const u = new SpeechSynthesisUtterance(text);
-      u.lang='en-GB'; u.rate=rate||0.88; u.pitch=1; u.volume=1;
-      if(voice) u.voice=voice;
+      u.lang = 'en-US'; 
+      u.rate = rate || 0.9;
+      u.pitch = 1;
+      u.volume = 1;
+      if(voice) u.voice = voice;
 
-      let settled = false;
-      const fail = ()=>{
-        if(settled) return;
-        settled = true;
-        onFail && onFail();
-      };
-      u.onstart = ()=>{ settled = true; };   // 成功开始读
-      u.onerror = fail;                       // 明确失败
+      let started = false;
+      u.onstart = () => { started = true; };
+      u.onerror = () => { if(onFail) onFail(); };
 
       speechSynthesis.speak(u);
-      // 华为等静默失败：800ms 内没触发 onstart → 认为不可用
-      setTimeout(()=>{ if(!settled) fail(); }, 800);
-    }catch(e){ onFail && onFail(); }
+      
+      setTimeout(() => { 
+        if(!started) {
+          speechSynthesis.cancel();
+          if(onFail) onFail(); 
+        }
+      }, 400);
+    }catch(e){ if(onFail) onFail(); }
   }
-
-
- function speakNative(text, rate){
-    if(!supported || !text) return;
-    try{
-      speechSynthesis.cancel();
-      const u = new SpeechSynthesisUtterance(text);
-      u.lang='en-GB'; u.rate=rate||0.88; u.pitch=1; u.volume=1;
-      if(voice) u.voice=voice;
-      speechSynthesis.speak(u);
-    }catch(e){}
-  }
-
-
-
 
   function pickVoice(){
     if(!supported) return;
     try{
       const vs = speechSynthesis.getVoices();
       if(!vs || !vs.length) return;
-      voice = vs.find(v=>/en[-_]GB/i.test(v.lang))
-           || vs.find(v=>/en[-_]US/i.test(v.lang))
-           || vs.find(v=>/^en/i.test(v.lang))
-           || null;
+      voice = vs.find(v=>/en[-_]US/i.test(v.lang)) || 
+              vs.find(v=>/en[-_]GB/i.test(v.lang)) || 
+              vs.find(v=>/^en/i.test(v.lang));
     }catch(e){}
   }
 
-  /* 句子逐词播放（华为友好） */
-  function speakWordByWord(sentence){
-    // 只用 ASCII 直引号，避免编码问题
-    const words = sentence
-      .replace(/[.,!?;:"'()\[\]\u2014\u2013-]+/g, ' ')
-      .split(/\s+/)
-      .filter(Boolean);
-    if(!words.length) return;
-
-    let i = 0;
-    const next = ()=>{
-      if(i >= words.length) return;
-      const w = words[i++];
-      const urls = [ youdaoUrl(w, 2), baiduUrl(w) ];
-      let k = 0;
-      const tryOne = ()=>{
-        if(k >= urls.length){ setTimeout(next, 80); return; }
-        try{
-          if(currentAudio){ try{currentAudio.pause();}catch(e){} currentAudio=null; }
-          const audio = new Audio(urls[k++]);
-          audio.volume = 1;
-          audio.onended = ()=>setTimeout(next, 120);
-          audio.onerror = ()=>setTimeout(tryOne, 60);
-          currentAudio = audio;
-          const p = audio.play();
-          if(p && p.catch) p.catch(()=>setTimeout(tryOne, 60));
-        }catch(e){ setTimeout(tryOne, 60); }
-      };
-      tryOne();
-    };
-    next();
+  if (supported) {
+    pickVoice();
+    if (speechSynthesis.onvoiceschanged !== undefined) {
+      speechSynthesis.onvoiceschanged = pickVoice;
+    }
   }
 
   return {
@@ -2814,62 +2819,52 @@ const Speaker=(function(){
     get enabled(){ return enabled; },
     set enabled(v){
       enabled = !!v;
-      if(!v){
-        try{ if(currentAudio) currentAudio.pause(); }catch(e){}
-        if(supported) try{ speechSynthesis.cancel(); }catch(e){}
-      }
+      if(!v && supported) try{ speechSynthesis.cancel(); }catch(e){}
+      if(!v && currentAudio) try{ currentAudio.pause(); }catch(e){}
     },
 
-
-
-
- speak(text, rate){
+    speak(text, rate){
       if(!enabled || !text) return;
+      
+      // 强行掐断上一次的所有声音
+      if(supported) try{ speechSynthesis.cancel(); }catch(e){}
+      if(currentAudio){ try{ currentAudio.pause(); }catch(e){} currentAudio = null; }
 
-      const clean = String(text)
-        .replace(/[\[\]]/g,'')
-        .replace(/[<>"'`\\]/g,'')
-        .replace(/\s+/g,' ')
-        .trim();
+      const clean = String(text).replace(/[\[\]]/g,'').replace(/[<>"'`\\]/g,'').replace(/\s+/g,' ').trim();
       if(!clean) return;
 
-      // —— 苹果系：单词、句子一律走原生 TTS ——
       if(isApple){
         speakNative(clean, rate);
         return;
       }
 
-      // —— 非苹果 · 单个词：MP3 → 原生 TTS 兜底 ——
       if(!clean.includes(' ')){
-        playMp3(youdaoUrl(clean, 2), () => speakNative(clean, rate));
+        playMp3(youdaoUrl(clean, 2), null, () => {
+          console.warn('单词 MP3 加载失败，已忽略:', clean);
+        });
         return;
       }
 
-      // —— 非苹果 · 句子：整句 MP3 → 逐词兜底 ——
       const urls = [
         youdaoUrl(clean, 2),
         baiduUrl(clean),
-        'https://translate.google.com/translate_tts?ie=UTF-8&q=' +
-          encodeURIComponent(clean) + '&tl=en&client=tw-ob'
+        'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodeURIComponent(clean) + '&tl=en&client=tw-ob'
       ];
       let i = 0;
       const tryNext = ()=>{
-        if(i >= urls.length){ speakWordByWord(clean); return; }
-        playMp3(urls[i++], tryNext);
+        if(i >= urls.length) return;
+        playMp3(urls[i++], null, tryNext);
       };
       tryNext();
     },
 
     stop(){
-              try{ if(currentAudio){ currentAudio.pause(); currentAudio=null; } }catch(e){}
-              if(supported) try{ speechSynthesis.cancel(); }catch(e){}
-            }
-          }; // ← 加上这个，闭合 return 的对象
-        })(); // ← 加上这个，闭合最外层的 IIFE 函数
+      try{ if(currentAudio){ currentAudio.pause(); currentAudio=null; } }catch(e){}
+      if(supported) try{ speechSynthesis.cancel(); }catch(e){}
+    }
+  };
+})(); // 👈 Speaker 完美闭合
 
-/* ═══════════════════════════════════════════════════════════
-   ★ 拼读引擎（精确等待，绝不叠音 · 提速版）
-   ═══════════════════════════════════════════════════════════ */
 /* ═══════════════════════════════════════════════════════════
    ★ 拼读引擎（支持独立语速配置 & 精确等待）
    ═══════════════════════════════════════════════════════════ */
@@ -2881,7 +2876,6 @@ function cancelSpell() {
   try { Speaker.stop(); } catch(e){}
 }
 
-// ★ 重点：新增 wordRate (整个单词语速) 和 letterRate (字母语速)
 async function spellWord(word, wordRate = 1.0, letterRate = 1.5) {
   if (!word) return;
   cancelSpell(); 
@@ -2895,41 +2889,36 @@ async function spellWord(word, wordRate = 1.0, letterRate = 1.5) {
     setTimeout(r, ms);
   });
 
-  // 传入自定义语速
   const speakNativeAsync = (text, localRate) => new Promise(r => {
     if (spellAborted) { r(); return; }
     if (!('speechSynthesis' in window)) { r(); return; }
     const u = new SpeechSynthesisUtterance(text);
-    u.lang = 'en-GB';
-    u.rate = localRate; // ★ 使用传入的独立语速
+    u.lang = 'en-US';
+    u.rate = localRate;
     u.onend = r;
     u.onerror = r;
     speechSynthesis.speak(u);
   });
 
-  // 1. 先读完整单词（使用较慢的 wordRate，比如 1.0）
   await speakNativeAsync(cleanWord, wordRate);
   if (spellAborted) return;
-  await wait(250); // 单词读完停顿 0.25 秒
+  await wait(250);
 
-  // 2. 逐个字母拼读（使用较快的 letterRate，比如 1.3）
   const letters = cleanWord.toLowerCase().split('');
   for (let i = 0; i < letters.length; i++) {
     if (spellAborted) return;
-    await speakNativeAsync(letters[i], letterRate); // ★ 字母用字母语速
+    await speakNativeAsync(letters[i], letterRate);
     if (spellAborted) return;
-    await wait(100); // 字母间停顿 0.1 秒
+    await wait(100);
   }
 
-  // 3. 最后再完整读一遍（回到较慢的 wordRate）
   await wait(250);
   if (spellAborted) return;
   await speakNativeAsync(cleanWord, wordRate);
   await wait(250);
 }
 
-
-/* —— 语音首次使用成就（必须放在 Speaker 定义之后）—— */
+/* —— 语音首次使用成就 —— */
 (function wrapSpeaker(){
   const _origSpeak = Speaker.speak.bind(Speaker);
   Speaker.speak = function(text, rate){
@@ -2940,17 +2929,13 @@ async function spellWord(word, wordRate = 1.0, letterRate = 1.5) {
   };
 })();
 
-
-
-
-
-
 let soundOn=true;
 function applySound(){
   Sfx.enabled=soundOn;Speaker.enabled=soundOn;
   const b=$('#btnSound');
   if(b){b.classList.toggle('on',soundOn);b.textContent=soundOn?'🔊':'🔇';}
 }
+
 function applySkin(){
   document.body.classList.toggle('skin-boy', currentSkin==='boy');
   const b=$('#btnSkin');
@@ -2960,7 +2945,6 @@ function applySkin(){
     b.title = currentSkin==='boy' ? '当前：男孩皮肤' : '当前：女孩皮肤';
   }
 }
-
 /* ═══════════════════════════════════════════════════════════
    工具
    ═══════════════════════════════════════════════════════════ */
@@ -3803,6 +3787,7 @@ function unlockAch(id){
   showAchievement(id);save();
 }
 function updateXpBar(){
+   if (!state || !state.game) return; // 👈 加上这一行！
   const g=state.game;const need=xpNeeded(g.level);
   const pct=Math.min(100,(g.xp/need)*100);
   const b=$('#xpFill');if(b)b.style.width=pct+'%';
@@ -3862,6 +3847,7 @@ function goHome(){
 
 /* —— 主页宠物卡片 —— */
 function renderPetCard(){
+    if (!state) return; // 👈 加上这一行！
   initPet();
   const p = state.pet;
   const el = $('#petCard');
@@ -4158,12 +4144,12 @@ function petStageUp(idx){
 
 
 function renderHome(){
-  
   $('#homeAvatar').textContent=currentUser.avatar;
   $('#homeName').textContent=currentUser.name;
   $('#btnAdmin').style.display='none';   // 家长模式已下线;
 
-  // ★ 鼠标悬停昵称显示会员状态
+
+// ★ 鼠标悬停昵称显示会员状态
   const __m = getMembership();
   const hName = $('#homeName');
   if(hName){
@@ -4178,7 +4164,7 @@ function renderHome(){
   const gs=state.goal.groups;
   const hg=$('#homeGoal');
 
-  if(hg){
+ if(hg){
     const __hasCat = WORDS.some(w => (w.u && w.u.trim()) || (w.g && w.g.trim()));
     if(!__hasCat){
       hg.textContent = '自定义词库 · 每日 ' + getDailyNew() + ' 词';
@@ -4187,7 +4173,7 @@ function renderHome(){
     }
   }
 
-  const pool=getPoolWords();
+const pool=getPoolWords();
   const learned=pool.filter(w=>state.bank[w.en]&&state.bank[w.en].seen>0);
   const levels=[
     {name:'牢固',color:'#4ade80',min:.85,count:0},
@@ -4213,7 +4199,8 @@ function renderHome(){
     +`<div class="legend-row" style="margin-top:4px;border-top:1px solid rgba(255,107,157,.15);padding-top:8px">
         <span class="muted small">已学 / 词库</span><b class="small">${learned.length} / ${pool.length}</b>
       </div>`;
-  const due=dueWords();
+
+   const due=dueWords();
   const fresh=freshWords(getDailyNew());
   $('#dueNum').textContent=due.length;
   $('#newNum').textContent=fresh.length;
@@ -4229,65 +4216,93 @@ function renderHome(){
     speech.textContent=t>15?`今天有 ${t} 个词哦，加油！💪`
       :t>8?`今天有 ${t} 个词，很快就完成了！`:`只有 ${t} 个词，轻松搞定！`;
   }
-  // ★ 考前冲刺按钮
-const sprintBtn = $('#btnSprint');
-if(sprintBtn){
-  const freshCount = getPoolWords().filter(w => !state.bank[w.en] || state.bank[w.en].seen === 0).length;
-  if(freshCount === 0 && due.length === 0){
-    sprintBtn.style.display = 'none';
-  } else {
-    sprintBtn.style.display = 'inline-flex';
-    sprintBtn.textContent = `🚀 考前冲刺（还剩 ${freshCount} 词未学）`;
-    sprintBtn.onclick = () => { Sfx.click(); showSprintDialog(); };
-  }
-}
-// ★ 检查冲刺存档
-(function(){
-  try{
-    const raw = localStorage.getItem('wq_sprint_progress');
-    if(!raw) return;
-    const p = JSON.parse(raw);
-    // 7 天过期
-    if(Date.now() - p.savedAt > 7 * 24 * 3600 * 1000){
-      localStorage.removeItem('wq_sprint_progress');
-      return;
-    }
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.style.cssText = 'background:linear-gradient(160deg,#FFF0F5,#FFE6EF);border:2px solid #FFD9E5;margin-bottom:14px';
-    const d = new Date(p.savedAt);
-    const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
-    card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-        <div style="flex:1;min-width:0">
-          <div style="font-weight:900;font-size:14px;color:#FF4D8D;margin-bottom:3px">
-            🚀 未完成的冲刺
-          </div>
-          <div style="font-size:12px;color:#8A8A8A;font-weight:700">
-            进度 ${p.idx} / ${p.queue.length} 题 · 保存于 ${timeStr}
-          </div>
-        </div>
-        <div style="display:flex;gap:6px;flex-shrink:0">
-          <button class="btn primary small" id="btnResumeSprint" style="width:auto;padding:8px 14px;font-size:13px">继续</button>
-          <button class="btn ghost small" id="btnDiscardSprint" style="width:auto;padding:8px 14px;font-size:13px">放弃</button>
-        </div>
-      </div>
-    `;
-    const ref = $('#homeFace') ? $('#homeFace').closest('.card') : null;
-    if(ref && ref.parentNode){
-      ref.parentNode.insertBefore(card, ref.nextSibling);
+// ★ 考前冲刺按钮
+  const sprintBtn = $('#btnSprint');
+  if(sprintBtn){
+    const freshCount = getPoolWords().filter(w => !state.bank[w.en] || state.bank[w.en].seen === 0).length;
+    if(freshCount === 0 && due.length === 0){
+      sprintBtn.style.display = 'none';
     } else {
-      const home = $('#s-home');
-      if(home) home.insertBefore(card, home.firstChild);
+      sprintBtn.style.display = 'inline-flex';
+      sprintBtn.textContent = `🚀 考前冲刺（还剩 ${freshCount} 词未学）`;
+      sprintBtn.onclick = () => { Sfx.click(); showSprintDialog(); };
     }
-    document.getElementById('btnResumeSprint').onclick = resumeSprint;
-    document.getElementById('btnDiscardSprint').onclick = discardSprint;
-  }catch(e){ console.warn('检查冲刺存档失败', e); }
-})();
- renderAchWall();renderTimeline();renderWeakness();updateXpBar();renderPetCard();
+  }
 
-}
+// ★ 检查冲刺存档（修复防重复版）
+ (function(){
+    try{
+      const oldCard = document.getElementById('sprintResumeCard');
+      if (oldCard) oldCard.remove();
+
+      const raw = localStorage.getItem('wq_sprint_progress');
+      if(!raw) return;
+      
+      let p;
+      try {
+        p = JSON.parse(raw);
+      } catch(err) {
+        console.warn('存档数据损坏，已自动清理');
+        localStorage.removeItem('wq_sprint_progress');
+        return;
+      }
+
+      if(Date.now() - p.savedAt > 7 * 24 * 3600 * 1000){
+        localStorage.removeItem('wq_sprint_progress');
+        return;
+      }
+
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.id = 'sprintResumeCard'; 
+      card.style.cssText = 'background:linear-gradient(160deg,#FFF0F5,#FFE6EF); border:1px solid #FFD1E3; border-radius:16px; padding:16px; margin-bottom:12px;';
+
+      const d = new Date(p.savedAt);
+      const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+      
+      card.innerHTML = `
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;">
+          <div style="flex:1;min-width:0">
+            <div style="font-weight:900;font-size:14px;color:#FF4D8D;margin-bottom:3px">
+              ✍️ 未完成的冲刺
+            </div>
+            <div style="font-size:12px;color:#888">
+              进度 ${p.idx} / ${p.queue.length} 题 · 保存于 ${timeStr}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px; flex-shrink:0;">
+             <button id="btnResumeSprint" class="btn btn-primary" style="padding:6px 12px; font-size:12px;">继续</button>
+             <button id="btnDiscardSprint" class="btn btn-outline" style="padding:6px 12px; font-size:12px;">放弃</button>
+          </div>
+        </div>
+      `;
+
+     const ref = $('#homeFace') ? $('#homeFace').closest('.card') : null;
+      if(ref && ref.parentNode){
+        const home = $('#s-home');
+        if(home) home.insertBefore(card, home.firstChild);
+      }
+
+      const btnResume = document.getElementById('btnResumeSprint');
+      const btnDiscard = document.getElementById('btnDiscardSprint');
+      if(btnResume) btnResume.onclick = resumeSprint;
+      if(btnDiscard) btnDiscard.onclick = discardSprint;
+
+    }catch(e){ 
+      console.warn('检查冲刺存档失败', e); 
+    }
+  })();
+ 
+  renderAchWall();
+  renderTimeline();
+  renderWeakness();
+  updateXpBar();
+  renderPetCard();
+ 
+} // 👈 这是 renderHome 真正的结尾
+
 function renderAchWall(){
+   if (!state || !state.game) return; // 👈 加上这一行！
   const g=state.game;
   $('#achGrid').innerHTML=Object.entries(ACHIEVEMENTS).map(([id,a])=>{
     const unlocked=g.achievements[id];
@@ -4296,6 +4311,7 @@ function renderAchWall(){
   }).join('');
 }
 function renderTimeline(){
+    if (!state) return; // 👈 加上这一行！
   const t=vnow();
   const items=getPoolWords()
     .map(w=>({w,b:state.bank[w.en]}))
@@ -4320,6 +4336,7 @@ function renderTimeline(){
 }
 
 function renderWeakness(){
+   if (!state) return; // 👈 加上这一行！
   const el=$('#weakness');
   const entries=Object.entries(state.groupStats).filter(([,v])=>v.ok+v.bad>0);
   if(!entries.length){ el.innerHTML='<div class="muted small" style="font-weight:700">还没有练习数据</div>';return; }
@@ -5781,8 +5798,14 @@ function startScenarioGame(){
 }
 
 function renderSentence(text){
-  return esc(text).replace(/\[([^\]]+)\]/g, (m, w) => {
-    return `<span class="key-word" data-word="${esc(w)}">${esc(w)}</span>`;
+  return esc(text).replace(/\[([^\]]+)\]|([a-zA-Z][a-zA-Z'-]*)/g, (match, keyWord, normalWord) => {
+    if (keyWord) {
+      // 这是自带中括号的重点词（保留高亮背景）
+      return `<span class="key-word clickable-word" data-word="${keyWord}">${keyWord}</span>`;
+    } else {
+      // 这是句子里的普通单词（加个虚线提示可点）
+      return `<span class="normal-word clickable-word" data-word="${normalWord}">${normalWord}</span>`;
+    }
   });
 }
 function sentencePlain(text){
@@ -5849,9 +5872,8 @@ const sentHtml = s.sentences.map(item=>{
       ${ph ? `<div class="ws-phonetic-mini">${renderPhonetic(ph)}</div>` : ''}
       
 
-  <div class="ws-en" style="display:flex; align-items:center; gap:8px;">
-        <div style="flex:1;">${renderSentence(item.en)}</div>
-        <button class="ws-speak" data-text="${esc(sentencePlain(item.en))}" title="朗读整句" style="margin-left:0;">🔊</button>
+ <div class="ws-en">
+        ${renderSentence(item.en)}
       </div>
 
       <div class="ws-zh">${esc(item.zh)}</div>
@@ -5860,11 +5882,10 @@ const sentHtml = s.sentences.map(item=>{
 }).join('');
 
 
-    const storyHtml = s.story.map((line, i)=>`
+     const storyHtml = s.story.map((line, i)=>`
       <div class="story-line">
         <div class="line-num">${i+1}</div>
         <div class="line-text">${renderSentence(line)}</div>
-        <button class="speak-mini" data-text="${esc(sentencePlain(line))}">🔊</button>
       </div>
     `).join('');
 
@@ -5894,20 +5915,17 @@ const sentHtml = s.sentences.map(item=>{
 
 
 
-   el.querySelectorAll('.ws-speak, .speak-mini').forEach(btn=>{
-      btn.onclick = (e)=>{
+   // ★ 点击任意单词进行发音
+    el.querySelectorAll('.clickable-word').forEach(wordEl => {
+      wordEl.onclick = (e) => {
         e.stopPropagation();
-        // ✅ 先播语音（趁用户手势还在）
-        Speaker.speak(btn.dataset.text, 0.82);
-        // 音效延后，避免抢手势
-        setTimeout(()=>Sfx.pop(), 80);
-      };
-    });
-    el.querySelectorAll('.key-word').forEach(kw=>{
-      kw.onclick = (e)=>{
-        e.stopPropagation();
-        Speaker.speak(kw.dataset.word, 0.82);
-        setTimeout(()=>Sfx.pop(), 80);
+        const word = wordEl.dataset.word;
+        // 视觉反馈：闪一下
+        wordEl.style.color = 'var(--pink)';
+        setTimeout(() => { wordEl.style.color = ''; }, 300);
+        
+        // 调用发音（由于是纯单词，Speaker 会走稳定的 MP3 接口）
+        Speaker.speak(word, 0.82);
       };
     });
 
@@ -6780,24 +6798,47 @@ if(__batchBox){
   }
 
 }
-/* ════════ 冲刺存档：保存 ════════ */
-function saveSprintProgress(){
-  if(!session || !session.isSprint) return;
-  try{
-    localStorage.setItem('wq_sprint_progress', JSON.stringify({
-      queue: session.queue,
-      idx: session.idx,
-      correct: session.correct,
-      wrong: session.wrong,
-      combo: session.combo,
-      maxCombo: session.maxCombo,
-      newCount: session.newCount,
-      coinsEarned: session.coinsEarned,
-      batchSize: session.batchSize,
-      savedAt: Date.now()
-    }));
-    console.log('💾 冲刺进度已存档：', session.idx, '/', session.queue.length);
-  }catch(e){ console.warn('存档失败', e); }
+
+/* ════════ 冲刺存档：保存（完美防崩溃防丢版） ════════ */
+let sprintSaveTimer = null;
+
+function saveSprintProgress(forceSync = false) {
+  if (!session || !session.isSprint) return;
+  
+  // 1. 立即把当时的数据抓取出来，冻结成快照（防止稍后 session 被清空导致报错）
+  const dataToSave = {
+    queue: session.queue,
+    idx: session.idx,
+    correct: session.correct,
+    wrong: session.wrong,
+    combo: session.combo,
+    maxCombo: session.maxCombo,
+    newCount: session.newCount,
+    coinsEarned: session.coinsEarned,
+    batchSize: session.batchSize,
+    savedAt: Date.now()
+  };
+
+  // 2. 如果 forceSync 为 true（比如用户关网页），立即同步保存
+  if (forceSync) {
+    if (sprintSaveTimer) clearTimeout(sprintSaveTimer);
+    try {
+      localStorage.setItem('wq_sprint_progress', JSON.stringify(dataToSave));
+      console.log('💾 冲刺进度已【立即】存档：', dataToSave.idx, '/', dataToSave.queue.length);
+    } catch(e) {}
+    return;
+  }
+
+  // 3. 否则，防抖延迟保存（防止手机卡顿）
+  if (sprintSaveTimer) clearTimeout(sprintSaveTimer);
+  sprintSaveTimer = setTimeout(() => {
+    try {
+      localStorage.setItem('wq_sprint_progress', JSON.stringify(dataToSave));
+      console.log('💾 冲刺进度已自动存档：', dataToSave.idx, '/', dataToSave.queue.length);
+    } catch (e) {
+      console.warn('存档失败', e);
+    }
+  }, 1000); 
 }
 
 /* ════════ 冲刺存档：恢复 ════════ */
@@ -6806,6 +6847,12 @@ function resumeSprint(){
     const raw = localStorage.getItem('wq_sprint_progress');
     if(!raw){ alert('没有找到存档'); return; }
     const p = JSON.parse(raw);
+     // 安全锁
+   if(!p || !p.queue || !Array.isArray(p.queue)) {
+      alert('存档已损坏，无法恢复');
+      localStorage.removeItem('wq_sprint_progress');
+      return;
+    }
 
     session = {
       queue: p.queue,
@@ -6829,7 +6876,11 @@ function resumeSprint(){
     showScreen('s-learn');
     renderLearn();
     console.log('▶️ 恢复冲刺：从第', p.idx + 1, '题开始');
-  }catch(e){ console.error('恢复失败', e); alert('存档损坏，已清除'); localStorage.removeItem('wq_sprint_progress'); }
+  }catch(e){ 
+  console.error('恢复失败', e); 
+  alert('存档损坏，已清除'); 
+  localStorage.removeItem('wq_sprint_progress'); 
+  }
 }
 
 /* ════════ 冲刺存档：放弃 ════════ */
@@ -7130,7 +7181,12 @@ function trackGamePlayed(type){
 }
 
 
-
+function finishSession(){
+  // ★ 冲刺完成，清除存档，并杀掉可能存在的延迟保存定时器
+  if(session && session.isSprint){
+    if (typeof sprintSaveTimer !== 'undefined' && sprintSaveTimer) clearTimeout(sprintSaveTimer);
+    localStorage.removeItem('wq_sprint_progress');
+  }
 function finishSession(){
   // ★ 冲刺完成，清除存档
   if(session && session.isSprint){
@@ -7204,6 +7260,8 @@ $('#btnSummaryTopic').onclick=()=>{
   if(levelupPending)return;
   renderGoal();showScreen('s-goal');
 };
+}
+
 
 /* ═══════════════════════════════════════════════════════════
    随心听 · 播放器
@@ -7441,7 +7499,7 @@ function initPage(){
   buildRuntimeUsers();
 
   /* ★ 检查 Supabase 登录状态 */
-sb.auth.getSession().then(async ({data:{session}})=>{
+  sb.auth.getSession().then(async ({data:{session}})=>{
     if(!session){
       window.location.href = 'index.html';
       return;
@@ -7475,26 +7533,28 @@ sb.auth.getSession().then(async ({data:{session}})=>{
     currentAccount = { id: user.id, name: name, avatar: '🦊', role: 'student', pwd: '' };
     currentUser = rtUser;
     state = currentUser.state;
-// ★ 从 Supabase 读每日新词量（覆盖本地）
-try{
-  const { data: __p } = await sb.from('profiles')
-    .select('daily_new').eq('id', user.id).single();
-  if(__p && typeof __p.daily_new === 'number'){
-    if(!currentUser.settings) currentUser.settings = {};
-    currentUser.settings.dailyNew = __p.daily_new;
-    // 顺便写回本地，保持一致
+    
+    // ★ 从 Supabase 读每日新词量（覆盖本地）
     try{
-      const KEY = 'wq_runtime_v5_' + user.id;
-      const raw = localStorage.getItem(KEY);
-      if(raw){
-        const p = JSON.parse(raw);
-        if(!p.settings) p.settings = {};
-        p.settings.dailyNew = __p.daily_new;
-        localStorage.setItem(KEY, JSON.stringify(p));
+      const { data: __p } = await sb.from('profiles')
+        .select('daily_new').eq('id', user.id).single();
+      if(__p && typeof __p.daily_new === 'number'){
+        if(!currentUser.settings) currentUser.settings = {};
+        currentUser.settings.dailyNew = __p.daily_new;
+        // 顺便写回本地，保持一致
+        try{
+          const KEY = 'wq_runtime_v5_' + user.id;
+          const raw = localStorage.getItem(KEY);
+          if(raw){
+            const p = JSON.parse(raw);
+            if(!p.settings) p.settings = {};
+            p.settings.dailyNew = __p.daily_new;
+            localStorage.setItem(KEY, JSON.stringify(p));
+          }
+        }catch(e){}
       }
-    }catch(e){}
-  }
-}catch(e){ /* 忽略 */ }
+    }catch(e){ /* 忽略 */ }
+    
     if(!state.game) state.game = defaultState().game;
     if(!state.game.achievements) state.game.achievements = {};
     if(!state.groupStats) state.groupStats = {};
@@ -7503,7 +7563,7 @@ try{
     if(!state.history) state.history = [];
     if(!state.pet) state.pet = { xp:0, equipped:null, owned:{}, lastStage:0 };
 
-   // ★ 惰性结算 + 刷新会员缓存（放在 goHome 之前）
+    // ★ 惰性结算 + 刷新会员缓存（放在 goHome 之前）
     (async ()=>{
       try{
         const freshProfile = await settleAndLoad(sb, user.id);
@@ -7532,11 +7592,19 @@ try{
         }
       }
     })();
-  });
-}
-window.addEventListener('beforeunload',()=>{ try{ saveRuntime(); }catch(e){} });
-window.addEventListener('pagehide',()=>{ try{ saveRuntime(); }catch(e){} });
 
+  }); // 👈 注意这里：闭合 sb.auth.getSession().then(async ...)
+} // 👈 注意这里：闭合最外层的 function initPage()
+
+// ================= 下面的监听器是放在外面的 =================
+window.addEventListener('beforeunload', () => {
+  if (typeof saveSprintProgress === 'function') saveSprintProgress(true); // 👈 加上 true，立刻存！
+});
+window.addEventListener('pagehide', () => { 
+  try {
+    if (typeof saveSprintProgress === 'function') saveSprintProgress(true); // 👈 加上 true
+  } catch(e) {}
+});
 </script>
 </body>
 </html>
