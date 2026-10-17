@@ -1212,6 +1212,115 @@ body.skin-boy .weak-tag{
   pointer-events:none;
 }
 #listenBanner:active{ transform:scale(.98); }
+#listenBanner:active{ transform:scale(.98); }
+
+/* ══════════ 单词跑酷 ══════════ */
+.runner-stage {
+  position: relative;
+  height: 240px;
+  background: linear-gradient(180deg, #4facfe 0%, #00f2fe 100%); /* 更明亮的天空 */
+  border-radius: 18px;
+  border: 3px solid rgba(255,255,255,.9);
+  overflow: hidden;
+  box-shadow: inset 0 -10px 20px rgba(0,0,0,.1);
+  margin-top: 10px;
+}
+
+/* 视差滚动层 */
+.runner-clouds {
+  position: absolute; top: 10%; left: 0; width: 200%; height: 100px;
+  background-image: radial-gradient(circle, #fff 20%, transparent 20%), radial-gradient(circle, #fff 20%, transparent 20%);
+  background-size: 80px 80px; background-position: 0 0, 40px 40px;
+  opacity: 0.6; animation: scrollBg 8s linear infinite;
+}
+.runner-hills {
+  position: absolute; bottom: 40%; left: 0; width: 200%; height: 100px;
+  background: #4ade80; border-radius: 50% 50% 0 0; opacity: 0.8;
+  animation: scrollBg 4s linear infinite;
+}
+.runner-ground {
+  position: absolute; bottom: 0; left: 0; width: 200%; height: 40%;
+  background: #8b5a2b; border-top: 4px solid #5abf3c;
+  animation: scrollBg 1.5s linear infinite;
+}
+.runner-ground::after { /* 地面虚线，增强速度感 */
+  content: ""; position: absolute; top: 10px; left: 0; width: 100%; height: 4px;
+  background: repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(255,255,255,.4) 30px, rgba(255,255,255,.4) 60px);
+}
+
+@keyframes scrollBg {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* 小人增加奔跑起伏动画 */
+.runner-char {
+  position: absolute;
+  bottom: 35%; 
+  left: 40px;
+  font-size: 52px;
+  transform-origin: bottom center;
+  z-index: 2;
+}
+
+.runner-char .char-body {
+  display: block;
+  transform: scaleX(-1); /* 强制面朝右 */
+  animation: runBob 0.4s infinite alternate ease-in-out; 
+}
+
+@keyframes runBob {
+  from { transform: scaleX(-1) translateY(0); }
+  to { transform: scaleX(-1) translateY(-8px); }
+}
+
+.runner-char.jump {
+  animation: runnerJump 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+@keyframes runnerJump {
+  0%, 100% { bottom: 35%; transform: scaleY(1); }
+  20% { bottom: 35%; transform: scaleY(0.8) scaleX(1.2); }
+  50% { bottom: 70%; transform: scaleY(1) scaleX(1); }
+  80% { bottom: 35%; transform: scaleY(0.9) scaleX(1.1); }
+}
+
+/* ===== 障碍物（从右侧飞来，向左飞出） ===== */
+.runner-obstacle {
+  position: absolute;
+  bottom: 35%; 
+  right: -200px; /* 初始完全藏在右侧屏幕外 */
+  left: unset;   /* 👈 关键：清除任何可能导致它跑到左边的 left 属性 */
+  background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%);
+  border-radius: 16px;
+  padding: 10px 16px;
+  border: 3px solid #fff;
+  box-shadow: 0 8px 20px rgba(0,0,0,.3);
+  text-align: center;
+  min-width: 120px;
+  z-index: 1;
+  transition: right 0.3s ease-out; /* 添加平滑过渡 */
+}
+
+/* 障碍物飞入画面，停在偏右的位置 */
+.runner-obstacle.approach { 
+  right: 35%; 
+}
+
+/* 答对后，障碍物继续向左飞，越过小人后消失 */
+.runner-obstacle.pass { 
+  right: 120%; /* right 越大，越靠左。120%意味着飞到左侧屏幕外 */
+  left: unset;
+  opacity: 0; 
+  transition: right 0.6s linear, opacity 0.6s; 
+  transform: scale(0.8); 
+}
+
+.runner-obstacle.hit { 
+  border-color: var(--red); 
+  animation: shake 0.4s ease; 
+}
+
+
 </style>
 
 
@@ -1238,7 +1347,7 @@ body.skin-boy .weak-tag{
 
   <section class="screen" id="s-listen-mode">
     <div class="top-bar">
-      <button class="back-btn" id="btnListenBack">← 退出</button>
+      <button class="back-btn" id="btnListenGameBack">← 退出</button>
       <span class="title">🎧 随心听</span>
       <span class="spacer"></span>
     </div>
@@ -1360,44 +1469,57 @@ body.skin-boy .weak-tag{
       <span class="spacer"></span>
     </div>
     <div class="tip">🎯 用你学过的单词来玩吧！游戏成绩不计入学习计划，但可以获得金币和经验哦～</div>
-    <div class="game-grid">
-      <div class="game-card" data-game="ai">
-        <div class="gi">🤖</div>
-        <div class="gn">人机对决</div>
-        <div class="gd">60秒 · 挑战电脑</div>
-      </div>
-      <div class="game-card" data-game="listen">
-        <div class="gi">🎧</div>
-        <div class="gn">听音选图</div>
-        <div class="gd">60秒 · 听发音选释义</div>
-      </div>
-      <div class="game-card" data-game="match">
-        <div class="gi">🔗</div>
-        <div class="gn">连连看</div>
-        <div class="gd">中英配对消除</div>
-      </div>
-      <div class="game-card" data-game="sheep">
-        <div class="gi">🧩</div>
-        <div class="gn">趣味消词</div>
-        <div class="gd">可调难度 · 可全词库</div>
-      </div>
-      <div class="game-card" data-game="minecraft" style="grid-column:1/-1">
-        <div class="gi">⛏️</div>
-        <div class="gn">单词矿工</div>
-        <div class="gd">多层矿山 · 采集稀有矿物</div>
-      </div>
-      <div class="game-card" data-game="scenario" style="grid-column:1/-1">
-        <div class="gi">📖</div>
-        <div class="gn">场景故事 · 分主题探索</div>
-        <div class="gd">连词成句 · 连句成文 · 在语境中学单词</div>
-      </div>
-    </div>
+
+   <div class="game-grid" id="gameGridContainer"></div>
     <div class="card" style="padding:14px 18px">
       <div class="small muted" style="font-weight:800;line-height:1.6">
         📚 当前游戏范围：<span id="gameRangeTxt" style="color:var(--pink)">—</span>
       </div>
       <div class="small muted" style="font-weight:700;margin-top:4px">
         如需更换，请到主界面「📚 主题」调整
+      </div>
+    </div>
+  </section>
+
+    <!-- 单词跑酷 -->
+  <section class="screen" id="s-game-runner">
+    <div class="top-bar">
+      <button class="back-btn" id="btnRunnerBack">← 退出</button>
+      <span class="title">🏃 单词跑酷</span>
+      <span class="spacer"></span>
+    </div>
+    
+    <div class="card" style="padding:12px 16px; display:flex; justify-content:space-between; font-weight:900;">
+      <span>得分 <span id="runnerScore" style="color:var(--pink)">0</span></span>
+      <span>❤️ <span id="runnerLife">3</span></span>
+      <span>⏱️ <span id="runnerTimer">60</span>s</span>
+    </div>
+
+        <div class="runner-stage" id="runnerStage">
+      <!-- 多层视差滚动背景 -->
+      <div class="runner-clouds"></div>
+      <div class="runner-hills"></div>
+      <div class="runner-ground"></div>
+      
+      <!-- 角色 -->
+     <div class="runner-char" id="runnerChar">
+  <div class="char-body">🏃‍♂️</div>
+</div>
+      
+      <!-- 障碍物 -->
+      <div class="runner-obstacle" id="runnerObstacle">
+        <div class="runner-q-label">选正确英文跳过：</div>
+        <div class="runner-q-zh" id="runnerQZh">中文释义</div>
+      </div>
+      
+      <!-- 连击提示与撞击特效 -->
+      <div class="runner-combo" id="runnerCombo">Combo x2!</div>
+      <div class="runner-hit" id="runnerHitEffect">💥</div>
+    </div>
+
+    <div class="card" style="margin-top:14px;">
+      <div class="options" id="runnerOptions" style="margin-top:0;">
+        <!-- 选项按钮会动态生成在这里 -->
       </div>
     </div>
   </section>
@@ -1521,7 +1643,7 @@ body.skin-boy .weak-tag{
 <div class="modal-overlay" id="modalOverlay"><div class="modal-card" id="modalCard"></div></div>
 
 <script src="w.js"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="./supabase.js"></script>
 <script src="membership.js"></script>
 <script>
 /* ═══════════════════════════════════════════════════════════
@@ -4498,32 +4620,109 @@ $('#btnSkin').onclick=()=>{
 };
 
 /* ═══════════════════════════════════════════════════════════
-   游戏中心
+   游戏中心 · 注册表与按需加载引擎
    ═══════════════════════════════════════════════════════════ */
+const GAME_REGISTRY = {
+   runner: {
+    name: '单词跑酷', desc: '手速与词汇的极速碰撞', icon: '🏃',
+    script: 'game-runner.js', 
+    initFn: 'startRunnerGame'
+  },
+  ai: {
+    name: '人机对决', desc: '60秒 · 挑战电脑', icon: '🤖',
+    script: 'game-ai.js', 
+    initFn: 'showAiDifficulty'
+  },
+  listen: {
+    name: '听音选图', desc: '60秒 · 听发音选释义', icon: '🎧',
+    script: 'game-listen.js',
+    initFn: 'startListenGame'
+  },
+  match: {
+    name: '连连看', desc: '中英配对消除', icon: '🔗',
+    script: 'game-match.js',
+    initFn: 'startMatchGame'
+  },
+  sheep: {
+    name: '趣味消词', desc: '可调难度 · 可全词库', icon: '🧩',
+    script: 'game-sheep.js',
+    initFn: 'showSheepSetup'
+  },
+  minecraft: {
+    name: '单词矿工', desc: '多层矿山 · 采集稀有矿物', icon: '⛏️',
+    script: 'game-minecraft.js',
+    initFn: 'showMcDifficulty'
+  },
+  scenario: {
+    name: '场景故事', desc: '分主题探索 · 语境中学单词', icon: '📖',
+    script: 'game-scenario.js',
+    initFn: 'startScenarioGame'
+  }
+};
+
+// 动态加载 JS 脚本的引擎
+function loadGameScript(src, callbackName) {
+  // 如果已经加载过，直接执行
+  if (window[callbackName]) {
+    window[callbackName]();
+    return;
+  }
+
+  const script = document.createElement('script');
+  script.src = src;
+  script.onload = () => {
+    if (window[callbackName]) {
+      window[callbackName]();
+    } else {
+      console.error(`找不到入口函数 ${callbackName}`);
+    }
+  };
+  script.onerror = () => {
+    alert('游戏加载失败，请检查网络或文件是否存在！');
+  };
+  document.body.appendChild(script);
+}
+
+// 渲染游戏列表
 function showGamesScreen(){
-  const gs=state.goal.groups;
-  $('#gameRangeTxt').textContent=(gs.length<=2?gs.join(' + '):gs.slice(0,2).join(' + ')+` 等${gs.length}个主题`);
+  const gs = state.goal.groups || [];
+  $('#gameRangeTxt').textContent = (gs.length <= 2 ? gs.join(' + ') : gs.slice(0, 2).join(' + ') + ` 等${gs.length}个主题`);
+  
+  const container = $('#gameGridContainer');
+  container.innerHTML = ''; // 清空
+
+  Object.keys(GAME_REGISTRY).forEach(gameId => {
+    const game = GAME_REGISTRY[gameId];
+    const card = document.createElement('div');
+    card.className = 'game-card';
+    
+    // 如果是矿工或故事，就让它占满一整行
+    if (gameId === 'minecraft' || gameId === 'scenario') {
+      card.style.gridColumn = '1 / -1';
+    }
+
+    card.innerHTML = `
+      <div class="gi">${game.icon}</div>
+      <div class="gn">${game.name}</div>
+      <div class="gd">${game.desc}</div>
+    `;
+    card.onclick = () => {
+      Sfx.click();
+      loadGameScript(game.script, game.initFn);
+    };
+    container.appendChild(card);
+  });
+
   showScreen('s-games');
 }
+
 $('#btnGames').onclick=()=>{ Sfx.click();showGamesScreen(); };
 $('#btnHomeGames').onclick=()=>{ Sfx.click();showGamesScreen(); };
 $('#btnGamesBack').onclick=()=>{ Sfx.click();goHome(); };
 $('#btnPetBack').onclick = ()=>{ Sfx.click(); goHome(); };
 $('#btnSummaryGame').onclick=()=>{ Sfx.click();showGamesScreen(); };
 
-document.querySelectorAll('.game-card').forEach(card=>{
-  card.addEventListener('click',()=>{
-    Sfx.click();
-    const g=card.dataset.game;
-    if(g==='ai') showAiDifficulty();
 
-    else if(g==='listen') startListenGame();
-    else if(g==='match') startMatchGame();
-    else if(g==='sheep') showSheepSetup();
-    else if(g==='minecraft') showMcDifficulty();
-    else if(g==='scenario') startScenarioGame();
-  });
-});
 
 /** 游戏取词：只取长度适中的词条，保证格子能放下 */
 function getGameWords(count, scope){
@@ -4536,1558 +4735,6 @@ function getGameWords(count, scope){
   }
   return shuffle(pool.slice()).slice(0, count);
 }
-
-/* ═══════════════════════════════════════════════════════════
-   游戏 1 · 人机对决
-   ═══════════════════════════════════════════════════════════ */
-/* ═══════════════════════════════════════════════════════════
-   ★ 人机对决 · 难度配置
-   目标分数 = 用户每分钟答对题数 × 10 分
-   电脑每 3 秒加分一次，60 秒共 20 次
-   ═══════════════════════════════════════════════════════════ */
-const AI_DIFFICULTY = {
-  easy: { name:'简单', icon:'🌱', min:6,  max:9,  target:'每分钟答对 15 题', color:'#4ade80' },
-  mid:  { name:'中等', icon:'🔥', min:9,  max:11, target:'每分钟答对 20 题', color:'#f59e0b' },
-  hard: { name:'困难', icon:'💎', min:11, max:14, target:'每分钟答对 25 题', color:'#ff6b9d' }
-};
-
-
-let aiGame=null;
-
-/* —— 人机对决 · 难度选择 —— */
-function showAiDifficulty(){
-  openModal(`
-    <div class="modal-title">🤖 人机对决 · 选择难度</div>
-    <div class="tip" style="background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.3);text-align:center">
-      🎯 电脑会模拟真实对手的答题速度，选一个适合你的难度吧！
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
-      ${Object.entries(AI_DIFFICULTY).map(([key,cfg])=>`
-        <button class="btn ghost" data-diff="${key}" style="padding:16px;text-align:left;
-          border-color:${cfg.color};color:${cfg.color};background:${cfg.color}11">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:28px">${cfg.icon}</span>
-            <div style="flex:1">
-              <div style="font-size:16px;font-weight:900">${cfg.name}</div>
-              <div style="font-size:11px;opacity:.7;font-weight:700;margin-top:2px">${cfg.target}</div>
-            </div>
-            <span style="font-size:20px;opacity:.5">›</span>
-          </div>
-        </button>
-      `).join('')}
-    </div>
-    <button class="btn ghost small" id="btnAiDiffCancel" style="margin-top:14px">取消</button>
-  `);
-  document.querySelectorAll('[data-diff]').forEach(btn=>{
-    btn.onclick = ()=>{
-      Sfx.click();
-      const diff = btn.dataset.diff;
-      closeModal();
-      startAiGame(diff);
-    };
-  });
-  $('#btnAiDiffCancel').onclick = ()=>{ Sfx.click(); closeModal(); };
-}
-
-function startAiGame(diff){
-  diff = diff || 'mid';                     // 默认中等
-  const cfg = AI_DIFFICULTY[diff] || AI_DIFFICULTY.mid;
-
-  if(aiGame){ clearInterval(aiGame.timer); clearInterval(aiGame.botTimer); }
-  const words=getGameWords(40);
-  aiGame={
-    words,idx:0,playerScore:0,botScore:0,diff:diff,cfg:cfg,
-    timeLeft:60,timer:null,botTimer:null,locked:false,ended:false
-  };
-  showScreen('s-game-ai');
-  $('#aiPlayerScore').textContent='0';
-  $('#aiBotScore').textContent='0';
-  $('#aiTimer').textContent='60';
-  renderAiQuestion();
-
-  aiGame.timer=setInterval(()=>{
-    if(!aiGame||aiGame.ended)return;
-    aiGame.timeLeft--;
-    $('#aiTimer').textContent=Math.max(0,aiGame.timeLeft);
-    if(aiGame.timeLeft<=5 && aiGame.timeLeft>0){ Sfx.pop(); }
-    if(aiGame.timeLeft<=0) endAiGame();
-  },1000);
-
-  // ★ 电脑按难度加分：每 3 秒一次，共 20 次
-  aiGame.botTimer=setInterval(()=>{
-    if(!aiGame||aiGame.ended||aiGame.timeLeft<=0)return;
-    const range = cfg.max - cfg.min + 1;
-    aiGame.botScore += cfg.min + Math.floor(Math.random()*range);
-    $('#aiBotScore').textContent=aiGame.botScore;
-  },3000);
-}
-
-
-
-function renderAiQuestion(){
-  if(!aiGame||aiGame.ended)return;
-  const w=aiGame.words[aiGame.idx % aiGame.words.length];
-  const mode=Math.random()<0.5?'en2zh':'zh2en';
-  const distractors=shuffle(aiGame.words.filter(x=>x.en!==w.en)).slice(0,3);
-  const options=shuffle([w,...distractors]);
-  const isEn2Zh=mode==='en2zh';
-
-  $('#aiQuestionCard').innerHTML=`
-    <div class="q-label">${isEn2Zh?'🔍 选出中文释义':'🔍 选出英文单词'}</div>
-    ${isEn2Zh
-      ? `<div style="text-align:center">
-           <div class="syll-word" style="font-size:26px;line-height:1.45">${renderSyllablesHTML(w.en)}</div>
-           ${w.ph?`<div class="phonetic-line" style="font-size:15px;margin-top:4px">${renderPhonetic(w.ph)}</div>`:''}
-           <button class="speak-btn" data-speak="${esc(w.en)}" style="margin-top:10px">🔊</button>
-         </div>`
-      : `<div class="zh-big" style="text-align:center">${esc(w.zh)}</div>`}
-    <div class="options">
-      ${options.map(o=>`<button class="option" data-en="${esc(o.en)}">${esc(isEn2Zh?o.zh:o.en)}</button>`).join('')}
-    </div>`;
-
-  $('#aiQuestionCard').querySelectorAll('.option').forEach(btn=>{
-    btn.onclick=()=>{
-      if(!aiGame||aiGame.locked||aiGame.ended||aiGame.timeLeft<=0)return;
-      aiGame.locked=true;
-      const ok=btn.dataset.en===w.en;
-      if(ok){
-        aiGame.playerScore+=10;
-        $('#aiPlayerScore').textContent=aiGame.playerScore;
-        Sfx.correct();
-        btn.classList.add('correct');
-        spawnStars(2,innerWidth/2,innerHeight*0.5,['⭐','✨']);
-      }else{
-        aiGame.playerScore=Math.max(0,aiGame.playerScore-3);
-        $('#aiPlayerScore').textContent=aiGame.playerScore;
-        Sfx.wrong();
-        btn.classList.add('wrong');
-        $('#aiQuestionCard').querySelectorAll('.option').forEach(b=>{
-          if(b.dataset.en===w.en) b.classList.add('correct');
-        });
-      }
-      setTimeout(()=>{
-        if(!aiGame||aiGame.ended)return;
-        aiGame.locked=false;
-        aiGame.idx++;
-        if(aiGame.timeLeft>0) renderAiQuestion();
-      }, ok?350:800);
-    };
-  });
-}
-
-function endAiGame(){
-  if(!aiGame||aiGame.ended)return;
-  aiGame.ended=true;
-  clearInterval(aiGame.timer);
-  clearInterval(aiGame.botTimer);
-  const p=aiGame.playerScore,b=aiGame.botScore;
-  const diff=aiGame.diff,cfg=aiGame.cfg;
-  const win=p>b,draw=p===b;
-  let rewardTxt='';
-  if(win){ addCoins(30);addXp(20);Sfx.finish();celebrateBig();
-    rewardTxt='<div style="color:var(--orange);font-weight:900;margin-top:8px">🎁 +30 金币 · +20 经验</div>'; }
-  else if(draw){ addCoins(15);addXp(10);Sfx.correct();
-    rewardTxt='<div style="color:var(--orange);font-weight:900;margin-top:8px">🎁 +15 金币 · +10 经验</div>'; }
-  else{ Sfx.wrong(); }
-  trackGamePlayed('ai');
-  save();
-  const emoji=win?'🏆':draw?'🤝':'💪';
-  const title=win?'你赢了！':draw?'平局！':'再接再厉！';
-  openModal(`
-    <div style="text-align:center">
-      <div style="font-size:60px">${emoji}</div>
-      <div style="font-size:20px;font-weight:900;margin:10px 0">${title}</div>
-      <div class="muted small" style="font-weight:800;margin-bottom:6px">
-        ${cfg.icon} ${cfg.name}难度 · ${cfg.target}
-      </div>
-      <div style="display:flex;gap:16px;justify-content:center;margin:18px 0;align-items:center">
-        <div><div style="font-size:28px;font-weight:900;color:var(--pink)">${p}</div>
-          <div class="muted small" style="font-weight:700">你</div></div>
-        <div style="font-size:20px;color:var(--muted)">:</div>
-        <div><div style="font-size:28px;font-weight:900;color:var(--purple)">${b}</div>
-          <div class="muted small" style="font-weight:700">电脑</div></div>
-      </div>
-      ${rewardTxt}
-      <button class="btn primary" id="btnAiAgain" style="margin-top:20px">🔄 再来一局（同难度）</button>
-      <button class="btn ghost small" id="btnAiChangeDiff" style="margin-top:10px">🎚️ 换个难度</button>
-      <button class="btn ghost small" id="btnAiExit" style="margin-top:10px">返回游戏乐园</button>
-    </div>`);
-  $('#btnAiAgain').onclick=()=>{ Sfx.click();closeModal();startAiGame(diff); };
-  $('#btnAiChangeDiff').onclick=()=>{ Sfx.click();closeModal();showAiDifficulty(); };
-  $('#btnAiExit').onclick=()=>{ Sfx.click();closeModal();showGamesScreen(); };
-}
-
-
-$('#btnAiBack').onclick=()=>{
-  if(!confirm('确定要退出本局对决吗？'))return;
-  Sfx.click();
-  if(aiGame){ clearInterval(aiGame.timer);clearInterval(aiGame.botTimer);aiGame.ended=true; }
-  showGamesScreen();
-};
-
-/* ═══════════════════════════════════════════════════════════
-   游戏 2 · 听音选图
-   ═══════════════════════════════════════════════════════════ */
-let listenGame=null;
-
-function startListenGame(){
-  if(!Speaker.supported){
-    if(!confirm('当前浏览器不支持语音合成，无法播放发音。\n是否改为显示英文单词来做英译中题目？'))return;
-  }
-  if(listenGame){ clearInterval(listenGame.timer); Speaker.stop(); }
-  const words=getGameWords(40);
-  listenGame={
-    words,idx:0,score:0,correct:0,wrong:0,
-    timeLeft:60,timer:null,locked:false,ended:false,
-    fallbackMode:!Speaker.supported
-  };
-  showScreen('s-game-listen');
-  $('#listenScore').textContent='0';
-  $('#listenTimer').textContent='60';
-  renderListenQuestion();
-
-  listenGame.timer=setInterval(()=>{
-    if(!listenGame||listenGame.ended)return;
-    listenGame.timeLeft--;
-    $('#listenTimer').textContent=Math.max(0,listenGame.timeLeft);
-    if(listenGame.timeLeft<=5 && listenGame.timeLeft>0){ Sfx.pop(); }
-    if(listenGame.timeLeft<=0) endListenGame();
-  },1000);
-}
-
-function renderListenQuestion(){
-  if(!listenGame||listenGame.ended)return;
-  const w=listenGame.words[listenGame.idx % listenGame.words.length];
-  const distractors=shuffle(listenGame.words.filter(x=>x.en!==w.en)).slice(0,3);
-  const options=shuffle([w,...distractors]);
-  listenGame.current=w;
-
-  const showWord = listenGame.fallbackMode;
-
-  $('#listenCard').innerHTML=`
-    <div style="text-align:center;padding:6px 0 12px">
-      ${showWord
-        ? `<div class="syll-word" style="font-size:26px;line-height:1.45">${renderSyllablesHTML(w.en)}</div>
-           ${w.ph?`<div class="phonetic-line" style="margin-top:6px">${renderPhonetic(w.ph)}</div>`:''}
-           <div class="muted small" style="font-weight:700;margin-top:8px">选择正确的释义</div>`
-        : `<button class="listen-loud" id="listenPlayBtn" title="点击重听">🔊</button>
-           <div class="muted small" style="font-weight:800;margin-top:12px">点击喇叭听发音 · 选择正确释义</div>`}
-    </div>
-    <div class="options">
-      ${options.map(o=>`<button class="option" data-en="${esc(o.en)}">${esc(o.zh)}</button>`).join('')}
-    </div>`;
-
-  const playBtn=$('#listenPlayBtn');
-  if(playBtn){
-    playBtn.onclick=(e)=>{
-      e.stopPropagation();
-      Sfx.pop();
-      playBtn.classList.add('playing');
-      Speaker.speak(w.en, 0.82);
-      setTimeout(()=>playBtn.classList.remove('playing'), 1500);
-    };
-    setTimeout(()=>{
-      if(!listenGame||listenGame.ended)return;
-      if(!playBtn.classList.contains('playing')){
-        playBtn.classList.add('playing');
-        setTimeout(()=>playBtn.classList.remove('playing'), 1500);
-      }
-      Speaker.speak(w.en, 0.82);
-    }, 250);
-  }
-
-  $('#listenCard').querySelectorAll('.option').forEach(btn=>{
-    btn.onclick=()=>{
-      if(!listenGame||listenGame.locked||listenGame.ended||listenGame.timeLeft<=0)return;
-      listenGame.locked=true;
-      const ok=btn.dataset.en===w.en;
-      if(ok){
-        listenGame.score+=10;listenGame.correct++;
-        $('#listenScore').textContent=listenGame.score;
-        Sfx.correct();
-        btn.classList.add('correct');
-        spawnStars(2,innerWidth/2,innerHeight*0.5,['⭐','✨']);
-      }else{
-        listenGame.score=Math.max(0,listenGame.score-3);listenGame.wrong++;
-        $('#listenScore').textContent=listenGame.score;
-        Sfx.wrong();
-        btn.classList.add('wrong');
-        $('#listenCard').querySelectorAll('.option').forEach(b=>{
-          if(b.dataset.en===w.en) b.classList.add('correct');
-        });
-        setTimeout(()=>Speaker.speak(w.en,0.75), 400);
-      }
-      setTimeout(()=>{
-        if(!listenGame||listenGame.ended)return;
-        listenGame.locked=false;
-        listenGame.idx++;
-        if(listenGame.timeLeft>0) renderListenQuestion();
-      }, ok?400:1200);
-    };
-  });
-}
-
-function endListenGame(){
-  if(!listenGame||listenGame.ended)return;
-  listenGame.ended=true;
-  clearInterval(listenGame.timer);
-  Speaker.stop();
-  const score=listenGame.score;
-  let coins=0,xp=0,msg='';
-  if(score>=80){ coins=40;xp=25;msg='🎧 听力超强！'; }
-  else if(score>=50){ coins=25;xp=15;msg='👍 听得很准！'; }
-  else if(score>=20){ coins=10;xp=8;msg='💪 继续加油！'; }
-  else{ coins=5;xp=5;msg='🌱 多练习会更好！'; }
-  addCoins(coins);addXp(xp);trackGamePlayed('listen');save();
-  Sfx.finish();celebrateBig();
-  openModal(`
-    <div style="text-align:center">
-      <div style="font-size:60px">🎧</div>
-      <div style="font-size:20px;font-weight:900;margin:10px 0">${msg}</div>
-      <div style="font-size:36px;font-weight:900;color:var(--pink)">${score} 分</div>
-      <div class="muted small" style="font-weight:700;margin-top:6px">
-        答对 ${listenGame.correct} · 答错 ${listenGame.wrong}
-      </div>
-      <div style="color:var(--orange);font-weight:900;margin-top:10px">🎁 +${coins} 金币 · +${xp} 经验</div>
-      <button class="btn primary" id="btnListenAgain" style="margin-top:20px">🔄 再来一局</button>
-      <button class="btn ghost small" id="btnListenExit" style="margin-top:10px">返回游戏乐园</button>
-    </div>`);
-  $('#btnListenAgain').onclick=()=>{ Sfx.click();closeModal();startListenGame(); };
-  $('#btnListenExit').onclick=()=>{ Sfx.click();closeModal();showGamesScreen(); };
-}
-$('#btnListenBack').onclick=()=>{
-  // 1. 用 try-catch 包住音效，就算被拦截也不影响退出
-  try {
-    Sfx.click();
-  } catch(e) {
-    console.warn('音效被拦截，已忽略', e);
-  }
-
-  // 2. 清理游戏状态
-  if(listenGame){
-    clearInterval(listenGame.timer);
-    listenGame.ended = true;
-  }
-
-  // 3. 停止发音，同样包一层保险
-  try {
-    Speaker.stop();
-  } catch(e) {
-    console.warn('停止发音失败，已忽略', e);
-  }
-
-  // 4. 跳回游戏乐园（你测试过没问题的那个函数）
-  showGamesScreen();
-};
-
-
-/* ═══════════════════════════════════════════════════════════
-   游戏 3 · 连连看
-   ═══════════════════════════════════════════════════════════ */
-let matchGame=null;
-
-function startMatchGame(){
-  if(matchGame){ clearInterval(matchGame.timer); }
-  const pairCount=6;
-  const words=getGameWords(pairCount);
-  const leftCards=words.map(w=>({id:w.en,text:w.en,matched:false}));
-  const rightCards=words.map(w=>({id:w.en,text:w.zh,matched:false}));
-  const left=shuffle([...leftCards]);
-  const right=shuffle([...rightCards]);
-  matchGame={
-    left,right,selectedLeft:null,selectedRight:null,
-    matchedCount:0,total:pairCount,
-    startTime:Date.now(),timer:null,locked:false
-  };
-  showScreen('s-game-match');
-  $('#matchTime').textContent='0';
-  $('#matchProgress').textContent=`0 / ${pairCount}`;
-  renderMatchGrid();
-
-  matchGame.timer=setInterval(()=>{
-    if(!matchGame)return;
-    $('#matchTime').textContent=Math.floor((Date.now()-matchGame.startTime)/1000);
-  },1000);
-}
-
-function renderMatchGrid(){
-  if(!matchGame)return;
-  const grid=$('#matchGrid');
-  const leftHtml=matchGame.left.map((c,i)=>`
-    <div class="match-cell${c.matched?' matched':''}${matchGame.selectedLeft===i?' selected':''}"
-         data-side="left" data-i="${i}">${renderSyllablesHTML(c.text)}</div>`).join('');
-  const rightHtml=matchGame.right.map((c,i)=>`
-    <div class="match-cell${c.matched?' matched':''}${matchGame.selectedRight===i?' selected':''}"
-         data-side="right" data-i="${i}">${esc(c.text)}</div>`).join('');
-  grid.innerHTML=`<div class="match-col">${leftHtml}</div><div class="match-col">${rightHtml}</div>`;
-
-  grid.querySelectorAll('.match-cell').forEach(el=>{
-    el.onclick=()=>onMatchCellClick(el.dataset.side,parseInt(el.dataset.i,10));
-  });
-}
-
-function onMatchCellClick(side,idx){
-  if(!matchGame||matchGame.locked)return;
-  if(side==='left'){
-    if(matchGame.left[idx].matched)return;
-    if(matchGame.selectedLeft===idx) matchGame.selectedLeft=null;
-    else matchGame.selectedLeft=idx;
-  }else{
-    if(matchGame.right[idx].matched)return;
-    if(matchGame.selectedRight===idx) matchGame.selectedRight=null;
-    else matchGame.selectedRight=idx;
-  }
-  Sfx.click();
-  renderMatchGrid();
-
-  if(matchGame.selectedLeft!==null && matchGame.selectedRight!==null){
-    const l=matchGame.left[matchGame.selectedLeft];
-    const r=matchGame.right[matchGame.selectedRight];
-    if(l.id===r.id){
-      matchGame.locked=true;
-      const li=matchGame.selectedLeft,ri=matchGame.selectedRight;
-      setTimeout(()=>{
-        if(!matchGame)return;
-        matchGame.left[li].matched=true;
-        matchGame.right[ri].matched=true;
-        matchGame.matchedCount++;
-        matchGame.selectedLeft=null;
-        matchGame.selectedRight=null;
-        matchGame.locked=false;
-        Sfx.correct();
-        spawnStars(3,innerWidth/2,innerHeight*0.4,['✨','⭐','💫']);
-        renderMatchGrid();
-        $('#matchProgress').textContent=`${matchGame.matchedCount} / ${matchGame.total}`;
-        if(matchGame.matchedCount>=matchGame.total) endMatchGame();
-      },260);
-    }else{
-      matchGame.locked=true;
-      setTimeout(()=>{
-        if(!matchGame)return;
-        matchGame.selectedLeft=null;
-        matchGame.selectedRight=null;
-        matchGame.locked=false;
-        Sfx.wrong();
-        renderMatchGrid();
-      },480);
-    }
-  }
-}
-
-function endMatchGame(){
-  if(!matchGame)return;
-  clearInterval(matchGame.timer);
-  const elapsed=Math.floor((Date.now()-matchGame.startTime)/1000);
-  let coins=10,xp=10;
-  if(elapsed<=30){ coins=30;xp=20; }
-  else if(elapsed<=60){ coins=20;xp=15; }
-  addCoins(coins);addXp(xp);
- trackGamePlayed('match');
-  save();
-  Sfx.finish();celebrateBig();
-  openModal(`
-    <div style="text-align:center">
-      <div style="font-size:60px">🎉</div>
-      <div style="font-size:20px;font-weight:900;margin:10px 0">全部配对成功！</div>
-      <div style="font-size:28px;font-weight:900;color:var(--pink)">${elapsed} 秒</div>
-      <div style="color:var(--orange);font-weight:900;margin-top:8px">🎁 +${coins} 金币 · +${xp} 经验</div>
-      <button class="btn primary" id="btnMatchAgain" style="margin-top:20px">🔄 再来一局</button>
-      <button class="btn ghost small" id="btnMatchExit" style="margin-top:10px">返回游戏乐园</button>
-    </div>`);
-  $('#btnMatchAgain').onclick=()=>{ Sfx.click();closeModal();matchGame=null;startMatchGame(); };
-  $('#btnMatchExit').onclick=()=>{ Sfx.click();closeModal();matchGame=null;showGamesScreen(); };
-}
-$('#btnMatchBack').onclick=()=>{
-  if(!confirm('确定要退出本局游戏吗？'))return;
-  Sfx.click();
-  if(matchGame){ clearInterval(matchGame.timer);matchGame=null; }
-  showGamesScreen();
-};
-
-/* ═══════════════════════════════════════════════════════════
-   游戏 4 · 趣味消词
-   ═══════════════════════════════════════════════════════════ */
-let sheepGame=null;
-
-const SHEEP_DIFFICULTIES = {
-  easy:   { name:'简单', pairs:8,  cols:4, rows:2, layers:2 },
-  mid:    { name:'中等', pairs:12, cols:4, rows:3, layers:2 },
-  hard:   { name:'困难', pairs:16, cols:4, rows:4, layers:2 },
-  insane: { name:'极限', pairs:20, cols:4, rows:5, layers:2 }
-};
-
-function showSheepSetup(){
-  const poolCount=getPoolWords().length;
-  openModal(`
-    <div class="modal-title">🧩 趣味消词 · 设置</div>
-    <div class="field">
-      <label style="font-size:13px">选择难度</label>
-      <div id="sheepDiffRow" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <button class="btn ghost small" data-diff="easy" style="padding:10px 4px;font-size:13px">
-          简单<span style="display:block;font-size:10px;opacity:.7;font-weight:700">8对 · 16张</span>
-        </button>
-        <button class="btn ghost small" data-diff="mid" style="padding:10px 4px;font-size:13px">
-          中等<span style="display:block;font-size:10px;opacity:.7;font-weight:700">12对 · 24张</span>
-        </button>
-        <button class="btn ghost small" data-diff="hard" style="padding:10px 4px;font-size:13px">
-          困难<span style="display:block;font-size:10px;opacity:.7;font-weight:700">16对 · 32张</span>
-        </button>
-        <button class="btn ghost small" data-diff="insane" style="padding:10px 4px;font-size:13px">
-          极限<span style="display:block;font-size:10px;opacity:.7;font-weight:700">20对 · 40张</span>
-        </button>
-      </div>
-    </div>
-    <div class="field">
-      <label style="font-size:13px">词汇范围</label>
-      <div id="sheepScopeRow" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px">
-        <button class="btn ghost small" data-scope="current" style="padding:10px 4px;font-size:13px">
-          当前范围<span style="display:block;font-size:10px;opacity:.7;font-weight:700">${poolCount}词</span>
-        </button>
-        <button class="btn ghost small" data-scope="all" style="padding:10px 4px;font-size:13px">
-          全部词库<span style="display:block;font-size:10px;opacity:.7;font-weight:700">${WORDS.length}词</span>
-        </button>
-      </div>
-    </div>
-    <button class="btn primary" id="btnSheepStart" style="margin-top:6px">开始挑战</button>
-    <button class="btn ghost small" id="btnSheepCancel" style="margin-top:10px">取消</button>
-  `);
-  let diff='easy',scope='current';
-
-  const setDiff=(d)=>{
-    diff=d;
-    document.querySelectorAll('#sheepDiffRow button').forEach(b=>{
-      const on=b.dataset.diff===d;
-      b.style.background=on?'linear-gradient(120deg,var(--pink),var(--orange))':'';
-      b.style.color=on?'#fff':'';
-      b.style.borderColor=on?'transparent':'';
-    });
-  };
-  const setScope=(s)=>{
-    scope=s;
-    document.querySelectorAll('#sheepScopeRow button').forEach(b=>{
-      const on=b.dataset.scope===s;
-      b.style.background=on?'linear-gradient(120deg,var(--purple),var(--blue))':'';
-      b.style.color=on?'#fff':'';
-      b.style.borderColor=on?'transparent':'';
-    });
-  };
-  document.querySelectorAll('#sheepDiffRow button').forEach(b=>{
-    b.onclick=()=>{ Sfx.click(); setDiff(b.dataset.diff); };
-  });
-  document.querySelectorAll('#sheepScopeRow button').forEach(b=>{
-    b.onclick=()=>{ Sfx.click(); setScope(b.dataset.scope); };
-  });
-  setDiff('easy');
-  setScope('current');
-
-  $('#btnSheepCancel').onclick=()=>{ Sfx.click(); closeModal(); };
-  $('#btnSheepStart').onclick=()=>{
-    Sfx.click();
-    closeModal();
-    startSheepGame(diff, scope);
-  };
-}
-
-function startSheepGame(diff, scope){
-  const cfg = SHEEP_DIFFICULTIES[diff] || SHEEP_DIFFICULTIES.easy;
-  const pairCount = cfg.pairs;
-  const words = getGameWords(pairCount, scope);
-
-  const rawCards=[];
-  words.forEach(w=>{
-    rawCards.push({pairId:w.en,text:w.en,type:'en'});
-    rawCards.push({pairId:w.en,text:w.zh,type:'zh'});
-  });
-  const shuffled=shuffle(rawCards);
-
-  const totalPositions = cfg.cols * cfg.rows;
-  const totalCards = pairCount * 2;
-  const cardsPerPosition = Math.ceil(totalCards / totalPositions);
-
-  const assignments=[];
-  for(let i=0;i<totalPositions;i++){
-    for(let l=0;l<cardsPerPosition;l++){
-      if(assignments.length < totalCards){
-        assignments.push({slotId:i, layer:l});
-      }
-    }
-  }
-  let extraLayer = cardsPerPosition;
-  while(assignments.length < totalCards){
-    for(let i=0;i<totalPositions && assignments.length<totalCards;i++){
-      assignments.push({slotId:i, layer:extraLayer});
-    }
-    extraLayer++;
-  }
-  shuffle(assignments);
-
-  const cards=shuffled.map((c,idx)=>({
-    ...c,
-    slotId:assignments[idx].slotId,
-    layer:assignments[idx].layer,
-    removed:false,
-    inSlot:false
-  }));
-
-  const cardH=62, gap=8, padY=12, layerOff=8;
-  const maxLayer = Math.max(...assignments.map(a=>a.layer));
-  const boardH = padY + cfg.rows*(cardH+gap) + maxLayer*layerOff + 20;
-
-  sheepGame={
-    cfg, scope,
-    cards,
-    slots:[],
-    maxSlots:7,
-    totalPairs:pairCount,
-    matchedPairs:0,
-    locked:false,
-    ended:false,
-    boardH
-  };
-
-  $('#sheepDiffTxt').textContent = `${cfg.name} · ${scope==='all'?'全词库':'当前范围'}`;
-  $('#sheepBoard').style.height = boardH + 'px';
-  $('#sheepSlots').textContent = `0/${sheepGame.maxSlots}`;
-
-  showScreen('s-game-sheep');
-  renderSheepBoard();
-  renderSheepSlots();
-}
-
-function isSheepCardBlocked(card){
-  if(!sheepGame)return true;
-  return sheepGame.cards.some(other=>{
-    if(other===card)return false;
-    if(other.removed||other.inSlot)return false;
-    if(other.layer<=card.layer)return false;
-    return other.slotId===card.slotId;
-  });
-}
-
-function renderSheepBoard(){
-  if(!sheepGame)return;
-  const board=$('#sheepBoard');
-  const cols=sheepGame.cfg.cols;
-  const cardW=80,cardH=62,gap=8,padX=12,padY=12,layerOff=8;
-  board.innerHTML='';
-
-  sheepGame.cards.forEach((card,idx)=>{
-    if(card.removed||card.inSlot)return;
-    const col=card.slotId%cols;
-    const row=Math.floor(card.slotId/cols);
-    const baseX=padX+col*(cardW+gap);
-    const baseY=padY+row*(cardH+gap+4);
-    const offX=card.layer*layerOff;
-    const offY=card.layer*layerOff;
-    const blocked=isSheepCardBlocked(card);
-
-    const el=document.createElement('div');
-    el.className='sheep-card '+(card.type==='en'?'en-card':'zh-card')+(blocked?' blocked':'');
-    el.style.left=(baseX+offX)+'px';
-    el.style.top=(baseY+offY)+'px';
-    el.style.zIndex=String(10+card.layer*10+idx);
-    if(card.type==='en'){
-      el.innerHTML=renderSyllablesHTML(card.text);
-    } else {
-      el.textContent=card.text;
-    }
-    if(!blocked){
-      el.onclick=()=>{ onSheepCardClick(card); };
-    }
-    board.appendChild(el);
-  });
-
-  const remaining=sheepGame.cards.filter(c=>!c.removed&&!c.inSlot).length;
-  $('#sheepLeft').textContent=remaining;
-  $('#sheepSlots').textContent=sheepGame.slots.length+'/'+sheepGame.maxSlots;
-}
-
-function renderSheepSlots(){
-  if(!sheepGame)return;
-  const row=$('#sheepSlotRow');
-  let html='';
-  for(let i=0;i<sheepGame.maxSlots;i++){
-    const card=sheepGame.slots[i];
-    if(card){
-      const inner = card.type==='en' ? renderSyllablesHTML(card.text) : esc(card.text);
-      html+=`<div class="sheep-slot filled ${card.type==='en'?'en-card':'zh-card'}">${inner}</div>`;
-    }else{
-      html+=`<div class="sheep-slot"></div>`;
-    }
-  }
-  row.innerHTML=html;
-}
-
-function onSheepCardClick(card){
-  if(!sheepGame||sheepGame.locked||sheepGame.ended)return;
-  if(card.removed||card.inSlot)return;
-  if(sheepGame.slots.length>=sheepGame.maxSlots)return;
-  if(isSheepCardBlocked(card))return;
-
-  Sfx.click();
-  card.inSlot=true;
-  sheepGame.slots.push(card);
-  renderSheepBoard();
-  renderSheepSlots();
-
-  const pairIdx=findSheepPair();
-  if(pairIdx!==null){
-    sheepGame.locked=true;
-    setTimeout(()=>{
-      if(!sheepGame||sheepGame.ended)return;
-      let [i,j]=pairIdx;
-      const c1=sheepGame.slots[i],c2=sheepGame.slots[j];
-      c1.removed=true;c1.inSlot=false;
-      c2.removed=true;c2.inSlot=false;
-      const maxI=Math.max(i,j),minI=Math.min(i,j);
-      sheepGame.slots.splice(maxI,1);
-      sheepGame.slots.splice(minI,1);
-      sheepGame.matchedPairs++;
-      Sfx.correct();
-      spawnStars(3,innerWidth/2,innerHeight*0.5,['✨','⭐','💫']);
-      renderSheepBoard();
-      renderSheepSlots();
-      sheepGame.locked=false;
-
-      if(sheepGame.matchedPairs>=sheepGame.totalPairs){
-        endSheepGame(true);
-      }else if(sheepGame.slots.length>=sheepGame.maxSlots && findSheepPair()===null){
-        setTimeout(()=>endSheepGame(false),500);
-      }
-    },340);
-  }else{
-    if(sheepGame.slots.length>=sheepGame.maxSlots){
-      setTimeout(()=>{
-        if(!sheepGame||sheepGame.ended)return;
-        if(findSheepPair()===null) endSheepGame(false);
-      },400);
-    }
-  }
-}
-
-function findSheepPair(){
-  if(!sheepGame)return null;
-  const slots=sheepGame.slots;
-  for(let i=0;i<slots.length;i++){
-    for(let j=i+1;j<slots.length;j++){
-      if(slots[i].pairId===slots[j].pairId && slots[i].type!==slots[j].type){
-        return [i,j];
-      }
-    }
-  }
-  return null;
-}
-
-function endSheepGame(win){
-  if(!sheepGame||sheepGame.ended)return;
-  sheepGame.ended=true;
-  const diff=sheepGame.cfg.name;
-  let coins=0,xp=0;
-  if(win){
-    const mult = sheepGame.cfg.pairs/8;
-    coins=Math.round(50*mult);
-    xp=Math.round(30*mult);
-    if(sheepGame.scope==='all'){ coins=Math.round(coins*1.3); xp=Math.round(xp*1.3); }
-    Sfx.finish();celebrateBig();
-  }else{
-    coins=5;xp=5;Sfx.wrong();
-  }
-  addCoins(coins);addXp(xp);
- trackGamePlayed('sheep');
-  save();
-  openModal(`
-    <div style="text-align:center">
-      <div style="font-size:60px">${win?'🎉':'😢'}</div>
-      <div style="font-size:20px;font-weight:900;margin:10px 0">
-        ${win?'太厉害了！全部消除！':'槽位满了...'}
-      </div>
-      <div class="muted small" style="font-weight:700">难度 ${diff} · ${sheepGame.scope==='all'?'全词库':'当前范围'}</div>
-      ${win
-        ? `<div style="color:var(--orange);font-weight:900;margin-top:8px">🎁 +${coins} 金币 · +${xp} 经验</div>`
-        : `<div style="color:var(--muted);font-weight:900;margin-top:8px">已配对 ${sheepGame.matchedPairs}/${sheepGame.totalPairs}</div>
-           <div style="color:var(--orange);font-weight:900;margin-top:4px">🎁 +${coins} 金币 · +${xp} 经验</div>`}
-      <button class="btn primary" id="btnSheepAgain" style="margin-top:20px">🔄 再来一局</button>
-      <button class="btn ghost small" id="btnSheepChange" style="margin-top:10px">⚙️ 调整难度</button>
-      <button class="btn ghost small" id="btnSheepExit" style="margin-top:10px">返回游戏乐园</button>
-    </div>`);
-  $('#btnSheepAgain').onclick=()=>{
-    Sfx.click();closeModal();
-    const d=sheepGame.cfg.name;
-    let key='easy';
-    Object.keys(SHEEP_DIFFICULTIES).forEach(k=>{ if(SHEEP_DIFFICULTIES[k].name===d) key=k; });
-    const sc=sheepGame.scope;
-    sheepGame=null;
-    startSheepGame(key, sc);
-  };
-  $('#btnSheepChange').onclick=()=>{ Sfx.click();closeModal();sheepGame=null;showSheepSetup(); };
-  $('#btnSheepExit').onclick=()=>{ Sfx.click();closeModal();sheepGame=null;showGamesScreen(); };
-}
-
-$('#btnSheepBack').onclick=()=>{
-  if(!confirm('确定要退出本局游戏吗？'))return;
-  Sfx.click();
-  sheepGame=null;showGamesScreen();
-};
-
-/* ═══════════════════════════════════════════════════════════
-   游戏 5 · 单词矿工
-   ═══════════════════════════════════════════════════════════ */
-/* ═══════════════════════════════════════════════════════════
-   ★ 单词矿工 · 难度配置
-   ═══════════════════════════════════════════════════════════ */
-const MC_DIFFICULTY = {
-  easy: { name:'简单', icon:'🌱', time:75, blocksPerDepth:5,  oreBonus:0.8,
-          desc:'75秒 · 每层5块 · 轻松下探', color:'#4ade80' },
-  mid:  { name:'中等', icon:'🔥', time:75, blocksPerDepth:6,  oreBonus:1.0,
-          desc:'75秒 · 每层6块 · 标准挑战', color:'#f59e0b' },
-  hard: { name:'困难', icon:'💎', time:75, blocksPerDepth:8,  oreBonus:1.3,
-          desc:'75秒 · 每层8块 · 稀有矿物加成', color:'#ff6b9d' }
-};
-
-
-let mcGame=null;
-
-const MC_ORES = [
-  {id:'coal',    icon:'🪨', name:'煤',   color:'#5a5a5a', minDepth:1, baseWeight:60, value:1},
-  {id:'copper',  icon:'🟠', name:'铜',   color:'#c07a3e', minDepth:1, baseWeight:25, value:2},
-  {id:'iron',    icon:'⚙️', name:'铁',   color:'#8a8fa0', minDepth:1, baseWeight:15, value:3},
-  {id:'gold',    icon:'🟡', name:'金',   color:'#f0b429', minDepth:2, baseWeight:12, value:5},
-  {id:'diamond', icon:'💎', name:'钻石', color:'#3ec6d4', minDepth:3, baseWeight:7,  value:10},
-  {id:'emerald', icon:'💚', name:'绿宝石',color:'#2ecc71', minDepth:4, baseWeight:4,  value:20}
-];
-
-
-const MC_BLOCK_TYPES = [
-  {type:'grass',    minDepth:1, maxDepth:1, weight:4},
-  {type:'dirt',     minDepth:1, maxDepth:1, weight:4},
-  {type:'stone',    minDepth:1, maxDepth:5, weight:3},
-  {type:'wood',     minDepth:1, maxDepth:2, weight:2},
-  {type:'iron',     minDepth:2, maxDepth:5, weight:3},
-  {type:'copper',   minDepth:2, maxDepth:5, weight:3},
-  {type:'gold',     minDepth:3, maxDepth:5, weight:2},
-  {type:'diamond',  minDepth:3, maxDepth:5, weight:2},
-  {type:'emerald',  minDepth:4, maxDepth:5, weight:1},
-  {type:'obsidian', minDepth:3, maxDepth:5, weight:2},
-  {type:'lava',     minDepth:4, maxDepth:5, weight:2}
-];
-
-function rollBlockType(depth){
-  const pool=MC_BLOCK_TYPES.filter(t=>depth>=t.minDepth && depth<=t.maxDepth);
-  const weights=pool.map(t=>t.weight);
-  const total=weights.reduce((a,b)=>a+b,0);
-  let r=Math.random()*total;
-  for(let i=0;i<pool.length;i++){
-    r-=weights[i];
-    if(r<=0) return pool[i].type;
-  }
-  return 'stone';
-}
-
-function rollOre(depth){
-  const weights=MC_ORES.map(o=>{
-    if(depth < o.minDepth) return 0;
-    const depthBonus = Math.max(0, depth - o.minDepth);
-    return o.baseWeight * (1 + depthBonus*0.7);
-  });
-  const total=weights.reduce((a,b)=>a+b,0);
-  if(total<=0) return MC_ORES[0];
-  let r=Math.random()*total;
-  for(let i=0;i<MC_ORES.length;i++){
-    r-=weights[i];
-    if(r<=0) return MC_ORES[i];
-  }
-  return MC_ORES[0];
-}
-
-function randomMcType(depth){ return rollBlockType(depth); }
-
-/* —— 单词矿工 · 难度选择 —— */
-function showMcDifficulty(){
-  openModal(`
-    <div class="modal-title">⛏️ 单词矿工 · 选择难度</div>
-    <div class="tip" style="background:rgba(167,139,250,.12);border-color:rgba(167,139,250,.3);text-align:center">
-      🎯 难度越高，挖矿时间越短，但稀有矿物价值也越高！
-    </div>
-    <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
-      ${Object.entries(MC_DIFFICULTY).map(([key,cfg])=>`
-        <button class="btn ghost" data-mcdiff="${key}" style="padding:16px;text-align:left;
-          border-color:${cfg.color};color:${cfg.color};background:${cfg.color}11">
-          <div style="display:flex;align-items:center;gap:10px">
-            <span style="font-size:28px">${cfg.icon}</span>
-            <div style="flex:1">
-              <div style="font-size:16px;font-weight:900">${cfg.name}</div>
-              <div style="font-size:11px;opacity:.7;font-weight:700;margin-top:2px">${cfg.desc}</div>
-            </div>
-            <span style="font-size:20px;opacity:.5">›</span>
-          </div>
-        </button>
-      `).join('')}
-    </div>
-    <button class="btn ghost small" id="btnMcDiffCancel" style="margin-top:14px">取消</button>
-  `);
-  document.querySelectorAll('[data-mcdiff]').forEach(btn=>{
-    btn.onclick = ()=>{
-      Sfx.click();
-      const diff = btn.dataset.mcdiff;
-      closeModal();
-      startMinecraftGame(diff);
-    };
-  });
-  $('#btnMcDiffCancel').onclick = ()=>{ Sfx.click(); closeModal(); };
-}
-
-function startMinecraftGame(diff){
-  diff = diff || 'mid';                          // 默认中等
-  const diffCfg = MC_DIFFICULTY[diff] || MC_DIFFICULTY.mid;
-
-  if(mcGame){ clearInterval(mcGame.timer); }
-  const boardSize=16;
-  const pool=shuffle(WORDS.filter(w=>w.en.length<=15 && w.zh.length<=12));
-  const picked=[];
-  const used=new Set();
-  for(const w of pool){
-    if(used.has(w.en)) continue;
-    used.add(w.en); picked.push(w);
-    if(picked.length>=boardSize) break;
-  }
-  if(picked.length<boardSize){
-    for(const w of WORDS){
-      if(used.has(w.en)) continue;
-      used.add(w.en); picked.push(w);
-      if(picked.length>=boardSize) break;
-    }
-  }
-  const depth=1;
-  const blocks=[];
-  for(let i=0;i<boardSize;i++){
-    blocks.push({word:picked[i],type:randomMcType(depth),alive:true});
-  }
-  const inventory={};
-  MC_ORES.forEach(o=>inventory[o.id]=0);
-
-  mcGame={
-    blocks,score:0,correct:0,wrong:0,
-    timeLeft:diffCfg.time,timer:null,locked:false,ended:false,
-    currentIdx:null,newDropIdx:-1,
-    depth:1,
-    digProgress:0,
-    blocksPerDepth:diffCfg.blocksPerDepth,
-    diff:diff,
-    diffCfg:diffCfg,
-    inventory,
-    lootThisGame:{}
-  };
-  pickMcTarget(true);
-  showScreen('s-game-minecraft');
-  $('#mcScore').textContent='0';
-  $('#mcTimer').textContent=String(diffCfg.time);
-  $('#mcDepthTag').textContent=`第 1 层 · ${diffCfg.icon}${diffCfg.name}`;
-  $('#mcBoard').className='mc-board depth-1';
-  renderMcInventory();
-  renderMcBoard();
-  renderMcOptions();
-
-  mcGame.timer=setInterval(()=>{
-    if(!mcGame||mcGame.ended) return;
-    mcGame.timeLeft--;
-    $('#mcTimer').textContent=Math.max(0,mcGame.timeLeft);
-    if(mcGame.timeLeft<=5 && mcGame.timeLeft>0) Sfx.pop();
-    if(mcGame.timeLeft<=0) endMinecraftGame();
-  },1000);
-}
-
-
-function pickMcTarget(initial){
-  if(!mcGame) return;
-  const alive=mcGame.blocks.map((b,i)=>({b,i})).filter(x=>x.b.alive);
-  if(!alive.length) return;
-  let candidates=alive;
-  if(!initial && alive.length>1 && mcGame.currentIdx!==null){
-    candidates=alive.filter(x=>x.i!==mcGame.currentIdx);
-  }
-  const pick=candidates[Math.floor(Math.random()*candidates.length)];
-  mcGame.currentIdx=pick.i;
-}
-
-function nextMcWord(){
-  if(!mcGame) return null;
-  const onBoard=new Set(mcGame.blocks.filter(b=>b.alive).map(b=>b.word.en));
-  const pool=WORDS.filter(w=>w.en.length<=15 && w.zh.length<=12 && !onBoard.has(w.en));
-  if(!pool.length) return WORDS[Math.floor(Math.random()*WORDS.length)];
-  return pool[Math.floor(Math.random()*pool.length)];
-}
-
-function renderMcInventory(){
-  if(!mcGame) return;
-  const inv=mcGame.inventory;
-  const el=$('#mcInventory');
-  el.innerHTML=MC_ORES.map(o=>{
-    const count=inv[o.id]||0;
-    return `<div class="mc-inv-item${count===0?' empty':''}" data-ore="${o.id}">
-      <span class="ic">${o.icon}</span>
-      <span class="ct">${count}</span>
-    </div>`;
-  }).join('');
-}
-
-function flashInventory(oreId){
-  const el=document.querySelector(`.mc-inv-item[data-ore="${oreId}"]`);
-  if(!el) return;
-  el.classList.remove('just-got');
-  void el.offsetWidth;
-  el.classList.add('just-got');
-}
-
-function renderMcBoard(){
-  if(!mcGame) return;
-  const board=$('#mcBoard');
-  board.className='mc-board depth-'+Math.min(5,mcGame.depth);
-  board.innerHTML=mcGame.blocks.map((b,i)=>{
-    if(!b.alive){
-      return `<div class="mc-block empty" data-i="${i}"></div>`;
-    }
-    const isTarget=i===mcGame.currentIdx;
-    const isNew=i===mcGame.newDropIdx;
-    return `<div class="mc-block ${b.type}${isTarget?' target':''}${isNew?' new-drop':''}" data-i="${i}">
-      <span class="mc-word">${esc(b.word.en)}</span>
-    </div>`;
-  }).join('');
-  mcGame.newDropIdx=-1;
-}
-
-function renderMcOptions(){
-  if(!mcGame) return;
-  const target=mcGame.blocks[mcGame.currentIdx];
-  if(!target||!target.alive) return;
-  const w=target.word;
-
-  const pool=WORDS.filter(x=>x.en!==w.en);
-  const same=shuffle(pool.filter(x=>x.g===w.g));
-  const others=shuffle(pool.filter(x=>x.g!==w.g));
-  const dists=[];
-  for(const c of same){ if(dists.length>=3) break; dists.push(c); }
-  for(const c of others){ if(dists.length>=3) break; dists.push(c); }
-  const opts=shuffle([w,...dists.slice(0,3)]);
-
-  const el=$('#mcQuestion');
-  el.innerHTML=`
-    <div class="mc-target-panel">
-      <div>
-        <div class="mc-target-label">⛏️ 挖掘目标 · 第 ${mcGame.depth} 层</div>
-        <div style="font-size:12px;font-weight:700;color:var(--muted);margin-top:2px">
-          本层进度 ${mcGame.digProgress}/${mcGame.blocksPerDepth}
-        </div>
-      </div>
-      <div class="mc-target-word">
-        <span class="syll-word" style="font-size:20px;line-height:1.45">${renderSyllablesHTML(w.en)}</span>
-        ${w.ph?`<div class="phonetic-line" style="font-size:14px;margin-top:2px">${renderPhonetic(w.ph)}</div>`:''}
-        <small>答对挖掉它并采集矿物</small>
-      </div>
-    </div>
-    <div class="options">
-      ${opts.map(o=>`<button class="option mc-option" data-en="${esc(o.en)}">${esc(o.zh)}</button>`).join('')}
-    </div>`;
-
-  el.querySelectorAll('.mc-option').forEach(btn=>{
-    btn.onclick=()=>{
-      if(!mcGame||mcGame.locked||mcGame.ended||mcGame.timeLeft<=0) return;
-      mcGame.locked=true;
-      const ok=btn.dataset.en===w.en;
-
-      if(ok){
-        mcGame.score+=10;
-        mcGame.correct++;
-        $('#mcScore').textContent=mcGame.score;
-        Sfx.correct();
-        btn.classList.add('correct');
-        spawnStars(2,innerWidth/2,innerHeight*0.5,['⛏️','✨']);
-
-      const ore=rollOre(mcGame.depth);
-if(ore.id === 'diamond') unlockAch('diamond_digger');   // ← 新增
-mcGame.inventory[ore.id]=(mcGame.inventory[ore.id]||0)+1;
-        mcGame.lootThisGame[ore.id]=(mcGame.lootThisGame[ore.id]||0)+1;
-
-        const blockEl=document.querySelector(`.mc-block[data-i="${mcGame.currentIdx}"]`);
-        if(blockEl){
-          const rect=blockEl.getBoundingClientRect();
-          const invEl=document.querySelector(`.mc-inv-item[data-ore="${ore.id}"]`);
-          let dx=0,dy=0;
-          if(invEl){
-            const invRect=invEl.getBoundingClientRect();
-            dx=invRect.left+invRect.width/2 - (rect.left+rect.width/2);
-            dy=invRect.top+invRect.height/2 - (rect.top+rect.height/2);
-          }
-          const flyEl=document.createElement('div');
-          flyEl.className='mc-ore-fly';
-          flyEl.textContent=ore.icon;
-          flyEl.style.left=(rect.left+rect.width/2-16)+'px';
-          flyEl.style.top=(rect.top+rect.height/2-16)+'px';
-          flyEl.style.setProperty('--dx',dx+'px');
-          flyEl.style.setProperty('--dy',dy+'px');
-          document.body.appendChild(flyEl);
-          setTimeout(()=>flyEl.remove(),1000);
-        }
-        setTimeout(()=>{
-          if(!mcGame) return;
-          renderMcInventory();
-          flashInventory(ore.id);
-          const oreName = document.createElement('div');
-          oreName.className='float-star';
-          oreName.textContent=`+1 ${ore.icon}${ore.name}`;
-          oreName.style.left=(innerWidth/2-30)+'px';
-          oreName.style.top=(innerHeight*0.45)+'px';
-          oreName.style.fontSize='20px';
-          oreName.style.color=ore.color;
-          oreName.style.textShadow='0 2px 8px rgba(0,0,0,.3)';
-          document.body.appendChild(oreName);
-          setTimeout(()=>oreName.remove(),1200);
-        }, 500);
-
-        const oldIdx=mcGame.currentIdx;
-        const blockEl2=document.querySelector(`.mc-block[data-i="${oldIdx}"]`);
-        if(blockEl2){
-          blockEl2.classList.remove('target');
-          blockEl2.classList.add('breaking');
-        }
-
-        setTimeout(()=>{
-          if(!mcGame||mcGame.ended) return;
-          mcGame.digProgress++;
-          if(mcGame.digProgress >= mcGame.blocksPerDepth){
-            mcGame.depth++;
-            mcGame.digProgress=0;
-            showDepthUpToast(mcGame.depth);
-            mcGame.blocks.forEach(b=>{
-              if(b.alive) b.type=randomMcType(mcGame.depth);
-            });
-          }
-          mcGame.blocks[oldIdx].word=nextMcWord();
-          mcGame.blocks[oldIdx].type=randomMcType(mcGame.depth);
-          mcGame.blocks[oldIdx].alive=true;
-          mcGame.newDropIdx=oldIdx;
-          pickMcTarget();
-          mcGame.locked=false;
-          $('#mcDepthTag').textContent=`第 ${mcGame.depth} 层`;
-          renderMcBoard();
-          renderMcOptions();
-        },280);
-      } else {
-        mcGame.score=Math.max(0,mcGame.score-3);
-        mcGame.wrong++;
-        $('#mcScore').textContent=mcGame.score;
-        Sfx.wrong();
-        btn.classList.add('wrong');
-        el.querySelectorAll('.mc-option').forEach(b=>{
-          if(b.dataset.en===w.en) b.classList.add('correct');
-        });
-        setTimeout(()=>{
-          if(!mcGame||mcGame.ended) return;
-          mcGame.locked=false;
-          renderMcOptions();
-        },1200);
-      }
-    };
-  });
-}
-
-function showDepthUpToast(depth){
-  const existing=document.querySelector('.mc-depth-toast');
-  if(existing) existing.remove();
-  const toast=document.createElement('div');
-  toast.className='mc-depth-toast';
-  const depthNames=['','地表','浅层矿洞','深层矿洞','熔岩层','虚空暗层'];
-  const name=depthNames[Math.min(depth,5)] || '深层矿洞';
-  toast.innerHTML=`⛏️ 深入第 ${depth} 层<div class="sub">${name} · 稀有矿物概率提升！</div>`;
-  document.body.appendChild(toast);
-  Sfx.levelup();
-  spawnStars(6,innerWidth/2,innerHeight/2,['💎','✨','⭐','💫']);
-  setTimeout(()=>toast.classList.add('show'),30);
-  setTimeout(()=>{
-    toast.classList.remove('show');
-    setTimeout(()=>toast.remove(),500);
-  },1600);
-}
-
-function endMinecraftGame(){
-  if(!mcGame||mcGame.ended) return;
-  mcGame.ended=true;
-  clearInterval(mcGame.timer);
-  const score=mcGame.score;
-
-  let oreValue=0;
-  const lootList=Object.entries(mcGame.lootThisGame).filter(([id,c])=>c>0);
-  const oreBonus = mcGame.diffCfg ? mcGame.diffCfg.oreBonus : 1.0;
-  lootList.forEach(([id,count])=>{
-    const ore=MC_ORES.find(o=>o.id===id);
-    if(ore) oreValue += Math.round(ore.value * count * oreBonus);
-  });
-
-  let baseCoins = 0;
-  let msg = '';
-  if(score>=100){ baseCoins=50; msg='⛏️ 钻石矿工！'; }
-  else if(score>=60){ baseCoins=30; msg='💎 优秀矿工！'; }
-  else if(score>=30){ baseCoins=15; msg='🪨 熟练矿工！'; }
-  else { baseCoins=5; msg='🌱 新手矿工！'; }
-
-  const totalCoins = baseCoins + oreValue;
-  const totalXp = Math.round(baseCoins*0.6) + Math.round(oreValue*0.5);
-
-
-  addCoins(totalCoins);addXp(totalXp);
- trackGamePlayed('minecraft');
- save();
-  Sfx.finish();celebrateBig();
-
-  let lootHtml='';
-  if(lootList.length){
-    lootHtml = `<div class="mc-loot-box">
-      ${lootList.map(([id,count])=>{
-        const ore=MC_ORES.find(o=>o.id===id);
-        return `<div class="mc-loot-item">
-          <div class="ic">${ore.icon}</div>
-          <div class="nm">${ore.name}</div>
-          <div class="ct">×${count}</div>
-        </div>`;
-      }).join('')}
-    </div>
-    <div class="muted small" style="text-align:center;margin-top:10px;font-weight:800">
-      💎 矿物总价值：${oreValue}
-    </div>`;
-  } else {
-    lootHtml = `<div class="muted small" style="text-align:center;margin-top:14px;font-weight:700">本次没有挖到矿物</div>`;
-  }
-
-  openModal(`
-    <div style="text-align:center">
-      <div style="font-size:60px">⛏️</div>
-      <div style="font-size:20px;font-weight:900;margin:10px 0">${msg}</div>
-      <div style="font-size:32px;font-weight:900;color:var(--pink)">${score} 分</div>
-     <div class="muted small" style="font-weight:800;margin-bottom:6px">
-        ${mcGame.diffCfg.icon} ${mcGame.diffCfg.name}难度 · ${mcGame.diffCfg.desc}
-      </div>
-      <div class="muted small" style="font-weight:700;margin-top:4px">
-        到达第 ${mcGame.depth} 层 · 答对 ${mcGame.correct} · 答错 ${mcGame.wrong}
-      </div>
-      ${lootHtml}
-      <div style="color:var(--orange);font-weight:900;margin-top:12px">🎁 +${totalCoins} 金币 · +${totalXp} 经验</div>
-      <button class="btn primary" id="btnMcAgain" style="margin-top:20px">🔄 再来一局（同难度）</button>
-      <button class="btn ghost small" id="btnMcChangeDiff" style="margin-top:10px">🎚️ 换个难度</button>
-      <button class="btn ghost small" id="btnMcExit" style="margin-top:10px">返回游戏乐园</button>
-    </div>`);
-   $('#btnMcAgain').onclick=()=>{ Sfx.click();closeModal();startMinecraftGame(mcGame.diff); };
-  $('#btnMcChangeDiff').onclick=()=>{ Sfx.click();closeModal();showMcDifficulty(); };
-  $('#btnMcExit').onclick=()=>{ Sfx.click();closeModal();showGamesScreen(); };
-}
-
-$('#btnMcBack').onclick=()=>{
-  if(!confirm('确定要退出本局游戏吗？'))return;
-  Sfx.click();
-  if(mcGame){ clearInterval(mcGame.timer);mcGame.ended=true; }
-  showGamesScreen();
-};
-
-/* ═══════════════════════════════════════════════════════════
-   游戏 6 · 场景故事
-   ═══════════════════════════════════════════════════════════ */
-let scenarioState = null;
-
-function startScenarioGame(){
-  scenarioState = { view:'list' };
-  showScreen('s-game-scenario');
-  renderScenario();
-}
-
-function renderSentence(text){
-  return esc(text).replace(/\[([^\]]+)\]|([a-zA-Z][a-zA-Z'-]*)/g, (match, keyWord, normalWord) => {
-    if (keyWord) {
-      // 这是自带中括号的重点词（保留高亮背景）
-      return `<span class="key-word clickable-word" data-word="${keyWord}">${keyWord}</span>`;
-    } else {
-      // 这是句子里的普通单词（加个虚线提示可点）
-      return `<span class="normal-word clickable-word" data-word="${normalWord}">${normalWord}</span>`;
-    }
-  });
-}
-function sentencePlain(text){
-  return text.replace(/\[([^\]]+)\]/g, '$1');
-}
-
-function renderScenario(){
-  const el = $('#scenarioContent');
-  if(!scenarioState) return;
-
-  if(scenarioState.view === 'list'){
-    const pool = getPoolWords();
-    const availableUnits = [...new Set(pool.map(w=>w.g))];
-    const list = SCENARIOS.filter(s => availableUnits.includes(s.unit));
-    if(!list.length){
-      el.innerHTML = `<div class="tip">当前所选主题暂时没有对应的场景故事，去「📚 主题」里多选几个主题试试吧～</div>
-        <button class="btn ghost small" id="btnScenarioEmptyBack">← 返回游戏乐园</button>`;
-      $('#btnScenarioEmptyBack').onclick=()=>{ Sfx.click(); showGamesScreen(); };
-      return;
-    }
-    el.innerHTML = `
-      <div class="tip">📖 每个主题都有一个专属场景。<b>先看单词例句（词→句）</b>，<b>再读完整故事（连句成文）</b>，最后做填空挑战，在真实语境里理解每个单词的用法。<br>💡 单词按<span style="color:#7c3aed;font-weight:900">音节分色</span>，一个音节一种颜色，读起来更有节奏。</div>
-      <div class="scenario-grid">
-        ${list.map(s=>`
-          <div class="scenario-card" data-id="${s.unit}">
-            <div class="scenario-icon">${s.icon}</div>
-            <div class="scenario-info">
-              <div class="scenario-unit">${esc(s.unit)}</div>
-              <div class="scenario-name">${esc(s.name)}</div>
-              <div class="scenario-desc">${esc(s.desc)}</div>
-              <div class="scenario-count" style="background:${s.color}22;color:${s.color}">
-                ${s.sentences.length} 个词 · ${s.story.length} 句故事 · ${s.quizzes.length} 道填空
-              </div>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-    `;
-    el.querySelectorAll('.scenario-card').forEach(card=>{
-      card.onclick = ()=>{
-        Sfx.click();
-        const s = SCENARIOS.find(x=>x.unit===card.dataset.id);
-        scenarioState = { view:'study', scenario:s, quizIdx:0, correct:0, locked:false };
-        renderScenario();
-      };
-    });
-    return;
-  }
-
-  if(scenarioState.view === 'study'){
-    const s = scenarioState.scenario;
-
-const sentHtml = s.sentences.map(item=>{
-  const wd = getWord(item.w);
-  const zh = wd ? wd.zh : '';
-  const ph = wd ? (wd.ph || '') : '';
-  return `
-    <div class="word-sent">
-      <div class="ws-head">
-        <span class="ws-word syll-word">${renderSyllablesHTML(item.w)}</span>
-        <span class="ws-zh-mini">${esc(zh)}</span>
-        <button class="ws-speak" data-text="${esc(item.w)}" title="朗读单词">🔊</button>
-      </div>
-      ${ph ? `<div class="ws-phonetic-mini">${renderPhonetic(ph)}</div>` : ''}
-      
-
- <div class="ws-en">
-        ${renderSentence(item.en)}
-      </div>
-
-      <div class="ws-zh">${esc(item.zh)}</div>
-    </div>
-  `;
-}).join('');
-
-
-     const storyHtml = s.story.map((line, i)=>`
-      <div class="story-line">
-        <div class="line-num">${i+1}</div>
-        <div class="line-text">${renderSentence(line)}</div>
-      </div>
-    `).join('');
-
-    el.innerHTML = `
-      <div class="story-card">
-        <div class="story-title">
-          <div class="st-icon">${s.icon}</div>
-          <div class="st-info">
-            <div class="st-name">${esc(s.unit)} · ${esc(s.name)}</div>
-            <div class="st-desc">${esc(s.desc)}</div>
-          </div>
-        </div>
-
-        <div class="section-label">🔤 词 → 句 · 每个单词的场景例句</div>
-        <div class="word-sent-list">${sentHtml}</div>
-
-        <div class="section-label">📖 连句成文 · 串起全部单词的小故事</div>
-        <div class="story-text">${storyHtml}</div>
-        <div class="story-zh">📝 参考译文：${esc(s.storyZh)}</div>
-
-        <button class="btn primary" id="btnScenarioQuiz" style="margin-top:18px">
-          🎯 开始填空挑战（${s.quizzes.length} 题）
-        </button>
-      </div>
-    `;
-
-
-
-
-   // ★ 点击任意单词进行发音
-    el.querySelectorAll('.clickable-word').forEach(wordEl => {
-      wordEl.onclick = (e) => {
-        e.stopPropagation();
-        const word = wordEl.dataset.word;
-        // 视觉反馈：闪一下
-        wordEl.style.color = 'var(--pink)';
-        setTimeout(() => { wordEl.style.color = ''; }, 300);
-        
-        // 调用发音（由于是纯单词，Speaker 会走稳定的 MP3 接口）
-        Speaker.speak(word, 0.82);
-      };
-    });
-
-
-
-
-    $('#btnScenarioQuiz').onclick = ()=>{
-      Sfx.click();
-      scenarioState.view = 'quiz';
-      scenarioState.quizIdx = 0;
-      scenarioState.correct = 0;
-      scenarioState.locked = false;
-      renderScenario();
-    };
-    return;
-  }
-
-  if(scenarioState.view === 'quiz'){
-    const s = scenarioState.scenario;
-    const idx = scenarioState.quizIdx;
-
-    if(idx >= s.quizzes.length){
-      renderScenarioResult();
-      return;
-    }
-
-    const quiz = s.quizzes[idx];
-    const unitWords = s.sentences.map(x=>getWord(x.w)).filter(Boolean);
-    const dists = shuffle(unitWords.filter(w=>w.en!==quiz.a)).slice(0,3);
-    const answerWord = unitWords.find(w=>w.en===quiz.a) || {en:quiz.a, zh:quiz.h};
-    const options = shuffle([answerWord, ...dists]);
-
-    const sentenceHtml = renderSentence(quiz.s);
-
-    el.innerHTML = `
-      <div class="progress" style="margin-bottom:12px">
-        <div class="progress-fill" style="width:${(idx/s.quizzes.length)*100}%"></div>
-      </div>
-      <div class="learn-meta" style="margin-bottom:14px">
-        <span>${esc(s.unit)} · 填空挑战</span>
-        <span>${idx+1} / ${s.quizzes.length}</span>
-      </div>
-      <div class="scenario-quiz">
-        <div class="q-label">📝 选择正确的单词填入空格</div>
-        <div class="q-sentence">${sentenceHtml}</div>
-        <div class="q-hint">💡 提示：${esc(quiz.h)}</div>
-        <div class="options">
-          ${options.map(o=>`
-            <button class="option" data-en="${esc(o.en)}">
-              <span class="syll-word" style="font-size:15px">${renderSyllablesHTML(o.en)}</span>
-              <span style="color:var(--muted);font-size:13px;font-weight:700"> · ${esc(o.zh)}</span>
-            </button>
-          `).join('')}
-        </div>
-      </div>
-    `;
-
-    el.querySelectorAll('.option').forEach(btn=>{
-      btn.onclick = ()=>{
-        if(scenarioState.locked) return;
-        scenarioState.locked = true;
-        const ok = btn.dataset.en === quiz.a;
-
-        el.querySelectorAll('.option').forEach(b=>{
-          b.classList.add('disabled');
-          if(b.dataset.en === quiz.a) b.classList.add('correct');
-          else if(b === btn) b.classList.add('wrong');
-        });
-
-        if(ok){
-          Sfx.correct();
-          spawnStars(3, innerWidth/2, innerHeight*0.5, ['⭐','✨','💫']);
-          addCoins(5);
-          addXp(5);
-          save();
-          scenarioState.correct++;
-        } else {
-          Sfx.wrong();
-          setTimeout(()=>Speaker.speak(quiz.a, 0.8), 320);
-        }
-
-        setTimeout(()=>{
-          scenarioState.locked = false;
-          scenarioState.quizIdx++;
-          renderScenario();
-        }, ok ? 900 : 1500);
-      };
-    });
-    return;
-  }
-}
-
-function renderScenarioResult(){
-  const s = scenarioState.scenario;
-  const total = s.quizzes.length;
-  const correct = scenarioState.correct;
-  const acc = Math.round(correct/total*100);
-
-  let emoji = '🌱';
-  let title = '继续加油！';
-  if(acc === 100){ emoji='🏆'; title='完美通关！'; }
-  else if(acc >= 80){ emoji='🎉'; title='非常棒！'; }
-  else if(acc >= 60){ emoji='👍'; title='做得不错！'; }
-  else if(acc >= 40){ emoji='💪'; title='继续努力！'; }
-
-  const bonusCoins = 20 + correct*3;
-  const bonusXp = 15 + correct*2;
-  addCoins(bonusCoins);
-  addXp(bonusXp);
-trackGamePlayed('scenario'); unlockAch('story_master');
-  save();
-  Sfx.finish();
-  celebrateBig();
-
-  $('#scenarioContent').innerHTML = `
-    <div class="card scenario-result">
-      <div class="res-emoji">${emoji}</div>
-      <div class="res-title">${title}</div>
-      <div class="res-score">${correct} / ${total}</div>
-      <div class="res-sub">${esc(s.unit)} · ${esc(s.name)} 场景完成</div>
-      <div style="background:rgba(255,167,81,.12);border-radius:14px;padding:12px;
-        margin-bottom:18px;font-weight:900;color:var(--orange)">
-        🎁 +${bonusCoins} 金币 · +${bonusXp} 经验
-      </div>
-      <button class="btn primary" id="btnScenarioAgain">🔄 再练一遍</button>
-      <button class="btn ghost small" id="btnScenarioRead" style="margin-top:10px">📖 重读故事</button>
-      <button class="btn ghost small" id="btnScenarioOther" style="margin-top:10px">📚 换个主题场景</button>
-      <button class="btn ghost small" id="btnScenarioExit" style="margin-top:10px">返回游戏乐园</button>
-    </div>
-  `;
-
-  $('#btnScenarioAgain').onclick = ()=>{
-    Sfx.click();
-    scenarioState = { view:'quiz', scenario:s, quizIdx:0, correct:0, locked:false };
-    renderScenario();
-  };
-  $('#btnScenarioRead').onclick = ()=>{
-    Sfx.click();
-    scenarioState = { view:'study', scenario:s, quizIdx:0, correct:0, locked:false };
-    renderScenario();
-  };
-  $('#btnScenarioOther').onclick = ()=>{
-    Sfx.click();
-    scenarioState = { view:'list' };
-    renderScenario();
-  };
-  $('#btnScenarioExit').onclick = ()=>{
-    Sfx.click();
-    showGamesScreen();
-  };
-}
-
-$('#btnScenarioBack').onclick = ()=>{
-  Sfx.click();
-  if(!scenarioState || scenarioState.view === 'list'){
-    scenarioState = null;
-    showGamesScreen();
-  } else {
-    scenarioState = { view:'list' };
-    renderScenario();
-  }
-};
 
 /* ═══════════════════════════════════════════════════════════
    ★ 家长面板 & 用户管理
