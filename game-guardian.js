@@ -14,7 +14,7 @@
       .combo-bar { height: 10px; background: #e5e7eb; border-radius: 5px; overflow: hidden; margin-top: 6px; }
       #gComboFill { height: 100%; width: 0; background: linear-gradient(90deg,#4ea1ff,#ffc83d); transition: width .2s; }
       
-      /* --- 战场与堡垒放大 --- */
+      /* --- 战场与堡垒 --- */
       .guardian-lane { position: relative; height: 220px; border-radius: 16px; background: linear-gradient(180deg,#eef5ff,#dbe8fb); overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 24px; transition: box-shadow 0.3s; }
       .guardian-lane.combo-flash { box-shadow: 0 0 30px 10px #ffc83d, inset 0 0 30px #ffc83d; }
       .g-base { position: absolute; top: 0; bottom: 0; width: 60px; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
@@ -78,7 +78,7 @@
       .g-result-title.lose { color: #7f8c8d; }
       .g-result-stars { font-size: 32px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
       .g-result-stats { font-size: 14px; color: #555; margin-bottom: 20px; line-height: 1.6; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
-      .g-result-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: #4ea1ff; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(78,161,255,0.4); }
+      .g-result-btn { display: block; width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; border: none; background: #4ea1ff; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(78,161,255,0.4); text-decoration: none; text-align: center; }
       .g-result-btn:hover { background: #3b82f6; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(78,161,255,0.6); }
       
       .confetti { position: absolute; width: 10px; height: 10px; background: #f00; z-index: 1000; top: -20px; pointer-events: none; }
@@ -97,9 +97,12 @@
     document.head.appendChild(style);
   }
 
-  // ========== 音效系统 ==========
+  // ========== 音效系统（带安全防范） ==========
   let audioCtx;
+  let soundEnabled = false;
+
   function initAudio() {
+    soundEnabled = true;
     if (!audioCtx) {
       const AudioContextClass = window.AudioContext || window.webkitAudioContext;
       if (AudioContextClass) audioCtx = new AudioContextClass();
@@ -108,8 +111,8 @@
   }
 
   function playSound(type) {
+    if (!soundEnabled) return; // 如果没解锁音频，直接静音跳过
     try {
-      initAudio();
       if (!audioCtx) return;
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
@@ -161,9 +164,48 @@
     WORDS = WORDS.slice(0, BASE_CONFIG.questions);
 
     let cfg = { ...BASE_CONFIG };
-    let state = {};
+    let state = { timeouts: [] };
 
     buildSetup();
+
+    // 清理所有挂起的定时器和延时任务
+    function killTimers() {
+      if (state.timers) {
+        clearInterval(state.timers.tick);
+        clearInterval(state.timers.enemySmall);
+        clearInterval(state.timers.enemyMid);
+      }
+      if (state.timeouts) {
+        state.timeouts.forEach(clearTimeout);
+        state.timeouts = [];
+      }
+      state.running = false;
+      state.phase = 'over';
+    }
+
+    // 终极安全退出
+    function safeExit() {
+      killTimers();
+      
+      // 1. 尝试调用外部引擎
+      if (opts && typeof opts.onExit === 'function') {
+        try { opts.onExit(); } catch (e) { console.error(e); }
+      }
+
+      // 2. 物理兜底：无论外部引擎成不成功，我们都在原位置放一个极其显眼的返回链接
+      setTimeout(() => {
+        // 如果游戏区域还在，且没有被外层框架替换掉
+        if (document.body.contains(hostEl)) {
+          hostEl.innerHTML = `
+            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; background:#fff; border-radius:16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); margin:20px auto; max-width:900px;">
+              <h2 style="color:#333; margin-bottom:20px; font-size:28px;">游戏已结束</h2>
+              <p style="color:#666; margin-bottom:30px; font-size:16px;">如果页面未能自动跳转，请点击下方按钮。</p>
+              <a href="wordgame.html" style="display:inline-block; padding:16px 40px; background:#4ea1ff; color:#fff; text-decoration:none; border-radius:12px; font-size:18px; font-weight:bold; box-shadow:0 6px 15px rgba(78,161,255,0.4); transition:transform 0.2s;">返回大厅主页</a>
+            </div>
+          `;
+        }
+      }, 50); // 延迟50ms，给外层引擎一点时间去销毁或切换屏幕
+    }
 
     function buildSetup() {
       hostEl.innerHTML = `
@@ -194,6 +236,7 @@
         playerUnits: [], enemyUnits: [],
         playerBaseHp: cfg.baseHp, enemyBaseHp: cfg.baseHp,
         timers: { tick: null, enemySmall: null, enemyMid: null },
+        timeouts: [],
         root: null, laneEl: null
       };
 
@@ -238,16 +281,7 @@
       updateBaseHpUI();
       updateComboUI();
 
-      hostEl.querySelector('#gExitBtn').onclick = () => {
-        if (state && state.running) {
-          state.running = false;
-          clearInterval(state.timers.tick); clearInterval(state.timers.enemySmall); clearInterval(state.timers.enemyMid);
-        }
-        if (opts && typeof opts.onExit === 'function') {
-          try { opts.onExit(); } catch(e) {}
-        }
-        hostEl.innerHTML = ''; 
-      };
+      hostEl.querySelector('#gExitBtn').onclick = safeExit;
     }
 
     function renderQuestion() {
@@ -285,10 +319,11 @@
       hostEl.querySelector('#gCorrect').textContent = state.correct;
       hostEl.querySelector('#gWrong').textContent = state.wrong;
 
-      setTimeout(() => {
+      const t = setTimeout(() => {
         if (state.qIndex >= cfg.questions) enterShowdown();
         else renderQuestion();
       }, 450);
+      state.timeouts.push(t);
     }
 
     function onCorrect() {
@@ -297,7 +332,8 @@
 
       if (state.combo % 5 === 0) {
         state.laneEl.classList.add('combo-flash');
-        setTimeout(() => state.laneEl.classList.remove('combo-flash'), 500);
+        const t = setTimeout(() => state.laneEl.classList.remove('combo-flash'), 500);
+        state.timeouts.push(t);
       }
 
       if (state.combo === cfg.heroCombo) {
@@ -418,7 +454,8 @@
       void unit.el.offsetWidth; 
       unit.el.classList.add('attacking');
       playSound('hit');
-      setTimeout(() => { if (unit.el) unit.el.classList.remove('attacking'); }, 200);
+      const t = setTimeout(() => { if (unit.el) unit.el.classList.remove('attacking'); }, 200);
+      state.timeouts.push(t);
     }
 
     function checkBases() {
@@ -476,7 +513,7 @@
 
       if (win) playSound('victory');
 
-      setTimeout(() => {
+      const t = setTimeout(() => {
         let stars = 0;
         if (win) {
           const accuracy = state.correct / cfg.questions;
@@ -492,6 +529,7 @@
           remainingUnits: state.playerUnits.length, heroSpawned: state.heroSpawned, heroSurvived: state.playerUnits.some(u => u.type === 'hero'), perfectCombo20: state.perfectCombo20
         });
       }, 800);
+      state.timeouts.push(t);
     }
 
     function showResultModal(win, stars) {
@@ -513,14 +551,7 @@
 
       if (win) createConfetti(overlay);
 
-      overlay.querySelector('#gResultBackBtn').onclick = () => {
-        if (opts && typeof opts.onExit === 'function') {
-          try { opts.onExit(); } catch (e) { console.error(e); }
-        }
-        setTimeout(() => {
-          window.location.reload();
-        }, 100);
-      };
+      overlay.querySelector('#gResultBackBtn').onclick = safeExit;
     }
 
     function createConfetti(container) {
@@ -545,7 +576,8 @@
       el.style.left = (x + 15) + 'px';
       el.style.top = '40%';
       state.laneEl.appendChild(el);
-      setTimeout(() => el.remove(), 800);
+      const t = setTimeout(() => el.remove(), 800);
+      state.timeouts.push(t);
     }
 
     function makeUnitEl(type, color, size, side) {
@@ -572,7 +604,8 @@
       const i = arr.indexOf(u); if (i >= 0) arr.splice(i, 1);
       if (!u.el) return;
       playSound('die'); u.el.classList.add('dying');
-      setTimeout(() => { if (u.el) u.el.remove(); }, 300);
+      const t = setTimeout(() => { if (u.el) u.el.remove(); }, 300);
+      state.timeouts.push(t);
     }
 
     function frontUnit(units, dir) {
@@ -580,7 +613,7 @@
       return units.reduce((best, u) => !best ? u : (dir > 0 ? (u.x > best.x ? u : best) : (u.x < best.x ? u : best)), null);
     }
     function topUnits(units, dir, n) { return units.slice().sort((a, b) => dir > 0 ? b.x - a.x : a.x - b.x).slice(0, n); }
-    function flashHit(u) { if (!u.el) return; u.el.classList.add('hit'); setTimeout(() => { if (u.el) u.el.classList.remove('hit'); }, 150); }
+    function flashHit(u) { if (!u.el) return; u.el.classList.add('hit'); const t = setTimeout(() => { if (u.el) u.el.classList.remove('hit'); }, 150); state.timeouts.push(t); }
 
     function updateBaseHpUI() {
       const p = hostEl.querySelector('#gPlayerBaseHp'), e = hostEl.querySelector('#gEnemyBaseHp');
@@ -603,13 +636,14 @@
       const b = document.createElement('div');
       b.className = 'g-banner' + (kind === 'danger' ? ' danger' : '');
       b.textContent = text; state.root?.appendChild(b);
-      setTimeout(() => { if (b) b.remove(); }, 1200);
+      const t = setTimeout(() => { if (b) b.remove(); }, 1200);
+      state.timeouts.push(t);
     }
-    function showHeroBanner() { state.root?.classList.add('hero-time'); showBanner('⚡ 英雄降临！'); setTimeout(() => state.root?.classList.remove('hero-time'), 1000); }
-    function shake(px) { state.root?.classList.add('shake'); setTimeout(() => state.root?.classList.remove('shake'), 150); }
+    function showHeroBanner() { state.root?.classList.add('hero-time'); showBanner('⚡ 英雄降临！'); const t = setTimeout(() => state.root?.classList.remove('hero-time'), 1000); state.timeouts.push(t); }
+    function shake(px) { state.root?.classList.add('shake'); const t = setTimeout(() => state.root?.classList.remove('shake'), 150); state.timeouts.push(t); }
 
     return function destroy() {
-      if (state.running) { state.running = false; clearInterval(state.timers.tick); clearInterval(state.timers.enemySmall); clearInterval(state.timers.enemyMid); }
+      killTimers();
       hostEl.innerHTML = '';
     };
   }
@@ -623,7 +657,7 @@
   window.PlaykynGames = window.PlaykynGames || {};
   window.PlaykynGames.guardian = {
     meta: { id: 'guardian', name: '守护王国', category: 'strategy', minTier: 'free', perks: { heroHpBonus: 0, heroComboThreshold: 10 } },
-    mount(hostEl, opts) { return createGuardianGame(hostEl, opts); },
+    mount(hostEl, opts) { return createGuardianGame(hostEl, opts); }
   };
 
 })();
