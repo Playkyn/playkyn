@@ -1319,7 +1319,45 @@ body.skin-boy .weak-tag{
   border-color: var(--red); 
   animation: shake 0.4s ease; 
 }
+/* ========== 守护王国 CSS ========== */
+.guardian-root { position: relative; overflow: hidden; width: 100%; max-width: 800px; margin: 0 auto; font-family: sans-serif; }
+.guardian-hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 8px; font-size: 14px; }
+.combo-track { flex: 1; }
+.combo-bar { height: 6px; background: #e5e7eb; border-radius: 3px; overflow: hidden; margin-top: 4px; }
+#gComboFill { height: 100%; width: 0; background: linear-gradient(90deg,#4ea1ff,#ffc83d); transition: width .2s; }
 
+.guardian-lane { position: relative; height: 120px; border-radius: 12px; background: linear-gradient(180deg,#eef5ff,#dbe8fb); overflow: hidden; border: 1px solid #cbd5e1; }
+.g-base { position: absolute; top: 0; bottom: 0; width: 24px; }
+.g-base-player { left: 0; background: #4ea1ff33; }
+.g-base-enemy  { right: 0; background: #ff6b6b33; }
+.g-base-hp { position: absolute; bottom: 4px; left: 2px; right: 2px; height: 4px; background:#0002; border-radius:2px; }
+.g-base-hp > div { height: 100%; background:#2ecc71; border-radius:2px; transition: width .2s; }
+
+.g-unit { position: absolute; top: 50%; border-radius: 50%; will-change: transform; box-shadow: 0 2px 4px #0002; }
+.g-unit.hero { box-shadow: 0 0 12px 2px #ffc83d; animation: gHeroPulse 1s infinite alternate; }
+.g-unit.hit { filter: brightness(1.6); }
+.g-unit .unit-hp { position: absolute; top: -6px; left: 0; right: 0; height: 3px; background: #0003; border-radius: 2px; }
+.g-unit .unit-hp > div { height: 100%; background: #fff; border-radius: 2px; transition: width .15s; }
+
+.guardian-quiz { margin-top: 10px; }
+.quiz-prompt { font-size: 20px; font-weight: 600; text-align: center; margin: 8px 0 12px; color: #333; }
+.quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.quiz-option { padding: 10px; border-radius: 8px; border: 1px solid #d1d5db; background: #fff; font-size: 15px; cursor: pointer; color: #333; transition: all 0.1s; }
+.quiz-option:hover:not(:disabled) { border-color: #4ea1ff; background: #f0f7ff; }
+.quiz-option.correct { background: #d1fae5; border-color: #10b981; color: #065f46; }
+.quiz-option.wrong   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+.quiz-option:disabled { cursor: default; opacity: .85; }
+
+.g-banner { position: absolute; left: 50%; top: 30%; transform: translate(-50%,0); background: #000b; color: #fff; padding: 8px 16px; border-radius: 8px; font-weight: 600; pointer-events: none; animation: gBannerIn .25s ease-out; white-space: nowrap; z-index: 10; }
+.g-banner.danger { background: #c0392bcc; }
+
+.guardian-root.hero-time::after { content: ''; position: absolute; inset: 0; background: radial-gradient(circle,#ffc83d44,transparent 70%); pointer-events: none; animation: gHeroFlash .8s ease-out; z-index: 5; }
+.guardian-root.shake { animation: gShake .15s; }
+
+@keyframes gShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-4px)} 75%{transform:translateX(4px)} }
+@keyframes gHeroPulse { from{box-shadow:0 0 8px 1px #ffc83d} to{box-shadow:0 0 18px 4px #ffc83d} }
+@keyframes gHeroFlash { from{opacity:1} to{opacity:0} }
+@keyframes gBannerIn { from{opacity:0; transform:translate(-50%,-8px)} to{opacity:1; transform:translate(-50%,0)} }
 
 </style>
 
@@ -4627,6 +4665,11 @@ const GAME_REGISTRY = {
     name: '单词跑酷', desc: '手速与词汇的极速碰撞', icon: '🏃',
     script: 'game-runner.js', 
     initFn: 'startRunnerGame'
+  },
+   guardian: {
+    name: '守护王国', desc: '答题出兵 · 决战守城', icon: '🏰',
+    script: 'game-guardian.js',
+    initFn: 'startGuardianGame'
   },
   ai: {
     name: '人机对决', desc: '60秒 · 挑战电脑', icon: '🤖',
