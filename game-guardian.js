@@ -2,6 +2,8 @@
 (function () {
   'use strict';
 
+  console.log('🛡️ 守护王国脚本加载 (v1.0.2)');
+
   // ========== 动态注入 CSS ==========
   if (!document.getElementById('guardian-styles')) {
     const style = document.createElement('style');
@@ -103,17 +105,20 @@
 
   function initAudio() {
     soundEnabled = true;
-    if (!audioCtx) {
-      const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-      if (AudioContextClass) audioCtx = new AudioContextClass();
+    try {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) audioCtx = new AudioContextClass();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {
+      console.warn('Audio init failed', e);
     }
-    if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
   }
 
   function playSound(type) {
-    if (!soundEnabled) return; // 如果没解锁音频，直接静音跳过
+    if (!soundEnabled || !audioCtx) return;
     try {
-      if (!audioCtx) return;
       const osc = audioCtx.createOscillator();
       const gainNode = audioCtx.createGain();
       osc.connect(gainNode); gainNode.connect(audioCtx.destination);
@@ -158,8 +163,18 @@
   const ENEMY_COLORS = { small: '#ff4757', mid: '#c0392b', hero: '#ff2d55' };
 
   function createGuardianGame(hostEl, opts) {
-    let WORDS = opts.getWords(BASE_CONFIG.questions) || [];
-    if (WORDS.length < 4) WORDS = [{en: 'apple', zh: '苹果'}, {en: 'banana', zh: '香蕉'}, {en: 'cat', zh: '猫'}, {en: 'dog', zh: '狗'}];
+    let WORDS = [];
+    try {
+      if (opts && typeof opts.getWords === 'function') {
+        WORDS = opts.getWords(BASE_CONFIG.questions) || [];
+      }
+    } catch (e) {
+      console.warn('线上词库获取失败', e);
+    }
+    
+    if (!WORDS || WORDS.length < 4) {
+      WORDS = [{en: 'apple', zh: '苹果'}, {en: 'banana', zh: '香蕉'}, {en: 'cat', zh: '猫'}, {en: 'dog', zh: '狗'}];
+    }
     while (WORDS.length < BASE_CONFIG.questions) WORDS = WORDS.concat(WORDS);
     WORDS = WORDS.slice(0, BASE_CONFIG.questions);
 
@@ -189,22 +204,21 @@
       
       // 1. 尝试调用外部引擎
       if (opts && typeof opts.onExit === 'function') {
-        try { opts.onExit(); } catch (e) { console.error(e); }
+        try { opts.onExit(); } catch (e) { console.error('外部退出报错', e); }
       }
 
-      // 2. 物理兜底：无论外部引擎成不成功，我们都在原位置放一个极其显眼的返回链接
+      // 2. 物理兜底
       setTimeout(() => {
-        // 如果游戏区域还在，且没有被外层框架替换掉
         if (document.body.contains(hostEl)) {
           hostEl.innerHTML = `
             <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; background:#fff; border-radius:16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); margin:20px auto; max-width:900px;">
               <h2 style="color:#333; margin-bottom:20px; font-size:28px;">游戏已结束</h2>
               <p style="color:#666; margin-bottom:30px; font-size:16px;">如果页面未能自动跳转，请点击下方按钮。</p>
-              <a href="wordgame.html" style="display:inline-block; padding:16px 40px; background:#4ea1ff; color:#fff; text-decoration:none; border-radius:12px; font-size:18px; font-weight:bold; box-shadow:0 6px 15px rgba(78,161,255,0.4); transition:transform 0.2s;">返回大厅主页</a>
+              <a href="wordgame.html" style="display:inline-block; padding:16px 40px; background:#4ea1ff; color:#fff; text-decoration:none; border-radius:12px; font-size:18px; font-weight:bold; box-shadow:0 6px 15px rgba(78,161,255,0.4);">返回大厅主页</a>
             </div>
           `;
         }
-      }, 50); // 延迟50ms，给外层引擎一点时间去销毁或切换屏幕
+      }, 100);
     }
 
     function buildSetup() {
@@ -524,10 +538,16 @@
 
         showResultModal(win, stars);
         
-        opts.onComplete?.({
-          gameId: 'guardian', win, stars, correct: state.correct, wrong: state.wrong, maxCombo: state.maxCombo,
-          remainingUnits: state.playerUnits.length, heroSpawned: state.heroSpawned, heroSurvived: state.playerUnits.some(u => u.type === 'hero'), perfectCombo20: state.perfectCombo20
-        });
+        try {
+          if (opts && typeof opts.onComplete === 'function') {
+            opts.onComplete({
+              gameId: 'guardian', win, stars, correct: state.correct, wrong: state.wrong, maxCombo: state.maxCombo,
+              remainingUnits: state.playerUnits.length, heroSpawned: state.heroSpawned, heroSurvived: state.playerUnits.some(u => u.type === 'hero'), perfectCombo20: state.perfectCombo20
+            });
+          }
+        } catch (e) {
+          console.error('上报结算数据失败', e);
+        }
       }, 800);
       state.timeouts.push(t);
     }
@@ -664,27 +684,51 @@
 
 /* ---------------- 兼容现有引擎的入口 ---------------- */
 window.startGuardianGame = function() {
-  const hostEl = document.getElementById('game-container') || document.getElementById('gameArea') || document.body; 
-  
-  const opts = {
-    getWords: (n) => window.getGameWords ? window.getGameWords(n) : [{en: 'apple', zh: '苹果'}, {en: 'banana', zh: '香蕉'}, {en: 'cat', zh: '猫'}, {en: 'dog', zh: '狗'}], 
-    onComplete: (result) => {
-      console.log('守护王国结算:', result);
-      if (typeof addCoins === 'function') {
-        let c = result.correct * 3 + result.maxCombo * 2;
-        if (result.win) c += 40 + result.stars * 20;
-        if (result.heroSurvived) c += 50;
-        if (result.perfectCombo20) c += 30;
-        addCoins(c);
-      }
-      if (typeof trackGamePlayed === 'function') trackGamePlayed('guardian', result); 
-      if (typeof showGameResult === 'function') showGameResult(result);
-    },
-    onExit: () => {
-      if (typeof showScreen === 'function') showScreen('lobby');
+  try {
+    let hostEl = document.getElementById('game-container') || document.getElementById('gameArea') || document.querySelector('.game-screen');
+    
+    // 【物理级兜底】：如果线上找不到挂载点，我们直接创建一个全屏浮层！
+    if (!hostEl) {
+      hostEl = document.createElement('div');
+      hostEl.id = 'guardian-temp-container';
+      hostEl.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f4f4f4; z-index:9999; overflow-y:auto; padding-top:20px;';
+      document.body.appendChild(hostEl);
     }
-  };
 
-  if (window.currentGuardianDestroy) window.currentGuardianDestroy();
-  window.currentGuardianDestroy = window.PlaykynGames.guardian.mount(hostEl, opts);
+    const opts = {
+      getWords: (n) => window.getGameWords ? window.getGameWords(n) : null, // 游戏内部会有词库兜底
+      onComplete: (result) => {
+        console.log('守护王国结算:', result);
+        try {
+          if (typeof addCoins === 'function') {
+            let c = result.correct * 3 + result.maxCombo * 2;
+            if (result.win) c += 40 + result.stars * 20;
+            if (result.heroSurvived) c += 50;
+            if (result.perfectCombo20) c += 30;
+            addCoins(c);
+          }
+          if (typeof trackGamePlayed === 'function') trackGamePlayed('guardian', result); 
+          if (typeof showGameResult === 'function') showGameResult(result);
+        } catch(e) { console.error('上报数据异常', e); }
+      },
+      onExit: () => {
+        try {
+          if (typeof showScreen === 'function') showScreen('lobby');
+        } catch(e) { console.error('跳转大厅异常', e); }
+      }
+    };
+
+    if (window.currentGuardianDestroy) {
+      try { window.currentGuardianDestroy(); } catch(e) {}
+    }
+    window.currentGuardianDestroy = window.PlaykynGames.guardian.mount(hostEl, opts);
+  } catch (fatalErr) {
+    console.error('守护王国启动崩溃:', fatalErr);
+    // 终极暴力提示
+    document.body.innerHTML = `<div style="padding:50px; text-align:center; font-family:sans-serif;">
+      <h1 style="color:red;">游戏加载失败</h1>
+      <p>错误信息: ${fatalErr.message}</p>
+      <button onclick="window.location.reload()" style="padding:10px 20px; font-size:18px; margin-top:20px;">刷新页面重试</button>
+    </div>`;
+  }
 };
