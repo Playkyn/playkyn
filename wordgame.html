@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
-<title>WordQuest · PET U11·U12 单词冒险</title>
+<title>WordQuest · 单词冒险</title>
+ <script src="game-feedback.js"></script>
 <style>
 
 /* ══════════ 宠物乐园 ══════════ */
@@ -1661,6 +1662,28 @@ body.skin-boy .weak-tag{
     <div id="scenarioContent"></div>
   </section>
 
+    <!-- 单词地鼠 -->
+  <section class="screen" id="s-game-whack">
+    <div class="top-bar">
+      <button class="back-btn" id="btnWhackBack">← 退出</button>
+      <span class="title">🔨 单词地鼠</span>
+      <span class="spacer"></span>
+    </div>
+    <!-- 游戏内容会挂载到这个容器里 -->
+    <div id="whack-container"></div>
+  </section>
+
+  <!-- 记忆闪配 -->
+  <section class="screen" id="s-game-flashmatch">
+    <div class="top-bar">
+      <button class="back-btn" id="btnFlashmatchBack">← 退出</button>
+      <span class="title">🎴 记忆闪配</span>
+      <span class="spacer"></span>
+    </div>
+    <!-- 游戏内容会挂载到这个容器里 -->
+    <div id="flashmatch-container"></div>
+  </section>
+
 </div>
 
 <div class="ach-toast" id="achToast">
@@ -1736,45 +1759,47 @@ function refreshMembershipCache(profile){
 /* ════════ 从数据库加载词库（带缓存兜底）════════ */
 async function loadWordlist(){
   console.log('🌐 从数据库加载词库...');
-
   const CACHE_KEY = 'wq_wordlist_cache_v2';
-
   let wordlistId = (localStorage.getItem('selected_wordlist_id') || '').trim();
 
-  // ① 没选过 → 找公开词库当默认
   if(!wordlistId){
     try{
       const { data: pub } = await sb
         .from('wordlists')
         .select('id, name')
         .eq('is_public', true)
-        .order('created_at', { ascending: true })
+        .order('created_at', { ascending: false }) 
         .limit(1)
         .maybeSingle();
       if(pub && pub.id){
         wordlistId = pub.id;
-        console.log('📚 默认词库：', pub.name);
+        console.log('📚 已加载最新公开词库：', pub.name);
       }
     }catch(e){ console.warn('查询公开词库失败', e); }
   }
 
-  // ② 有了 wordlistId → 查词库内容
   if(wordlistId){
     try{
-      const { data, error } = await sb
-        .from('words')
-        .select('*')
-        .eq('wordlist_id', wordlistId);
+      // 分两次拉取，突破 1000 限制
+      let { data: data1, error } = await sb.from('words').select('*').eq('wordlist_id', wordlistId).range(0, 999);
+      let { data: data2 } = await sb.from('words').select('*').eq('wordlist_id', wordlistId).range(1000, 1999);
+      
+      const rawData = [...(data1 || []), ...(data2 || [])];
 
-      if(!error && data && data.length){
-        const words = data.map(r => ({
-          en: r.word,
-          zh: r.meaning,
-          ph: r.phonetic || '',
-          u: r.unit || '',
-          g: r.group || ''
-        }));
-
+      if(!error && rawData && rawData.length){
+        // 🚨 核心修复：把 group 兜底给 u，解决分类为空的问题
+        const words = rawData.map(r => {
+          let unitStr = r.unit || r.group || '全部词汇';
+          return {
+            en: r.word,
+            zh: r.meaning,
+            ph: r.phonetic || '',
+            u: unitStr,   // 强行让 u 有值
+            g: r.group || ''
+          };
+        });
+        
+        // 写入缓存
         try{
           localStorage.setItem(CACHE_KEY, JSON.stringify({
             at: Date.now(),
@@ -1786,14 +1811,13 @@ async function loadWordlist(){
         console.log('✅ 从数据库加载词库：', words.length, '个词');
         return words;
       }
-
       console.warn('⚠️ 数据库无数据或报错：', error?.message);
     }catch(e){
       console.warn('⚠️ 数据库请求异常：', e.message);
     }
   }
 
-  // ③ 数据库失败 → 用缓存兜底
+  // 兜底：读取缓存
   try{
     const raw = localStorage.getItem(CACHE_KEY);
     if(raw){
@@ -1806,7 +1830,6 @@ async function loadWordlist(){
     }
   }catch(e){}
 
-  // ④ 完全失败
   console.error('❌ 无法加载词库：数据库请求失败，且无缓存可用');
   return null;
 }
@@ -1818,10 +1841,10 @@ function isUnlocked(){ return _unlock.unlocked; }
 /* 解锁弹窗 */
 function showUnlockPrompt(){
   if(typeof openModal !== 'function') return;
-  openModal(`
+   openModal(`
     <div class="modal-title">🔒 解锁完整版</div>
     <div style="font-size:13px;color:var(--muted);font-weight:700;line-height:1.7;margin-bottom:18px">
-      PET U1U2 免费体验。<br>
+      免费体验基础单元。<br>
       解锁完整版可使用全部单元与后续更新。
     </div>
     <div style="background:rgba(255,107,157,.08);border-radius:12px;padding:14px;margin-bottom:16px;text-align:left">
@@ -3343,25 +3366,47 @@ function bankOf(en){
 
 
 function getPoolWords() {
+  if (!WORDS || !WORDS.length) return [];
+  
   const unlocked = isUnlocked();
   const clean = arr => arr.filter(w => w && w.en && w.zh);
 
-  const hasCategories = WORDS.some(w => w && w.u && w.u.trim()) || WORDS.some(w => w && w.g && w.g.trim());
+  const hasCategories = WORDS.some(w => w && (w.u || w.g));
   if(!hasCategories){
     return clean(WORDS);
   }
 
-  if (!state.goal || !state.goal.unit) {
-    return clean(unlocked ? WORDS : WORDS.filter(w => w && w.u === 'U1U2'));
+  const allUnits = [...new Set(WORDS.map(w => w.u || w.g || '全部词汇'))].sort();
+  const freeUnit = allUnits[0] || '全部词汇'; 
+
+  if (!state.goal) state.goal = {};
+
+  if (!state.goal.unit || !allUnits.includes(state.goal.unit)) {
+    state.goal.unit = freeUnit;
+    state.goal.groups = []; 
+    if (typeof save === 'function') save();
   }
+  
   let unit = state.goal.unit;
-  if (!unlocked && unit !== 'U1U2') unit = 'U1U2';
+
+  if (!unlocked) {
+    unit = freeUnit;
+    state.goal.unit = unit;
+  }
+
   const selectedGroups = state.goal.groups || [];
-  if (selectedGroups.length === 0) return clean(WORDS.filter(w => w && w.u === unit));
-  return clean(WORDS.filter(w => w && w.u === unit && selectedGroups.includes(w.g)));
+  
+  return clean(WORDS.filter(w => {
+    if (!w) return false;
+    const wordUnit = w.u || w.g || '全部词汇';
+    if (unit === '全部词汇') return true;
+    
+    const matchUnit = wordUnit === unit;
+    const matchGroup = selectedGroups.length === 0 || selectedGroups.includes(w.g);
+    
+    return matchUnit && matchGroup;
+  }));
 }
-
-
 
 function dueWords(){
   const t=vnow();
@@ -3554,6 +3599,13 @@ function doLogin(account){
   currentUser = rtUser;
   state = currentUser.state;
 
+    // 🚨 终极强杀旧缓存！
+    if (state && state.goal) {
+      // 不管它以前叫啥，哪怕叫 U1U2、U11U12，统统干掉！
+      state.goal.unit = null;
+      state.goal.groups = [];
+    }
+
   if(!state.game) state.game = defaultState().game;
   if(!state.game.achievements) state.game.achievements = {};
   if(!state.groupStats) state.groupStats = {};
@@ -3678,8 +3730,7 @@ $('#userChipGoal').onclick=()=>{ Sfx.click();openUserMenu(); };
    ═══════════════════════════════════════════════════════════ */
 
 function renderGoal() {
-    // 无分类词库 → 不需要选单元，直接回主页
-  const __hasCat = WORDS.some(w => (w.u && w.u.trim()) || (w.g && w.g.trim()));
+  const __hasCat = WORDS.some(w => w && (w.u || w.g));
   if(!__hasCat){
     if(!state.goal) state.goal = {};
     state.goal.unit = null;
@@ -3687,24 +3738,29 @@ function renderGoal() {
     goHome();
     return;
   }
-  // 1. 初始化层级结构状态
+
   if (!state.goal) state.goal = { unit: null, groups: [] };
-  if (!state.goal.unit || !UNITS.includes(state.goal.unit)) {
-    state.goal.unit = UNITS[0]; // 默认选第一个单元
+  
+  const dynamicUnits = [...new Set(WORDS.map(w => w.u || w.g || '全部词汇'))].sort();
+  if (dynamicUnits.length === 0) dynamicUnits.push('全部');
+  const freeUnit = dynamicUnits[0];
+  
+  if (!state.goal.unit || !dynamicUnits.includes(state.goal.unit)) {
+    state.goal.unit = freeUnit;
   }
-
-  // 2. 渲染「单元」按钮
-    const _unlocked = isUnlocked();
-  $('#unitChips').innerHTML = UNITS.map(u => {
+  
+  const _unlocked = isUnlocked();
+  
+  // 1. 渲染单元
+  $('#unitChips').innerHTML = dynamicUnits.map(u => {
     const on = state.goal.unit === u;
-    const locked = !_unlocked && u !== 'U1U2';
-    const n = WORDS.filter(w => w.u === u).length;
+    const locked = !_unlocked && u !== freeUnit; 
+    const n = WORDS.filter(w => (w.u || w.g || '全部词汇') === u).length;
     return `<div class="chip${on ? ' on' : ''}${locked ? ' locked' : ''}" data-u="${u}" data-locked="${locked}">
-      ${locked ? '🔒 ' : ''}${u} <span style="opacity:.75">${n}</span></div>`;
+      ${locked ? ' 🔒 ' : ''}${u} <span style="opacity:.75">${n}</span></div>`;
   }).join('');
-
-  // 3. 绑定「单元」点击事件
-    $('#unitChips').querySelectorAll('.chip').forEach(el => {
+  
+  $('#unitChips').querySelectorAll('.chip').forEach(el => {
     el.onclick = () => {
       if (el.dataset.locked === 'true') {
         Sfx.error();
@@ -3713,31 +3769,28 @@ function renderGoal() {
       }
       Sfx.click();
       state.goal.unit = el.dataset.u;
-      const unitGroups = [...new Set(WORDS.filter(w => w.u === state.goal.unit).map(w => w.g))];
+      const unitGroups = [...new Set(WORDS.filter(w => (w.u || w.g || '全部词汇') === state.goal.unit).map(w => w.g).filter(Boolean))];
       state.goal.groups = unitGroups.length > 0 ? [unitGroups[0]] : [];
       renderGoal();
     };
   });
-
-  // 4. 获取当前单元下所有可用的类别
-  const currentUnitGroups = [...new Set(WORDS.filter(w => w.u === state.goal.unit).map(w => w.g))];
-  const allowed = getAllowedGroups(); // 获取家长限制后的允许列表
-
-  // 5. 如果当前选中的类别不属于这个单元，自动修复
+  
+  // 2. 渲染类别
+  const currentUnitGroups = [...new Set(WORDS.filter(w => (w.u || w.g || '全部词汇') === state.goal.unit).map(w => w.g).filter(Boolean))];
+  const allowed = getAllowedGroups();
+  
   if (!state.goal.groups || state.goal.groups.length === 0 || !state.goal.groups.every(g => currentUnitGroups.includes(g))) {
     state.goal.groups = allowed.length > 0 ? [allowed[0]] : [currentUnitGroups[0]];
   }
-
-  // 6. 渲染「类别」按钮
+  
   $('#poolChips').innerHTML = currentUnitGroups.map(g => {
-    const n = WORDS.filter(w => w.u === state.goal.unit && w.g === g).length;
+    const n = WORDS.filter(w => (w.u || w.g || '全部词汇') === state.goal.unit && w.g === g).length;
     const on = state.goal.groups.includes(g);
     const locked = !allowed.includes(g);
     return `<div class="chip${on ? ' on' : ''}${locked ? ' locked' : ''}" data-g="${g}" data-locked="${locked}">
       ${locked ? '🔒' : ''} ${g} <span style="opacity:.75">${n}</span></div>`;
   }).join('');
-
-  // 7. 绑定「类别」点击事件
+  
   $('#poolChips').querySelectorAll('.chip').forEach(el => {
     el.onclick = () => {
       if (el.dataset.locked === 'true') { Sfx.error(); say('这个类别还没有解锁哦～'); return; }
@@ -3751,38 +3804,36 @@ function renderGoal() {
       renderGoal();
     };
   });
-
-  // 8. 更新统计信息
-  const currentUnitWords = WORDS.filter(w => w.u === state.goal.unit);
+  
+  // 3. 更新统计和底部按钮
+  const currentUnitWords = WORDS.filter(w => (w.u || w.g || '全部词汇') === state.goal.unit);
   const selectedWords = currentUnitWords.filter(w => state.goal.groups.includes(w.g));
   const learnedCount = Object.values(state.bank).filter(b => b.seen > 0).length;
   $('#poolInfo').textContent = `当前单元：${state.goal.unit} · 已选 ${state.goal.groups.length} 个类别 · 共 ${selectedWords.length} 词` + (hasProgress() ? ` · 已有 ${learnedCount} 词学习记录` : '');
-
-  // 9. 更新按钮和标题
+  
   const isFirstTime = !hasProgress();
   $('#btnStartGoal').textContent = isFirstTime ? '🚀 下一步 · 初始诊断' : '💾 保存并返回';
   $('#btnBackFromGoal').style.display = isFirstTime ? 'none' : 'block';
   $('#goalTip').style.display = isFirstTime ? 'none' : 'block';
   $('#goalTitle').textContent = isFirstTime ? '选择学习内容' : '调整学习内容';
-
+  
   const daily = getDailyNew();
   const range = $('#dailyRange');
   range.value = daily; $('#dailyVal').textContent = daily;
-
+  
   if (currentUser.role === 'student') {
     range.disabled = true; $('#dailyHint').textContent = '🔒 每日任务量由家长设定';
   } else {
     range.disabled = false; $('#dailyHint').textContent = '建议从每天 10 个开始，坚持比数量更重要';
   }
-
-    const uc = $('#userChipGoal');
+  
+  const uc = $('#userChipGoal');
   if (uc) {
     $('#goalAvatar').textContent = currentUser.avatar || '🦊';
     $('#goalUserName').textContent = currentUser.name || '用户';
   }
   say(isFirstTime ? '先选单元，再选类别，我们出发吧！' : '想换换口味吗？选好后点保存～');
 }
-
 
 
 
@@ -4592,37 +4643,77 @@ function openWeakWordStudy(en){
         else if(optEl === btn) optEl.classList.add('wrong');
       });
 
-      if(ok){
-        Sfx.correct();
-        spawnStars(2, innerWidth/2, innerHeight*0.4, ['⭐','✨']);
-        bankItem.m = clamp(bankItem.m + 0.15, 0, 0.95); 
-        bankItem.streak++;
-        bankItem.bad = Math.max(0, bankItem.bad - 1);    
-        bankItem.next = vnow() + 24*3600e3;       
-        addCoins(5); addXp(10);            
-        state.game.totalCorrect++;
-        save();
+            if(ok){
+        // 🛡️ 防御 1：将音效、特效、数据更新全部包裹
+        try {
+          if (typeof Sfx !== 'undefined' && typeof Sfx.correct === 'function') Sfx.correct();
+          if (typeof spawnStars === 'function') spawnStars(2, innerWidth/2, innerHeight*0.4, ['⭐','✨']);
+          
+          if (typeof bankItem !== 'undefined') {
+            bankItem.m = clamp(bankItem.m + 0.15, 0, 0.95); 
+            bankItem.streak++;
+            bankItem.bad = Math.max(0, bankItem.bad - 1);    
+            if (typeof vnow === 'function') bankItem.next = vnow() + 24*3600e3;       
+          }
+          
+          if (typeof addCoins === 'function') addCoins(5); 
+          if (typeof addXp === 'function') addXp(10);            
+          if (typeof state !== 'undefined' && state.game) state.game.totalCorrect++;
+          if (typeof save === 'function') save();
+        } catch (err) {
+          console.error("🚨 答对后的数据/特效更新报错，已被安全拦截:", err);
+        }
 
-        $('#weakErr').textContent = '🎉 回答正确！掌握度提升，错误次数已减少！';
-        $('#weakErr').style.color = 'var(--green)';
+        // UI 更新（独立在外，确保必执行）
+        if ($('#weakErr')) {
+          $('#weakErr').textContent = '🎉 回答正确！掌握度提升，错误次数已减少！';
+          $('#weakErr').style.color = 'var(--green)';
+        }
       } else {
-        Sfx.wrong();
-        $('#weakErr').textContent = '❌ 答错了，再听一遍发音加强记忆吧！';
-        $('#weakErr').style.color = 'var(--red)';
-        bankItem.bad++; 
-        bankItem.streak = 0;
-        save();
-        setTimeout(() => Speaker.speak(w.en, 0.75), 400);
+        // 🛡️ 防御 2：答错时的数据更新包裹
+        try {
+          if (typeof Sfx !== 'undefined' && typeof Sfx.wrong === 'function') Sfx.wrong();
+          if (typeof bankItem !== 'undefined') {
+            bankItem.bad++; 
+            bankItem.streak = 0;
+          }
+          if (typeof save === 'function') save();
+        } catch (err) {
+          console.error("🚨 答错后的数据更新报错，已被安全拦截:", err);
+        }
+
+        // UI 更新（独立在外，确保必执行）
+        if ($('#weakErr')) {
+          $('#weakErr').textContent = '❌ 答错了，再听一遍发音加强记忆吧！';
+          $('#weakErr').style.color = 'var(--red)';
+        }
+
+        // 🛡️ 防御 3：语音播放极易在手机上卡死，放到延迟里并加防御
+        try {
+          setTimeout(() => {
+            if (typeof Speaker !== 'undefined' && typeof Speaker.speak === 'function') {
+              Speaker.speak(w.en, 0.75);
+            }
+          }, 400);
+        } catch(e) {}
       }
 
-      $('#weakCompleteBtn').style.display = 'block';
-      $('#weakCompleteBtn').onclick = () => {
-        closeModal();
-        renderHome(); 
-      };
-    };
-  });
-}
+      // 🛡️ 防御 4：无论上面发生什么，最后的“完成”按钮必须显示出来，防止无路可走
+      const completeBtn = $('#weakCompleteBtn');
+      if (completeBtn) {
+        completeBtn.style.display = 'block';
+        completeBtn.onclick = () => {
+          try {
+            closeModal();
+            renderHome(); 
+          } catch (err) {
+            console.error("返回主页报错:", err);
+          }
+        };
+      }
+    }; // 🔴 这行必须有：闭合 btn.onclick
+  }); // 🔴 这行必须有：闭合 forEach
+} // 🔴 这行必须有：闭合整个 openWeakWordStudy 函数
 
 $('#btnFF').onclick=()=>{
   Sfx.click();
@@ -4660,48 +4751,95 @@ $('#btnSkin').onclick=()=>{
 /* ═══════════════════════════════════════════════════════════
    游戏中心 · 注册表与按需加载引擎
    ═══════════════════════════════════════════════════════════ */
+// ==========================================
+// 1. 游戏注册表（数据部分）
+// ==========================================
 const GAME_REGISTRY = {
-   runner: {
-    name: '单词跑酷', desc: '手速与词汇的极速碰撞', icon: '🏃',
-    script: 'game-runner.js', 
-    initFn: 'startRunnerGame'
+  // --- 老游戏 ---
+  runner: { name: '单词跑酷', desc: '手速与词汇的极速碰撞', icon: '🏃', script: 'game-runner.js', initFn: 'startRunnerGame' },
+  guardian: { name: '守护王国', desc: '答题出兵 · 决战守城', icon: '🏰', script: 'game-guardian.js', initFn: 'startGuardianGame' },
+  ai: { name: '人机对决', desc: '60秒 · 挑战电脑', icon: '🤖', script: 'game-ai.js', initFn: 'showAiDifficulty' },
+  listen: { name: '听音选图', desc: '60秒 · 听发音选释义', icon: '🎧', script: 'game-listen.js', initFn: 'startListenGame' },
+  match: { name: '连连看', desc: '中英配对消除', icon: '🔗', script: 'game-match.js', initFn: 'startMatchGame' },
+  sheep: { name: '趣味消词', desc: '可调难度 · 可全词库', icon: '🧩', script: 'game-sheep.js', initFn: 'showSheepSetup' },
+  minecraft: { name: '单词矿工', desc: '多层矿山 · 采集稀有矿物', icon: '⛏️', script: 'game-minecraft.js', initFn: 'showMcDifficulty' },
+  scenario: { name: '场景故事', desc: '分主题探索 · 语境中学单词', icon: '📖', script: 'game-scenario.js', initFn: 'startScenarioGame' },
+  whack: {
+    name: '单词地鼠', desc: '眼疾手快 · 敲出正确释义',
+    icon: `<svg viewBox="0 0 64 64" width="52" height="52" style="filter: drop-shadow(0 3px 5px rgba(0,0,0,0.15));"><rect x="10" y="4" width="44" height="24" rx="4" fill="#fff5e1" stroke="#8b5a2b" stroke-width="3"/><text x="32" y="22" font-family="sans-serif" font-size="14" font-weight="900" fill="#5c3a1e" text-anchor="middle">词</text><circle cx="14" cy="36" r="6" fill="#fbbf24"/><circle cx="50" cy="36" r="6" fill="#fbbf24"/><ellipse cx="32" cy="46" rx="20" ry="16" fill="#fbbf24"/><ellipse cx="32" cy="48" rx="12" ry="8" fill="#fff"/><circle cx="24" cy="42" r="2.5" fill="#000"/><circle cx="40" cy="42" r="2.5" fill="#000"/></svg>`,
+    script: 'game-whack.js', initFn: 'startWhackGame'
   },
-   guardian: {
-    name: '守护王国', desc: '答题出兵 · 决战守城', icon: '🏰',
-    script: 'game-guardian.js',
-    initFn: 'startGuardianGame'
-  },
-  ai: {
-    name: '人机对决', desc: '60秒 · 挑战电脑', icon: '🤖',
-    script: 'game-ai.js', 
-    initFn: 'showAiDifficulty'
-  },
-  listen: {
-    name: '听音选图', desc: '60秒 · 听发音选释义', icon: '🎧',
-    script: 'game-listen.js',
-    initFn: 'startListenGame'
-  },
-  match: {
-    name: '连连看', desc: '中英配对消除', icon: '🔗',
-    script: 'game-match.js',
-    initFn: 'startMatchGame'
-  },
-  sheep: {
-    name: '趣味消词', desc: '可调难度 · 可全词库', icon: '🧩',
-    script: 'game-sheep.js',
-    initFn: 'showSheepSetup'
-  },
-  minecraft: {
-    name: '单词矿工', desc: '多层矿山 · 采集稀有矿物', icon: '⛏️',
-    script: 'game-minecraft.js',
-    initFn: 'showMcDifficulty'
-  },
-  scenario: {
-    name: '场景故事', desc: '分主题探索 · 语境中学单词', icon: '📖',
-    script: 'game-scenario.js',
-    initFn: 'startScenarioGame'
-  }
+  flashmatch: { name: '记忆闪配', desc: '翻转卡片 · 记忆单词配对', icon: '🎴', script: 'game-flashmatch.js', initFn: 'startFlashMatchGame' },
+
+  // --- 新游戏 ---
+  racer: { name: '单词赛车', desc: '选对单词 · 冲刺终点', icon: '🏎️', script: 'game-racer.js', initFn: 'startRacerGame' },
+  shooter: { name: '单词射击', desc: '点击字母 · 击落单词靶', icon: '🎯', script: 'game-shooter.js', initFn: 'startShooterGame' },
+  maze: { name: '单词迷宫', desc: '走迷宫 · 收集字母拼单词', icon: '🗺️', script: 'game-maze.js', initFn: 'startMazeGame' }
 };
+
+const DEFAULT_ACCESS = { tier: 'free', dailyLimit: Infinity };
+
+// ==========================================
+// 2. 辅助查询函数（给页面渲染用）
+// ==========================================
+function getGameMeta(id) {
+  const meta = GAME_REGISTRY[id];
+  if (!meta) return null;
+  return { id, ...meta, access: { ...DEFAULT_ACCESS, ...(meta.access || {}) } };
+}
+
+function listGames() {
+  return Object.keys(GAME_REGISTRY).map(getGameMeta);
+}
+
+// ==========================================
+// 3. 核心加载器（给页面启动游戏用）
+// ==========================================
+const _scriptCache = new Map();
+
+function loadScriptOnce(src) {
+  if (_scriptCache.has(src)) return _scriptCache.get(src);
+  const p = new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src;
+    s.async = true;
+    s.onload = () => resolve();
+    s.onerror = () => reject(new Error('脚本加载失败: ' + src));
+    document.head.appendChild(s);
+  });
+  _scriptCache.set(src, p);
+  return p;
+}
+
+async function loadGame(meta) {
+  if (meta.script && meta.initFn) {
+    await loadScriptOnce(meta.script);
+    const mount = window[meta.initFn];
+    if (typeof mount !== 'function') {
+      throw new Error(`initFn 未找到: ${meta.initFn}`);
+    }
+    return { type: 'global', mount };
+  }
+  // 如果以后用到 module 引入模式，这里保留兼容
+  if (meta.module) {
+    const mod = await meta.module();
+    const mount = mod.mount || mod.default;
+    if (typeof mount !== 'function') {
+      throw new Error(`模块未导出 mount: ${meta.id || meta.name}`);
+    }
+    return { type: 'module', mount };
+  }
+  throw new Error(`加载配置缺失: ${meta.id || meta.name || '未知游戏'}`);
+}
+
+// ==========================================
+// 4. 统一挂载到全局（最干净的一处挂载）
+// ==========================================
+window.GAME_REGISTRY = GAME_REGISTRY;
+window.getGameMeta = getGameMeta;
+window.listGames = listGames;
+window.loadGame = loadGame;
+ 
 
 // 动态加载 JS 脚本的引擎
 function loadGameScript(src, callbackName) {
@@ -5650,6 +5788,7 @@ function renderLearn(){
   if(session.combo>=2) scoreEl.innerHTML=`<span class="combo-fire">🔥 x${session.combo}</span>`;
   else scoreEl.innerHTML='';
 
+  // ===== 1. 新词预览模式 =====
   if(item.isNew && !item.previewed){
     card.innerHTML=`
       <div class="preview">
@@ -5657,18 +5796,66 @@ function renderLearn(){
         ${renderWordCardBlock(w.en)}
         <div class="zh-big" style="margin-top:18px">${esc(w.zh)}</div>
         <div style="margin-top:16px">
-          <span class="tag" style="background:${GROUP_COLOR[w.g]}22;color:${GROUP_COLOR[w.g]}">${w.g}</span>
+          <span class="tag" style="background:${GROUP_COLOR[w.g] || '#8b93b8'}22;color:${GROUP_COLOR[w.g] || '#8b93b8'}">${w.g}</span>
         </div>
+        
+        <!-- 👇 新增的 AI 造句区域 -->
+        <div style="margin-top:16px;">
+          <button class="btn ghost small" id="btnAiExample" style="width:auto;padding:8px 20px;display:inline-block;border-color:var(--purple);color:var(--purple);font-weight:900;">🤖 AI 老师造句</button>
+          <div id="aiExampleBox" style="display:none;margin-top:14px;background:rgba(167,139,250,.1);border:1px dashed var(--purple);border-radius:12px;padding:14px;text-align:left;font-size:14px;line-height:1.6;animation:fadeIn .3s ease;"></div>
+        </div>
+        <!-- 👆 新增结束 -->
+
         <button class="btn primary" id="btnGot" style="margin-top:22px">✨ 我记住了</button>
       </div>`;
     say('认识一个新朋友！');
     setTimeout(()=>Speaker.speak(w.en),180);
+    
+    // AI 造句按钮事件
+    const btnAi = $('#btnAiExample');
+    if(btnAi){
+      btnAi.onclick = async () => {
+        Sfx.click();
+        const box = $('#aiExampleBox');
+        btnAi.textContent = '⏳ AI 思考中...';
+        btnAi.disabled = true;
+        
+        try {
+          const { data, error } = await sb.functions.invoke('quick-service', {
+            body: { word: w.en, meaning: w.zh }
+          });
+          
+          if (error) throw error;
+          if (data.error) throw new Error(data.error);
+          
+          box.style.display = 'block';
+          box.innerHTML = `
+            <div style="color:var(--purple);font-weight:900;font-size:12px;margin-bottom:6px;">✨ AI 语境记忆 ${data.cached ? '(极速缓存)' : ''}</div>
+            <div style="font-weight:900;color:var(--text);margin-bottom:6px;font-size:15px;">${data.en}</div>
+            <div style="color:var(--muted);font-weight:700;">${data.zh}</div>
+          `;
+          
+          if (window.Speaker) window.Speaker.speak(data.en);
+          
+        } catch (err) {
+          console.error('AI 造句失败:', err);
+          box.style.display = 'block';
+          box.innerHTML = '<div style="color:var(--red);font-weight:800;">AI 老师开小差了，请稍后再试。</div>';
+        } finally {
+          btnAi.textContent = '🤖 AI 老师造句';
+          btnAi.disabled = false;
+        }
+      };
+    }
+
     $('#btnGot').onclick=()=>{
       Sfx.click();spawnStars(2,innerWidth/2,innerHeight*0.6,['✨','⭐']);
       item.previewed=true;renderLearn();
     };
     return;
   }
+
+  // ===== 2. 拼写题模式 =====
   const q=currentQuestion();
   if(q.mode==='spell'){
     const hint=w.en[0]+' _'.repeat(w.en.length-1);
@@ -5698,6 +5885,8 @@ function renderLearn(){
     setTimeout(()=>input.focus(),120);
     return;
   }
+
+  // ===== 3. 选择题模式 =====
   const isEn2Zh=q.mode==='en2zh';
   card.innerHTML=`
     <div class="q-label">${isEn2Zh?'🔍 选出正确的中文释义':'🔍 选出对应的英文'}</div>
@@ -6204,6 +6393,7 @@ function initPage(){
         .select('display_name').eq('id', user.id).single();
       if(__p && __p.display_name) name = __p.display_name;
     }catch(e){}
+       // ... 你截图里的前面部分保持不变 ...
     let rtUser = runtimeUsers.find(u => u.id === user.id);
     if(!rtUser){
       const r = loadRuntime(user.id, {dailyNew:10, allowedGroups:null});
@@ -6223,6 +6413,16 @@ function initPage(){
     currentAccount = { id: user.id, name: name, avatar: '🦊', role: 'student', pwd: '' };
     currentUser = rtUser;
     state = currentUser.state;
+    
+    // 🚨 【新增】在这里强行斩断 U1U2 的旧缓存！
+    if (state && state.goal) {
+      if (state.goal.unit === 'U1U2' || state.goal.unit === 'U11U12' || !state.goal.unit) {
+        state.goal.unit = null;   // 清空它，后面拉取词库后会自动赋值为 '交通' 或 '全部'
+        state.goal.groups = [];   // 顺手清空已选类别
+      }
+    }
+    // 🚨 新增结束
+
     
     // ★ 从 Supabase 读每日新词量（覆盖本地）
     try{
@@ -6295,6 +6495,28 @@ window.addEventListener('pagehide', () => {
     if (typeof saveSprintProgress === 'function') saveSprintProgress(true); // 👈 加上 true
   } catch(e) {}
 });
-</script>
+   </script> 
+    <script>
+      // ==========================================
+      // 🛡️ 移动端防卡死 & 全局兜底守护脚本
+      // ==========================================
+      
+      window.onerror = function(msg, url, line) {
+        console.warn("🚨 捕捉到运行错误:", msg, "行号:", line);
+        return true; 
+      };
+
+      document.addEventListener('click', function() {
+        try {
+          if (window.audioCtx && window.audioCtx.state === 'suspended') {
+            window.audioCtx.resume();
+          }
+        } catch(e) {}
+      }, { once: true });
+
+      console.log("✅ 守护脚本已加载");
+    </script>
+    <script src="game-hud.js"></script>
+<script src="word-pool.js"></script>
 </body>
 </html>

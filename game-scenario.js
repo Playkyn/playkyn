@@ -32,10 +32,12 @@ async function renderScenario(){
   if(scenarioState.view === 'list'){
     el.innerHTML = `<div class="tip" style="text-align:center;padding:20px;">⏳ 正在从云端加载故事库...</div>`;
     
-    const pool = getPoolWords();
-    const availableUnits = [...new Set(pool.map(w=>w.g))];
+      const pool = getPoolWords();
+    
+    // 把当前用户词库里的单词全部转成小写，方便比对
+    const userWordsSet = new Set(pool.map(w => w.en.toLowerCase()));
 
-    // ★ 从 Supabase 拉取所有故事
+    // 从 Supabase 拉取所有故事
     const { data: dbScenarios, error } = await sb.from('scenarios').select('*');
     
     if(error){
@@ -44,11 +46,24 @@ async function renderScenario(){
       return;
     }
 
-    // 过滤出用户当前选中分类的故事
-    const list = dbScenarios.filter(s => availableUnits.includes(s.unit));
+    // 🌟 核心改变：计算每个故事包含了多少个用户学过的词
+    let list = dbScenarios.map(s => {
+      let matchCount = 0;
+      if (s.sentences && Array.isArray(s.sentences)) {
+        s.sentences.forEach(item => {
+          // 如果故事里的单词在用户词库里，重合度 +1
+          if (item.w && userWordsSet.has(item.w.toLowerCase())) {
+            matchCount++;
+          }
+        });
+      }
+      return { ...s, matchCount };
+    })
+    .filter(s => s.matchCount > 0) // 👈 只要包含至少 1 个学过的词，就留下
+    .sort((a, b) => b.matchCount - a.matchCount); // 👈 按包含的单词数量从多到少排序
 
     if(!list.length){
-      el.innerHTML = `<div class="tip">当前所选主题暂时没有对应的场景故事（数据库里没查到），去「📚 主题」里多选几个主题试试吧～</div>
+      el.innerHTML = `<div class="tip">当前词库里没有匹配到故事里的单词，建议先去「开始学习」背几个词，或者去「📚 主题」里多选几个分类～</div>
         <button class="btn ghost small" id="btnScenarioEmptyBack">← 返回游戏乐园</button>`;
       $('#btnScenarioEmptyBack').onclick=()=>{ Sfx.click(); showGamesScreen(); };
       return;

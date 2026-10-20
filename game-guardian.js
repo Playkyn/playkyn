@@ -2,38 +2,86 @@
 (function () {
   'use strict';
 
-  console.log('🛡️ 守护王国脚本加载 (v1.0.2)');
-
   // ========== 动态注入 CSS ==========
   if (!document.getElementById('guardian-styles')) {
     const style = document.createElement('style');
     style.id = 'guardian-styles';
     style.textContent = `
-      /* --- 放大整体布局 --- */
-      .guardian-root { position: relative; overflow: hidden; width: 100%; max-width: 900px; margin: 20px auto; font-family: sans-serif; background: #fff; padding: 24px; border-radius: 16px; box-shadow: 0 8px 24px rgba(0,0,0,0.12); min-height: 400px; }
-      .guardian-hud { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 16px; font-size: 16px; }
-      .combo-track { flex: 1; }
-      .combo-bar { height: 10px; background: #e5e7eb; border-radius: 5px; overflow: hidden; margin-top: 6px; }
+      .guardian-modal { 
+        position: fixed; inset: 0; 
+        background: rgba(0,0,0,0.85); 
+        z-index: 99999; 
+        display: flex; align-items: center; justify-content: center; 
+        backdrop-filter: blur(4px); 
+        overflow: hidden; 
+        padding: 10px; 
+      }
+      
+      .guardian-root { 
+        position: relative; 
+        width: 95vw; 
+        max-width: 900px; 
+        height: auto; 
+        max-height: 95vh; 
+        background: #fff; 
+        padding: 20px 24px; 
+        border-radius: 20px; 
+        box-shadow: 0 15px 50px rgba(0,0,0,0.6); 
+        font-family: sans-serif; 
+        display: flex;
+        flex-direction: column;
+      }
+      
+      .guardian-setup { 
+        max-width: 600px !important; 
+        width: 90vw !important;
+        padding: 40px !important; 
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: center !important;
+        align-items: center !important;
+        text-align: center;
+      }
+
+      .guardian-hud { 
+        flex-shrink: 0; 
+        display: flex; justify-content: space-between; align-items: center; 
+        gap: 20px; margin-bottom: 16px; font-size: 18px; font-weight: bold; 
+      }
+      .combo-track { flex: 1; max-width: 400px; }
+      .combo-bar { height: 12px; background: #e5e7eb; border-radius: 6px; overflow: hidden; margin-top: 6px; }
       #gComboFill { height: 100%; width: 0; background: linear-gradient(90deg,#4ea1ff,#ffc83d); transition: width .2s; }
       
-      /* --- 战场与堡垒 --- */
-      .guardian-lane { position: relative; height: 220px; border-radius: 16px; background: linear-gradient(180deg,#eef5ff,#dbe8fb); overflow: hidden; border: 2px solid #cbd5e1; margin-bottom: 24px; transition: box-shadow 0.3s; }
+      /* 【修改】战场高度大幅增加到 400px，给士兵留出足够的空间 */
+      .guardian-lane { 
+        position: relative; 
+        width: 100%;
+        height: 400px; 
+        flex: none;
+        border-radius: 16px; 
+        background: linear-gradient(180deg,#eef5ff,#dbe8fb); 
+        overflow: hidden; 
+        border: 2px solid #cbd5e1; 
+        transition: box-shadow 0.3s; 
+        margin-bottom: 20px;
+      }
       .guardian-lane.combo-flash { box-shadow: 0 0 30px 10px #ffc83d, inset 0 0 30px #ffc83d; }
-      .g-base { position: absolute; top: 0; bottom: 0; width: 60px; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+      
+      .g-base { position: absolute; top: 0; bottom: 0; width: 80px; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; }
       .g-base-player { left: 0; background: linear-gradient(90deg, #4ea1ff44, transparent); }
       .g-base-enemy  { right: 0; background: linear-gradient(-90deg, #ff6b6b44, transparent); }
       
-      .g-castle { font-size: 56px; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.2)); margin-bottom: 12px; transition: transform 0.1s; }
-      .g-base-hp { width: 44px; height: 8px; background: #0004; border-radius: 4px; overflow: hidden; }
+      /* 【修改】城堡和血条适度缩小 */
+      .g-castle { font-size: 52px; filter: drop-shadow(0 6px 6px rgba(0,0,0,0.2)); margin-bottom: 12px; transition: transform 0.1s; }
+      .g-base-hp { width: 50px; height: 8px; background: #0004; border-radius: 4px; overflow: hidden; }
       .g-base-hp > div { height: 100%; background: #2ecc71; border-radius: 4px; transition: width 0.2s; }
       .g-base-enemy .g-base-hp > div { background: #e74c3c; float: right; }
 
       .castle-hit { animation: castleShake 0.3s; }
       @keyframes castleShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
 
-      /* --- 火柴人单位 --- */
       .g-unit { position: absolute !important; top: 50% !important; left: 0 !important; display: flex !important; align-items: center !important; justify-content: center !important; z-index: 2 !important; }
-      .g-unit .unit-hp { position: absolute; top: -10px; left: 10%; right: 10%; height: 6px; background: #0004; border-radius: 3px; z-index: 10;}
+      .g-unit .unit-hp { position: absolute; top: -10px; left: 10%; right: 10%; height: 5px; background: #0004; border-radius: 3px; z-index: 10;}
       .g-unit .unit-hp > div { height: 100%; background: #fff; border-radius: 3px; transition: width .15s; }
       
       .g-unit.hero { filter: drop-shadow(0 0 16px #ffc83d); animation: gHeroPulse 1s infinite alternate; z-index: 10 !important; }
@@ -54,66 +102,77 @@
       .g-unit.hit svg { filter: brightness(0.5) sepia(1) hue-rotate(-50deg); animation: gHitShake 0.15s; }
       .guardian-root.shake { animation: gShake .15s; }
       
-      /* --- 答题区域 --- */
-      .guardian-quiz { margin-top: 10px; }
-      .quiz-prompt { font-size: 28px; font-weight: 700; text-align: center; margin: 12px 0 24px; color: #333; }
+      .guardian-quiz { 
+        flex-shrink: 0; 
+        width: 100%; 
+        max-width: 800px; 
+        margin: 0 auto; 
+      }
+      .quiz-prompt { font-size: 28px; font-weight: 700; text-align: center; margin: 0 0 12px; color: #333; }
       .quiz-options { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-      .quiz-option { padding: 18px; border-radius: 12px; border: 2px solid #d1d5db; background: #fff; font-size: 20px; cursor: pointer; color: #333; transition: all 0.1s; font-weight: 500; }
-      .quiz-option:hover:not(:disabled) { border-color: #4ea1ff; background: #f0f7ff; transform: translateY(-2px); box-shadow: 0 6px 12px rgba(0,0,0,0.05); }
+      .quiz-option { padding: 16px; border-radius: 10px; border: 2px solid #d1d5db; background: #fff; font-size: 20px; cursor: pointer; color: #333; transition: all 0.1s; font-weight: 600; }
+      .quiz-option:hover:not(:disabled) { border-color: #4ea1ff; background: #f0f7ff; transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
       .quiz-option.correct { background: #d1fae5; border-color: #10b981; color: #065f46; }
       .quiz-option.wrong   { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
       .quiz-option:disabled { cursor: default; opacity: .85; transform: none; box-shadow: none; }
       
-      .g-banner { position: absolute; left: 50%; top: 30%; transform: translate(-50%,0); background: #000c; color: #fff; padding: 12px 24px; border-radius: 12px; font-weight: bold; font-size: 18px; pointer-events: none; animation: gBannerIn .25s ease-out; white-space: nowrap; z-index: 20; }
+      .g-banner { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%); background: #000c; color: #fff; padding: 16px 32px; border-radius: 12px; font-weight: bold; font-size: 28px; pointer-events: none; animation: gBannerIn .25s ease-out; white-space: nowrap; z-index: 20; }
       .g-banner.danger { background: #c0392bcc; }
       
-      .g-float-text { position: absolute; font-weight: 900; font-size: 24px; color: #ff4757; text-shadow: 1px 1px 3px #000; pointer-events: none; z-index: 50; animation: floatUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-      @keyframes floatUp { 0% { opacity: 0; transform: translateY(0) scale(0.5); } 20% { opacity: 1; transform: translateY(-15px) scale(1.3); } 100% { opacity: 0; transform: translateY(-60px) scale(1); } }
+      .g-float-text { position: absolute; font-weight: 900; font-size: 28px; color: #ff4757; text-shadow: 2px 2px 5px #000; pointer-events: none; z-index: 50; animation: floatUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+      @keyframes floatUp { 0% { opacity: 0; transform: translateY(0) scale(0.5); } 20% { opacity: 1; transform: translateY(-20px) scale(1.3); } 100% { opacity: 0; transform: translateY(-80px) scale(1); } }
 
-      /* --- 缩小且精致的结算面板 --- */
-      .g-result-overlay { position: absolute; inset: 0; background: rgba(0,0,0,0.85); z-index: 999; display: flex; align-items: center; justify-content: center; perspective: 1000px; }
-      .g-result-card { background: linear-gradient(135deg, #ffffff, #f0f5ff); padding: 24px; border-radius: 16px; text-align: center; width: 280px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: cardFlipIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; transform-origin: center; position: relative; overflow: hidden; }
-      .g-result-card::before { content:''; position:absolute; inset:0; border-radius:16px; padding:2px; background:linear-gradient(45deg,#f1c40f,#e74c3c,#4ea1ff); -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; }
+      .g-result-overlay { 
+        position: fixed; inset: 0; 
+        background: rgba(0,0,0,0.85); 
+        z-index: 999999; 
+        display: flex; align-items: center; justify-content: center; 
+      }
+      .g-result-card { 
+        background: linear-gradient(135deg, #ffffff, #f0f5ff); 
+        padding: 30px; border-radius: 20px; text-align: center; 
+        width: 340px; 
+        min-width: 340px;
+        flex-shrink: 0;
+        box-shadow: 0 15px 40px rgba(0,0,0,0.5); 
+        animation: cardFlipIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; 
+        transform-origin: center; position: relative; overflow: hidden; 
+      }
+      .g-result-card::before { content:''; position:absolute; inset:0; border-radius:20px; padding:3px; background:linear-gradient(45deg,#f1c40f,#e74c3c,#4ea1ff); -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events:none; }
       
-      .g-result-title { font-size: 28px; font-weight: 900; margin: 0 0 10px 0; }
-      .g-result-title.win { color: #f1c40f; text-shadow: 0 2px 8px rgba(241,196,15,0.5); animation: titlePulse 1s infinite alternate; }
+      .g-result-title { font-size: 32px; font-weight: 900; margin: 0 0 10px 0; }
+      .g-result-title.win { color: #f1c40f; text-shadow: 0 3px 10px rgba(241,196,15,0.5); animation: titlePulse 1s infinite alternate; }
       .g-result-title.lose { color: #7f8c8d; }
-      .g-result-stars { font-size: 32px; margin-bottom: 15px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-      .g-result-stats { font-size: 14px; color: #555; margin-bottom: 20px; line-height: 1.6; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #e2e8f0; }
-      .g-result-btn { display: block; width: 100%; box-sizing: border-box; padding: 12px; border-radius: 8px; border: none; background: #4ea1ff; color: #fff; font-size: 16px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(78,161,255,0.4); text-decoration: none; text-align: center; }
+      .g-result-stars { font-size: 38px; margin-bottom: 20px; text-shadow: 0 3px 6px rgba(0,0,0,0.2); }
+      .g-result-stats { font-size: 16px; color: #555; margin-bottom: 24px; line-height: 1.8; background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+      .g-result-btn { display: block; width: 100%; box-sizing: border-box; padding: 14px; border-radius: 10px; border: none; background: #4ea1ff; color: #fff; font-size: 18px; font-weight: bold; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 10px rgba(78,161,255,0.4); text-align: center; }
       .g-result-btn:hover { background: #3b82f6; transform: translateY(-2px); box-shadow: 0 6px 15px rgba(78,161,255,0.6); }
       
-      .confetti { position: absolute; width: 10px; height: 10px; background: #f00; z-index: 1000; top: -20px; pointer-events: none; }
-      @keyframes fallDown { to { transform: translateY(500px) rotate(720deg); opacity: 0; } }
+      .confetti { position: absolute; width: 12px; height: 12px; background: #f00; z-index: 1000; top: -20px; pointer-events: none; }
+      @keyframes fallDown { to { transform: translateY(600px) rotate(720deg); opacity: 0; } }
       @keyframes cardFlipIn { 0% { opacity: 0; transform: rotateX(90deg) scale(0.5); } 100% { opacity: 1; transform: rotateX(0) scale(1); } }
       @keyframes titlePulse { from { transform: scale(1); } to { transform: scale(1.05); } }
 
-      @keyframes gWalk { from { margin-top: 0; } to { margin-top: -5px; } }
+      @keyframes gWalk { from { margin-top: 0; } to { margin-top: -6px; } }
       @keyframes gAttackRight { 0% { transform: translateX(0); } 50% { transform: translateX(20px) scale(1.1); } 100% { transform: translateX(0); } }
       @keyframes gAttackLeft { 0% { transform: scaleX(-1) translateX(0); } 50% { transform: scaleX(-1) translateX(20px) scale(1.1); } 100% { transform: scaleX(-1) translateX(0); } }
-      @keyframes gHitShake { 0% { transform: translateX(0); } 50% { transform: translateX(8px); } 100% { transform: translateX(0); } }
-      @keyframes gShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
-      @keyframes gHeroPulse { from{filter:drop-shadow(0 0 6px #ffc83d)} to{filter:drop-shadow(0 0 20px #ffc83d)} }
-      @keyframes gBannerIn { from{opacity:0; transform:translate(-50%,-10px)} to{opacity:1; transform:translate(-50%,0)} }
+      @keyframes gHitShake { 0% { transform: translateX(0); } 50% { transform: translateX(10px); } 100% { transform: translateX(0); } }
+      @keyframes gShake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-10px)} 75%{transform:translateX(10px)} }
+      @keyframes gHeroPulse { from{filter:drop-shadow(0 0 10px #ffc83d)} to{filter:drop-shadow(0 0 24px #ffc83d)} }
+      @keyframes gBannerIn { from{opacity:0; transform:translate(-50%,-15px)} to{opacity:1; transform:translate(-50%,-50%)} }
     `;
     document.head.appendChild(style);
   }
 
-  // ========== 音效系统（带安全防范） ==========
   let audioCtx;
   let soundEnabled = false;
 
   function initAudio() {
     soundEnabled = true;
     try {
-      if (!audioCtx) {
-        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-        if (AudioContextClass) audioCtx = new AudioContextClass();
-      }
-      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-    } catch (e) {
-      console.warn('Audio init failed', e);
-    }
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+    } catch (e) {}
   }
 
   function playSound(type) {
@@ -155,26 +214,18 @@
     frontLineSize: 3, maxHeroesPerGame: 1, heroCombo: 10, midBonusCombo: 5, wrongSpawnEnemy: true
   };
 
+  // 【修改】大幅缩小尺寸：42 / 56 / 76
   const UNIT_STATS = {
-    small: { atk: 1, hp: 3,  speed: 1.00, color: '#4ea1ff', size: 48 },
-    mid:   { atk: 2, hp: 8,  speed: 0.90, color: '#2f6fd0', size: 64 },
-    hero:  { atk: 3, hp: 10, speed: 1.10, color: '#ffc83d', size: 80 },
+    small: { atk: 1, hp: 3,  speed: 1.00, color: '#4ea1ff', size: 42 },
+    mid:   { atk: 2, hp: 8,  speed: 0.90, color: '#2f6fd0', size: 56 },
+    hero:  { atk: 3, hp: 10, speed: 1.10, color: '#ffc83d', size: 76 },
   };
   const ENEMY_COLORS = { small: '#ff4757', mid: '#c0392b', hero: '#ff2d55' };
 
-  function createGuardianGame(hostEl, opts) {
+  function createGuardianGame(modalEl, opts) {
     let WORDS = [];
-    try {
-      if (opts && typeof opts.getWords === 'function') {
-        WORDS = opts.getWords(BASE_CONFIG.questions) || [];
-      }
-    } catch (e) {
-      console.warn('线上词库获取失败', e);
-    }
-    
-    if (!WORDS || WORDS.length < 4) {
-      WORDS = [{en: 'apple', zh: '苹果'}, {en: 'banana', zh: '香蕉'}, {en: 'cat', zh: '猫'}, {en: 'dog', zh: '狗'}];
-    }
+    try { if (opts && typeof opts.getWords === 'function') WORDS = opts.getWords(BASE_CONFIG.questions) || []; } catch (e) {}
+    if (!WORDS || WORDS.length < 4) WORDS = [{en: 'apple', zh: '苹果'}, {en: 'banana', zh: '香蕉'}, {en: 'cat', zh: '猫'}, {en: 'dog', zh: '狗'}];
     while (WORDS.length < BASE_CONFIG.questions) WORDS = WORDS.concat(WORDS);
     WORDS = WORDS.slice(0, BASE_CONFIG.questions);
 
@@ -183,57 +234,37 @@
 
     buildSetup();
 
-    // 清理所有挂起的定时器和延时任务
     function killTimers() {
-      if (state.timers) {
-        clearInterval(state.timers.tick);
-        clearInterval(state.timers.enemySmall);
-        clearInterval(state.timers.enemyMid);
-      }
-      if (state.timeouts) {
-        state.timeouts.forEach(clearTimeout);
-        state.timeouts = [];
-      }
+      if (state.timers) { clearInterval(state.timers.tick); clearInterval(state.timers.enemySmall); clearInterval(state.timers.enemyMid); clearInterval(state.timers.showdown); }
+      if (state.timeouts) { state.timeouts.forEach(clearTimeout); state.timeouts = []; }
       state.running = false;
       state.phase = 'over';
     }
 
-    // 终极安全退出
     function safeExit() {
       killTimers();
-      
-      // 1. 尝试调用外部引擎
-      if (opts && typeof opts.onExit === 'function') {
-        try { opts.onExit(); } catch (e) { console.error('外部退出报错', e); }
-      }
-
-      // 2. 物理兜底
-      setTimeout(() => {
-        if (document.body.contains(hostEl)) {
-          hostEl.innerHTML = `
-            <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; height:100%; min-height:400px; background:#fff; border-radius:16px; box-shadow: 0 8px 24px rgba(0,0,0,0.1); margin:20px auto; max-width:900px;">
-              <h2 style="color:#333; margin-bottom:20px; font-size:28px;">游戏已结束</h2>
-              <p style="color:#666; margin-bottom:30px; font-size:16px;">如果页面未能自动跳转，请点击下方按钮。</p>
-              <a href="wordgame.html" style="display:inline-block; padding:16px 40px; background:#4ea1ff; color:#fff; text-decoration:none; border-radius:12px; font-size:18px; font-weight:bold; box-shadow:0 6px 15px rgba(78,161,255,0.4);">返回大厅主页</a>
-            </div>
-          `;
-        }
-      }, 100);
+      if (modalEl && modalEl.parentNode) modalEl.parentNode.removeChild(modalEl);
+      try { if (opts && typeof opts.onExit === 'function') opts.onExit(); } catch (e) {}
+      setTimeout(() => { window.location.href = 'wordgame.html'; }, 50);
     }
 
     function buildSetup() {
-      hostEl.innerHTML = `
-        <div class="guardian-root" style="padding: 30px; text-align: center;">
-          <h2 style="margin: 10px 0; color: #333; font-size: 36px; font-weight: 900; text-shadow: 0 3px 6px rgba(0,0,0,0.1);">守护王国</h2>
-          <p style="margin: 0 0 40px 0; color: #666; font-size: 18px;">答题召唤士兵，抵御敌军入侵！</p>
-          <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
-            <button class="g-diff-btn easy" data-diff="easy" style="padding: 16px 40px; border-radius: 12px; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: #fff; background: #10b981; box-shadow: 0 6px 12px rgba(16,185,129,0.3); transition:transform 0.1s;">简单</button>
-            <button class="g-diff-btn normal" data-diff="normal" style="padding: 16px 40px; border-radius: 12px; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: #fff; background: #3b82f6; box-shadow: 0 6px 12px rgba(59,130,246,0.3); transition:transform 0.1s;">普通</button>
-            <button class="g-diff-btn hard" data-diff="hard" style="padding: 16px 40px; border-radius: 12px; border: none; font-size: 20px; font-weight: bold; cursor: pointer; color: #fff; background: #ef4444; box-shadow: 0 6px 12px rgba(239,68,68,0.3); transition:transform 0.1s;">困难</button>
+      modalEl.innerHTML = `
+        <div class="guardian-root guardian-setup">
+          <h2 style="margin: 0 0 10px 0; color: #333; font-size: 34px; font-weight: 900; text-shadow: 0 3px 6px rgba(0,0,0,0.1);">守护王国</h2>
+          <p style="margin: 0 0 30px 0; color: #666; font-size: 16px;">答题召唤士兵，抵御敌军入侵！</p>
+          <div style="display: flex; gap: 16px; justify-content: center; margin-bottom: 30px;">
+            <button class="g-diff-btn easy" data-diff="easy" style="padding: 14px 32px; border-radius: 10px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; color: #fff; background: #10b981; box-shadow: 0 4px 10px rgba(16,185,129,0.3); transition: transform 0.1s;">简单</button>
+            <button class="g-diff-btn normal" data-diff="normal" style="padding: 14px 32px; border-radius: 10px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; color: #fff; background: #3b82f6; box-shadow: 0 4px 10px rgba(59,130,246,0.3); transition: transform 0.1s;">普通</button>
+            <button class="g-diff-btn hard" data-diff="hard" style="padding: 14px 32px; border-radius: 10px; border: none; font-size: 18px; font-weight: bold; cursor: pointer; color: #fff; background: #ef4444; box-shadow: 0 4px 10px rgba(239,68,68,0.3); transition: transform 0.1s;">困难</button>
+          </div>
+          <div>
+            <button id="gExitBtn" style="padding: 10px 20px; border: 2px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer; font-size: 15px; color: #64748b; font-weight: bold;">直接返回大厅</button>
           </div>
         </div>`;
       
-      hostEl.querySelectorAll('.g-diff-btn').forEach(btn => {
+      modalEl.querySelector('#gExitBtn').onclick = safeExit;
+      modalEl.querySelectorAll('.g-diff-btn').forEach(btn => {
         btn.onclick = (e) => {
           e.preventDefault();
           initAudio();
@@ -249,7 +280,7 @@
         heroCount: 0, heroSpawned: false, perfectCombo20: false,
         playerUnits: [], enemyUnits: [],
         playerBaseHp: cfg.baseHp, enemyBaseHp: cfg.baseHp,
-        timers: { tick: null, enemySmall: null, enemyMid: null },
+        timers: { tick: null, enemySmall: null, enemyMid: null, showdown: null },
         timeouts: [],
         root: null, laneEl: null
       };
@@ -261,7 +292,7 @@
     }
 
     function buildLayout() {
-      hostEl.innerHTML = `
+      modalEl.innerHTML = `
         <div class="guardian-root">
           <div class="guardian-hud">
             <div class="combo-track">
@@ -270,7 +301,7 @@
             </div>
             <div class="guardian-score" style="display:flex; align-items:center; gap:24px;">
               <div><span>✔ <b id="gCorrect">0</b></span> <span>✘ <b id="gWrong">0</b></span></div>
-              <button id="gExitBtn" style="padding: 8px 16px; border: 2px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer; font-size: 16px; color: #64748b; font-weight: bold;">退出</button>
+              <button id="gExitBtn" style="padding: 10px 20px; border: 2px solid #cbd5e1; background: #f8fafc; border-radius: 8px; cursor: pointer; font-size: 16px; color: #64748b; font-weight: bold;">退出</button>
             </div>
           </div>
 
@@ -290,25 +321,36 @@
             <div class="quiz-options" id="gOptions"></div>
           </div>
         </div>`;
-      state.root = hostEl.querySelector('.guardian-root');
-      state.laneEl = hostEl.querySelector('#gLane');
+      state.root = modalEl.querySelector('.guardian-root');
+      state.laneEl = modalEl.querySelector('#gLane');
       updateBaseHpUI();
       updateComboUI();
 
-      hostEl.querySelector('#gExitBtn').onclick = safeExit;
+      modalEl.querySelector('#gExitBtn').onclick = safeExit;
     }
 
-    function renderQuestion() {
+        function renderQuestion() {
       if (state.phase !== 'quiz') return;
       if (state.qIndex >= WORDS.length) { enterShowdown(); return; }
 
       const q = WORDS[state.qIndex];
+      
+      // 【防御 1】如果遇到脏数据（比如某题缺失），跳过这题，防止整个页面卡死
+      if (!q || !q.en || !q.zh) {
+        console.warn("遇到异常题目数据，已自动跳过", state.qIndex, q);
+        state.qIndex++;
+        if (state.qIndex >= cfg.questions) enterShowdown();
+        else renderQuestion();
+        return;
+      }
+
       const pool = WORDS.filter(w => w.en !== q.en);
       const options = shuffle([q, ...shuffle(pool).slice(0, Math.min(3, pool.length))]);
 
-      hostEl.querySelector('#gPrompt').textContent = q.zh;
-      const box = hostEl.querySelector('#gOptions');
+      modalEl.querySelector('#gPrompt').textContent = q.zh;
+      const box = modalEl.querySelector('#gOptions');
       box.innerHTML = '';
+      
       options.forEach(opt => {
         const btn = document.createElement('button');
         btn.className = 'quiz-option';
@@ -320,24 +362,49 @@
 
     function submitAnswer(isCorrect, btn) {
       if (state.phase !== 'quiz' || !state.running) return;
-      hostEl.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
-      btn.classList.add(isCorrect ? 'correct' : 'wrong');
+      
+      // 禁用所有按钮，防止连续点击
+      modalEl.querySelectorAll('.quiz-option').forEach(b => b.disabled = true);
+      if (btn) btn.classList.add(isCorrect ? 'correct' : 'wrong');
 
-      if (isCorrect) {
-        state.correct++; onCorrect(); playSound('correct');
-      } else {
-        state.wrong++; onWrong(); playSound('wrong'); shake(8);
+      // 【防御 2】将所有状态更新和音效播放包裹在 try-catch 中
+      // 即使 onCorrect / playSound 报错，也不会阻断后面的跳题逻辑
+      try {
+        if (isCorrect) {
+          state.correct++; 
+          onCorrect(); 
+          playSound('correct');
+        } else {
+          state.wrong++; 
+          onWrong(); 
+          playSound('wrong'); 
+          shake(8);
+        }
+      } catch (err) {
+        console.error("答题动画或音效播放报错，但不影响游戏进程:", err);
       }
+
+      // 这里必须保证绝对能往下走
       state.qIndex++;
       updateComboUI();
-      hostEl.querySelector('#gCorrect').textContent = state.correct;
-      hostEl.querySelector('#gWrong').textContent = state.wrong;
+      
+      const cEl = modalEl.querySelector('#gCorrect');
+      const wEl = modalEl.querySelector('#gWrong');
+      if (cEl) cEl.textContent = state.correct;
+      if (wEl) wEl.textContent = state.wrong;
 
+      // 延迟跳转下一题
       const t = setTimeout(() => {
-        if (state.qIndex >= cfg.questions) enterShowdown();
-        else renderQuestion();
+        try {
+          if (state.qIndex >= cfg.questions) enterShowdown();
+          else renderQuestion();
+        } catch (err) {
+          console.error("渲染下一题报错:", err);
+        }
       }, 450);
-      state.timeouts.push(t);
+      
+      // 记录定时器以便清理
+      if (state.timeouts) state.timeouts.push(t);
     }
 
     function onCorrect() {
@@ -371,7 +438,7 @@
     function spawnPlayerUnit(type) {
       const s = UNIT_STATS[type];
       const el = makeUnitEl(type, s.color, s.size, 'player');
-      const unit = { side: 'player', type, atk: s.atk, hp: s.hp, maxHp: s.hp, x: 60, cd: cfg.atkInterval, el };
+      const unit = { side: 'player', type, atk: s.atk, hp: s.hp, maxHp: s.hp, x: 80, cd: cfg.atkInterval, el };
       state.laneEl.appendChild(el); state.playerUnits.push(unit); placeUnit(unit); updateUnitHp(unit);
     }
 
@@ -379,8 +446,8 @@
       try {
         const s = UNIT_STATS[type];
         const el = makeUnitEl(type, ENEMY_COLORS[type], s.size, 'enemy');
-        let laneW = state.laneEl.clientWidth || 600;
-        const unit = { side: 'enemy', type, atk: s.atk, hp: s.hp, maxHp: s.hp, x: laneW - 60 - s.size, cd: cfg.atkInterval, el };
+        let laneW = state.laneEl.clientWidth || 1000;
+        const unit = { side: 'enemy', type, atk: s.atk, hp: s.hp, maxHp: s.hp, x: laneW - 80 - s.size, cd: cfg.atkInterval, el };
         state.laneEl.appendChild(el); state.enemyUnits.push(unit); placeUnit(unit); updateUnitHp(unit);
       } catch (err) {}
     }
@@ -406,10 +473,10 @@
 
     function moveSide(units, enemyUnits, dir, dt) {
       if (!units.length) return;
-      let laneW = state.laneEl.clientWidth || 600;
+      let laneW = state.laneEl.clientWidth || 1000;
       const sorted = units.slice().sort((a, b) => dir > 0 ? b.x - a.x : a.x - b.x);
       const enemyFront = frontUnit(enemyUnits, -dir);
-      const speedMultiplier = state.phase === 'showdown' ? 2 : 1;
+      const speedMultiplier = state.phase === 'showdown' ? 3 : 1;
 
       for (let i = 0; i < sorted.length; i++) {
         const u = sorted[i], s = UNIT_STATS[u.type];
@@ -418,18 +485,18 @@
         let target = u.x + dir * cfg.unitSpeed * s.speed * dt * speedMultiplier;
         
         if (dir > 0) {
-          let maxX = laneW - 60 - s.size;
+          let maxX = laneW - 80 - s.size;
           if (enemyFront) maxX = Math.min(maxX, enemyFront.x - s.size - cfg.engageRange + 5);
-          if (i > 0) maxX = Math.min(maxX, sorted[i - 1].x - s.size - 8);
+          if (i > 0) maxX = Math.min(maxX, sorted[i - 1].x - s.size - 12);
           u.x = Math.max(u.x, Math.min(target, maxX));
         } else {
-          let minX = 60;
+          let minX = 80;
           if (enemyFront) minX = Math.max(minX, enemyFront.x + UNIT_STATS[enemyFront.type].size + cfg.engageRange - 5);
-          if (i > 0) minX = Math.max(minX, sorted[i - 1].x + UNIT_STATS[sorted[i - 1].type].size + 8);
+          if (i > 0) minX = Math.max(minX, sorted[i - 1].x + UNIT_STATS[sorted[i - 1].type].size + 12);
           u.x = Math.min(u.x, Math.max(target, minX));
         }
         
-        if (isNaN(u.x) || !isFinite(u.x)) u.x = dir > 0 ? 60 : laneW - 60 - s.size;
+        if (isNaN(u.x) || !isFinite(u.x)) u.x = dir > 0 ? 80 : laneW - 80 - s.size;
         placeUnit(u);
       }
     }
@@ -442,7 +509,7 @@
 
       const pAttackers = topUnits(state.playerUnits, 1, cfg.frontLineSize);
       const eAttackers = topUnits(state.enemyUnits, -1, cfg.frontLineSize);
-      const currentAtkInterval = state.phase === 'showdown' ? 400 : cfg.atkInterval;
+      const currentAtkInterval = state.phase === 'showdown' ? 200 : cfg.atkInterval;
 
       for (const p of pAttackers) {
         if (eFront.hp <= 0) break;
@@ -473,12 +540,12 @@
     }
 
     function checkBases() {
-      let laneW = state.laneEl.clientWidth || 600;
+      let laneW = state.laneEl.clientWidth || 1000;
       let pCastleHit = false;
       let eCastleHit = false;
 
       for (const e of state.enemyUnits.slice()) {
-        if (e.x <= 60) {
+        if (e.x <= 80) {
           state.playerBaseHp = Math.max(0, state.playerBaseHp - e.atk);
           removeUnit(state.enemyUnits, e);
           updateBaseHpUI();
@@ -487,7 +554,7 @@
         }
       }
       for (const p of state.playerUnits.slice()) {
-        if (p.x + UNIT_STATS[p.type].size >= laneW - 60) {
+        if (p.x + UNIT_STATS[p.type].size >= laneW - 80) {
           state.enemyBaseHp = Math.max(0, state.enemyBaseHp - p.atk);
           removeUnit(state.playerUnits, p);
           updateBaseHpUI();
@@ -497,11 +564,11 @@
       }
 
       if (pCastleHit) {
-        const c = hostEl.querySelector('#pCastle');
+        const c = modalEl.querySelector('#pCastle');
         c.classList.remove('castle-hit'); void c.offsetWidth; c.classList.add('castle-hit');
       }
       if (eCastleHit) {
-        const c = hostEl.querySelector('#eCastle');
+        const c = modalEl.querySelector('#eCastle');
         c.classList.remove('castle-hit'); void c.offsetWidth; c.classList.add('castle-hit');
       }
 
@@ -512,18 +579,33 @@
     function enterShowdown() {
       if (state.phase !== 'quiz') return;
       state.phase = 'showdown';
-      clearInterval(state.timers.enemySmall); clearInterval(state.timers.enemyMid);
-      const qz = hostEl.querySelector('#gQuiz'); if (qz) qz.remove();
-      showBanner('决战阶段！');
-      if (state.playerUnits.length === 0 && state.enemyUnits.length === 0) triggerVictory(state.playerBaseHp >= state.enemyBaseHp);
+      clearInterval(state.timers.enemySmall); 
+      clearInterval(state.timers.enemyMid);
+      
+      const qz = modalEl.querySelector('#gQuiz'); if (qz) qz.remove();
+      showBanner('决战阶段！清场中...');
+      
+      if (state.playerUnits.length === 0 && state.enemyUnits.length === 0) {
+        triggerVictory(state.playerBaseHp >= state.enemyBaseHp);
+        return;
+      }
+
+      state.timers.showdown = setInterval(() => {
+        if (state.phase === 'showdown') {
+          const win = state.playerBaseHp >= state.enemyBaseHp;
+          triggerVictory(win);
+        }
+      }, 15000);
     }
 
-    // ====== 结算 ======
     function triggerVictory(win) {
       if (state.phase === 'over') return;
       state.phase = 'over';
       state.running = false;
-      clearInterval(state.timers.tick); clearInterval(state.timers.enemySmall); clearInterval(state.timers.enemyMid);
+      clearInterval(state.timers.tick); 
+      clearInterval(state.timers.enemySmall); 
+      clearInterval(state.timers.enemyMid);
+      clearInterval(state.timers.showdown);
 
       if (win) playSound('victory');
 
@@ -545,9 +627,7 @@
               remainingUnits: state.playerUnits.length, heroSpawned: state.heroSpawned, heroSurvived: state.playerUnits.some(u => u.type === 'hero'), perfectCombo20: state.perfectCombo20
             });
           }
-        } catch (e) {
-          console.error('上报结算数据失败', e);
-        }
+        } catch (e) {}
       }, 800);
       state.timeouts.push(t);
     }
@@ -567,7 +647,7 @@
           <button class="g-result-btn" id="gResultBackBtn">返回大厅</button>
         </div>
       `;
-      state.root.appendChild(overlay);
+      modalEl.appendChild(overlay);
 
       if (win) createConfetti(overlay);
 
@@ -576,13 +656,13 @@
 
     function createConfetti(container) {
       const colors = ['#f1c40f', '#e74c3c', '#3498db', '#2ecc71', '#9b59b6'];
-      for (let i = 0; i < 40; i++) {
+      for (let i = 0; i < 50; i++) {
         const confetti = document.createElement('div');
         confetti.className = 'confetti';
         confetti.style.left = Math.random() * 100 + '%';
         confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-        confetti.style.width = (Math.random() * 8 + 6) + 'px';
-        confetti.style.height = (Math.random() * 8 + 6) + 'px';
+        confetti.style.width = (Math.random() * 10 + 8) + 'px';
+        confetti.style.height = (Math.random() * 10 + 8) + 'px';
         confetti.style.animation = `fallDown ${Math.random() * 1.5 + 1}s linear forwards`;
         confetti.style.animationDelay = Math.random() * 0.5 + 's';
         container.appendChild(confetti);
@@ -636,13 +716,13 @@
     function flashHit(u) { if (!u.el) return; u.el.classList.add('hit'); const t = setTimeout(() => { if (u.el) u.el.classList.remove('hit'); }, 150); state.timeouts.push(t); }
 
     function updateBaseHpUI() {
-      const p = hostEl.querySelector('#gPlayerBaseHp'), e = hostEl.querySelector('#gEnemyBaseHp');
+      const p = modalEl.querySelector('#gPlayerBaseHp'), e = modalEl.querySelector('#gEnemyBaseHp');
       if (p) p.style.width = (state.playerBaseHp / cfg.baseHp * 100) + '%';
       if (e) e.style.width = (state.enemyBaseHp / cfg.baseHp * 100) + '%';
     }
 
     function updateComboUI() {
-      const txt = hostEl.querySelector('#gComboText'), fill = hostEl.querySelector('#gComboFill');
+      const txt = modalEl.querySelector('#gComboText'), fill = modalEl.querySelector('#gComboFill');
       const need = cfg.heroCombo, left = Math.max(0, need - state.combo);
       if (txt) {
         if (state.heroCount >= cfg.maxHeroesPerGame && state.combo < need) txt.textContent = '英雄已出战';
@@ -664,7 +744,7 @@
 
     return function destroy() {
       killTimers();
-      hostEl.innerHTML = '';
+      if (modalEl && modalEl.parentNode) modalEl.parentNode.removeChild(modalEl);
     };
   }
 
@@ -680,55 +760,36 @@
     mount(hostEl, opts) { return createGuardianGame(hostEl, opts); }
   };
 
+  window.startGuardianGame = function() {
+    try {
+      let modal = document.getElementById('guardian-modal');
+      if (modal) modal.remove();
+
+      modal = document.createElement('div');
+      modal.id = 'guardian-modal';
+      modal.className = 'guardian-modal';
+      document.body.appendChild(modal);
+
+      const opts = {
+        getWords: (n) => { try { return window.getGameWords ? window.getGameWords(n) : null; } catch (e) { return null; } },
+        onComplete: (result) => {
+          try {
+            if (typeof addCoins === 'function') {
+              let c = result.correct * 3 + result.maxCombo * 2;
+              if (result.win) c += 40 + result.stars * 20;
+              if (result.heroSurvived) c += 50;
+              if (result.perfectCombo20) c += 30;
+              addCoins(c);
+            }
+            if (typeof trackGamePlayed === 'function') trackGamePlayed('guardian', result); 
+            if (typeof showGameResult === 'function') showGameResult(result);
+          } catch(e) {}
+        },
+        onExit: () => { try { if (typeof showScreen === 'function') showScreen('lobby'); } catch(e) {} }
+      };
+
+      if (window.currentGuardianDestroy) { try { window.currentGuardianDestroy(); } catch(e) {} }
+      window.currentGuardianDestroy = window.PlaykynGames.guardian.mount(modal, opts);
+    } catch (err) { alert('游戏启动失败：' + err.message); }
+  };
 })();
-
-/* ---------------- 兼容现有引擎的入口 ---------------- */
-window.startGuardianGame = function() {
-  try {
-    let hostEl = document.getElementById('game-container') || document.getElementById('gameArea') || document.querySelector('.game-screen');
-    
-    // 【物理级兜底】：如果线上找不到挂载点，我们直接创建一个全屏浮层！
-    if (!hostEl) {
-      hostEl = document.createElement('div');
-      hostEl.id = 'guardian-temp-container';
-      hostEl.style.cssText = 'position:fixed; top:0; left:0; width:100vw; height:100vh; background:#f4f4f4; z-index:9999; overflow-y:auto; padding-top:20px;';
-      document.body.appendChild(hostEl);
-    }
-
-    const opts = {
-      getWords: (n) => window.getGameWords ? window.getGameWords(n) : null, // 游戏内部会有词库兜底
-      onComplete: (result) => {
-        console.log('守护王国结算:', result);
-        try {
-          if (typeof addCoins === 'function') {
-            let c = result.correct * 3 + result.maxCombo * 2;
-            if (result.win) c += 40 + result.stars * 20;
-            if (result.heroSurvived) c += 50;
-            if (result.perfectCombo20) c += 30;
-            addCoins(c);
-          }
-          if (typeof trackGamePlayed === 'function') trackGamePlayed('guardian', result); 
-          if (typeof showGameResult === 'function') showGameResult(result);
-        } catch(e) { console.error('上报数据异常', e); }
-      },
-      onExit: () => {
-        try {
-          if (typeof showScreen === 'function') showScreen('lobby');
-        } catch(e) { console.error('跳转大厅异常', e); }
-      }
-    };
-
-    if (window.currentGuardianDestroy) {
-      try { window.currentGuardianDestroy(); } catch(e) {}
-    }
-    window.currentGuardianDestroy = window.PlaykynGames.guardian.mount(hostEl, opts);
-  } catch (fatalErr) {
-    console.error('守护王国启动崩溃:', fatalErr);
-    // 终极暴力提示
-    document.body.innerHTML = `<div style="padding:50px; text-align:center; font-family:sans-serif;">
-      <h1 style="color:red;">游戏加载失败</h1>
-      <p>错误信息: ${fatalErr.message}</p>
-      <button onclick="window.location.reload()" style="padding:10px 20px; font-size:18px; margin-top:20px;">刷新页面重试</button>
-    </div>`;
-  }
-};

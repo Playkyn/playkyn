@@ -1,0 +1,480 @@
+word,meaning,phonetic,unit,group
+red,红色,,,颜色
+blue,蓝色,,,颜色
+yellow,黄色,,,颜色
+green,绿色,,,颜色
+black,黑色,,,颜色
+white,白色,,,颜色
+orange,橙色,,,颜色
+pink,粉色,,,颜色
+purple,紫色,,,颜色
+brown,棕色,,,颜色
+head,头,,,身体
+face,脸,,,身体
+nose,鼻子,,,身体
+mouth,嘴巴,,,身体
+eye,眼睛,,,身体
+ear,耳朵,,,身体
+arm,手臂,,,身体
+hand,手,,,身体
+finger,手指,,,身体
+leg,腿,,,身体
+foot,脚,,,身体
+body,身体,,,身体
+hair,头发,,,身体
+toe,脚趾,,,身体
+neck,脖子,,,身体
+cat,猫,,,动物
+dog,狗,,,动物
+pig,猪,,,动物
+duck,鸭子,,,动物
+rabbit,兔子,,,动物
+panda,熊猫,,,动物
+monkey,猴子,,,动物
+elephant,大象,,,动物
+bird,鸟,,,动物
+tiger,老虎,,,动物
+lion,狮子,,,动物
+mouse,老鼠,,,动物
+squirrel,松鼠,,,动物
+bear,熊,,,动物
+horse,马,,,动物
+cow,奶牛,,,动物
+sheep,绵羊,,,动物
+hen,母鸡,,,动物
+giraffe,长颈鹿,,,动物
+deer,鹿,,,动物
+snake,蛇,,,动物
+kangaroo,袋鼠,,,动物
+whale,鲸鱼,,,动物
+fish,鱼,,,动物
+insect,昆虫,,,动物
+ant,蚂蚁,,,动物
+bee,蜜蜂,,,动物
+butterfly,蝴蝶,,,动物
+dragonfly,蜻蜓,,,动物
+goose,鹅,,,动物
+goat,山羊,,,动物
+camel,骆驼,,,动物
+fox,狐狸,,,动物
+wolf,狼,,,动物
+frog,青蛙,,,动物
+turtle,乌龟,,,动物
+dolphin,海豚,,,动物
+seal,海豹,,,动物
+kitten,小猫,,,动物
+rice,米饭,,,食物
+bread,面包,,,食物
+beef,牛肉,,,食物
+milk,牛奶,,,食物
+water,水,,,食物
+egg,鸡蛋,,,食物
+tofu,豆腐,,,食物
+hamburger,汉堡包,,,食物
+French fries,炸薯条,,,食物
+cake,蛋糕,,,食物
+hot dog,热狗,,,食物
+chicken,鸡肉,,,食物
+juice,果汁,,,食物
+tea,茶,,,食物
+coffee,咖啡,,,食物
+sandwich,三明治,,,食物
+salad,沙拉,,,食物
+ice cream,冰淇淋,,,食物
+apple,苹果,,,食物
+banana,香蕉,,,食物
+pear,梨,,,食物
+grape,葡萄,,,食物
+watermelon,西瓜,,,食物
+peach,桃子,,,食物
+strawberry,草莓,,,食物
+tomato,西红柿,,,食物
+potato,土豆,,,食物
+green beans,青豆,,,食物
+carrot,胡萝卜,,,食物
+cabbage,卷心菜,,,食物
+onion,洋葱,,,食物
+mutton,羊肉,,,食物
+pork,猪肉,,,食物
+noodles,面条,,,食物
+soup,汤,,,食物
+biscuit,饼干,,,食物
+candy,糖果,,,食物
+sweet,甜食,,,食物
+chocolate,巧克力,,,食物
+cheese,奶酪,,,食物
+pie,馅饼,,,食物
+jam,果酱,,,食物
+honey,蜂蜜,,,食物
+sausage,香肠,,,食物
+dumpling,饺子,,,食物
+breakfast,早餐,,,食物
+lunch,午餐,,,食物
+dinner,晚餐,,,食物
+pen,钢笔,,,学校
+pencil,铅笔,,,学校
+pencil-case,铅笔盒,,,学校
+book,书,,,学校
+bag,包,,,学校
+ruler,尺子,,,学校
+eraser,橡皮,,,学校
+crayon,蜡笔,,,学校
+notebook,笔记本,,,学校
+schoolbag,书包,,,学校
+comic book,漫画书,,,学校
+post card,明信片,,,学校
+newspaper,报纸,,,学校
+dictionary,字典,,,学校
+story-book,故事书,,,学校
+school,学校,,,学校
+classroom,教室,,,学校
+library,图书馆,,,学校
+playground,操场,,,学校
+gym,体育馆,,,学校
+art room,美术室,,,学校
+computer room,电脑室,,,学校
+music room,音乐室,,,学校
+washroom,卫生间,,,学校
+canteen,食堂,,,学校
+teachers office,教师办公室,,,学校
+window,窗户,,,学校
+board,黑板,,,学校
+light,灯,,,学校
+picture,图画,,,学校
+door,门,,,学校
+floor,地板,,,学校
+computer,电脑,,,学校
+desk,书桌,,,学校
+chair,椅子,,,学校
+father,爸爸,,,家庭
+mother,妈妈,,,家庭
+brother,兄弟,,,家庭
+sister,姐妹,,,家庭
+grandpa,爷爷/外公,,,家庭
+grandma,奶奶/外婆,,,家庭
+uncle,叔叔/舅舅,,,家庭
+aunt,阿姨/姑姑,,,家庭
+cousin,堂/表兄弟姐妹,,,家庭
+friend,朋友,,,家庭
+boy,男孩,,,家庭
+girl,女孩,,,家庭
+man,男人,,,家庭
+woman,女人,,,家庭
+teacher,老师,,,职业
+student,学生,,,职业
+doctor,医生,,,职业
+nurse,护士,,,职业
+driver,司机,,,职业
+farmer,农民,,,职业
+policeman,警察,,,职业
+singer,歌手,,,职业
+writer,作家,,,职业
+actor,男演员,,,职业
+actress,女演员,,,职业
+artist,艺术家,,,职业
+TV reporter,电视台记者,,,职业
+engineer,工程师,,,职业
+accountant,会计,,,职业
+salesperson,销售员,,,职业
+cleaner,清洁工,,,职业
+baseball player,棒球运动员,,,职业
+jacket,夹克衫,,,衣服
+shirt,衬衫,,,衣服
+skirt,短裙,,,衣服
+dress,连衣裙,,,衣服
+T-shirt,T恤衫,,,衣服
+sweater,毛衣,,,衣服
+coat,外套,,,衣服
+shorts,短裤,,,衣服
+socks,袜子,,,衣服
+shoes,鞋子,,,衣服
+pants,裤子,,,衣服
+hat,帽子,,,衣服
+sunglasses,太阳镜,,,衣服
+scarf,围巾,,,衣服
+gloves,手套,,,衣服
+jeans,牛仔裤,,,衣服
+sneakers,网球鞋,,,衣服
+sandals,凉鞋,,,衣服
+boots,靴子,,,衣服
+cap,鸭舌帽,,,衣服
+home,家,,,地点
+room,房间,,,地点
+bedroom,卧室,,,地点
+living room,客厅,,,地点
+kitchen,厨房,,,地点
+bathroom,卫生间,,,地点
+study,书房,,,地点
+zoo,动物园,,,地点
+shop,商店,,,地点
+supermarket,超市,,,地点
+hospital,医院,,,地点
+cinema,电影院,,,地点
+bookstore,书店,,,地点
+post office,邮局,,,地点
+park,公园,,,地点
+garden,花园,,,地点
+farm,农场,,,地点
+factory,工厂,,,地点
+museum,博物馆,,,地点
+restaurant,餐馆,,,地点
+hotel,旅馆,,,地点
+bank,银行,,,地点
+airport,机场,,,地点
+station,车站,,,地点
+bus,公共汽车,,,交通
+car,小汽车,,,交通
+bike,自行车,,,交通
+train,火车,,,交通
+plane,飞机,,,交通
+ship,轮船,,,交通
+subway,地铁,,,交通
+taxi,出租车,,,交通
+boat,小船,,,交通
+spaceship,宇宙飞船,,,交通
+Monday,星期一,,,时间
+Tuesday,星期二,,,时间
+Wednesday,星期三,,,时间
+Thursday,星期四,,,时间
+Friday,星期五,,,时间
+Saturday,星期六,,,时间
+Sunday,星期日,,,时间
+morning,早上,,,时间
+afternoon,下午,,,时间
+evening,晚上,,,时间
+night,夜晚,,,时间
+today,今天,,,时间
+tomorrow,明天,,,时间
+yesterday,昨天,,,时间
+spring,春天,,,时间
+summer,夏天,,,时间
+autumn,秋天,,,时间
+winter,冬天,,,时间
+weekend,周末,,,时间
+often,经常,,,时间
+sometimes,有时,,,时间
+usually,通常,,,时间
+always,总是,,,时间
+never,从不,,,时间
+tonight,今晚,,,时间
+next week,下周,,,时间
+this morning,今天早上,,,时间
+this afternoon,今天下午,,,时间
+this evening,今天晚上,,,时间
+January,一月,,,月份
+February,二月,,,月份
+March,三月,,,月份
+April,四月,,,月份
+May,五月,,,月份
+June,六月,,,月份
+July,七月,,,月份
+August,八月,,,月份
+September,九月,,,月份
+October,十月,,,月份
+November,十一月,,,月份
+December,十二月,,,月份
+first,第一,,,序数词
+second,第二,,,序数词
+third,第三,,,序数词
+fourth,第四,,,序数词
+fifth,第五,,,序数词
+eighth,第八,,,序数词
+ninth,第九,,,序数词
+twelfth,第十二,,,序数词
+twentieth,第二十,,,序数词
+sun,太阳,,,自然
+moon,月亮,,,自然
+star,星星,,,自然
+rain,雨,,,自然
+snow,雪,,,自然
+wind,风,,,自然
+cloud,云,,,自然
+tree,树,,,自然
+flower,花,,,自然
+grass,草,,,自然
+river,河流,,,自然
+lake,湖泊,,,自然
+forest,森林,,,自然
+path,小路,,,自然
+sky,天空,,,自然
+cloudy,多云的,,,自然
+sunny,晴朗的,,,自然
+rainy,下雨的,,,自然
+snowy,下雪的,,,自然
+windy,有风的,,,自然
+weather,天气,,,自然
+mountain,山,,,自然
+sea,海,,,自然
+world,世界,,,自然
+earth,地球,,,自然
+run,跑,,,动词
+jump,跳,,,动词
+swim,游泳,,,动词
+read,阅读,,,动词
+write,写,,,动词
+draw,画画,,,动词
+sing,唱歌,,,动词
+dance,跳舞,,,动词
+play,玩耍,,,动词
+eat,吃,,,动词
+drink,喝,,,动词
+walk,走路,,,动词
+fly,飞,,,动词
+climb,攀爬,,,动词
+sleep,睡觉,,,动词
+wash,洗,,,动词
+clean,打扫,,,动词
+watch,看,,,动词
+do,做,,,动词
+go,去,,,动词
+come,来,,,动词
+have,有,,,动词
+buy,买,,,动词
+take,拿/带,,,动词
+listen,听,,,动词
+look,看,,,动词
+wait,等待,,,动词
+cook,做饭,,,动词
+study,学习,,,动词
+learn,学习,,,动词
+speak,说,,,动词
+say,说,,,动词
+tell,告诉,,,动词
+get to,到达,,,动词
+take a trip,去旅行,,,动词
+read a magazine,阅读杂志,,,动词
+go to the cinema,去看电影,,,动词
+ride a bike,骑自行车,,,动词
+play the violin,拉小提琴,,,动词
+make kites,做风筝,,,动词
+collect stamps,集邮,,,动词
+dive,跳水,,,动词
+play football,踢足球,,,动词
+play basketball,打篮球,,,动词
+do homework,做作业,,,动词
+do housework,做家务,,,动词
+do morning exercises,做早操,,,动词
+have English class,上英语课,,,动词
+eat breakfast,吃早饭,,,动词
+eat lunch,吃午饭,,,动词
+eat dinner,吃晚饭,,,动词
+go to school,去上学,,,动词
+go to bed,去睡觉,,,动词
+go home,回家,,,动词
+get up,起床,,,动词
+put on,穿上,,,动词
+take off,脱下,,,动词
+look at,看,,,动词
+listen to,听,,,动词
+play with,玩...,,,动词
+go shopping,去购物,,,动词
+go swimming,去游泳,,,动词
+go fishing,去钓鱼,,,动词
+go hiking,去远足,,,动词
+sweep the floor,扫地,,,动词
+wash the dishes,洗碗,,,动词
+make the bed,铺床,,,动词
+water the flowers,浇花,,,动词
+empty the trash,倒垃圾,,,动词
+clean the room,打扫房间,,,动词
+watch TV,看电视,,,动词
+wash my clothes,洗衣服,,,动词
+visit grandparents,看望祖父母,,,动词
+have a fever,发烧,,,动词
+have a sore throat,喉咙痛,,,动词
+have a cold,感冒,,,动词
+hurt,受伤,,,动词
+feel,感觉,,,动词
+fall,摔倒,,,动词
+fall off,从...摔下,,,动词
+went,去(过去式),,,动词
+saw,看见(过去式),,,动词
+ate,吃(过去式),,,动词
+took,拿(过去式),,,动词
+bought,买(过去式),,,动词
+big,大的,,,形容词
+small,小的,,,形容词
+tall,高的,,,形容词
+short,矮的/短的,,,形容词
+long,长的,,,形容词
+happy,快乐的,,,形容词
+sad,悲伤的,,,形容词
+hot,热的,,,形容词
+cold,冷的,,,形容词
+warm,温暖的,,,形容词
+cool,凉爽的,,,形容词
+fat,胖的,,,形容词
+thin,瘦的,,,形容词
+fast,快的,,,形容词
+slow,慢的,,,形容词
+new,新的,,,形容词
+old,旧的/老的,,,形容词
+young,年轻的,,,形容词
+strong,强壮的,,,形容词
+beautiful,美丽的,,,形容词
+nice,好的,,,形容词
+good,好的,,,形容词
+bad,坏的,,,形容词
+easy,容易的,,,形容词
+hard,困难的,,,形容词
+expensive,昂贵的,,,形容词
+cheap,便宜的,,,形容词
+funny,滑稽可笑的,,,形容词
+kind,亲切的,,,形容词
+strict,严格的,,,形容词
+smart,聪明的,,,形容词
+active,积极的,,,形容词
+quiet,安静的,,,形容词
+fresh,新鲜的,,,形容词
+healthy,健康的,,,形容词
+delicious,美味的,,,形容词
+sweet,甜的,,,形容词
+sour,酸的,,,形容词
+salty,咸的,,,形容词
+tasty,好吃的,,,形容词
+taller,更高的,,,形容词
+shorter,更矮的,,,形容词
+stronger,更强壮的,,,形容词
+older,更老的,,,形容词
+younger,更年轻的,,,形容词
+bigger,更大的,,,形容词
+heavier,更重的,,,形容词
+longer,更长的,,,形容词
+thinner,更瘦的,,,形容词
+smaller,更小的,,,形容词
+busy,忙碌的,,,形容词
+tired,疲劳的,,,形容词
+angry,生气的,,,形容词
+excited,兴奋的,,,形容词
+in,在...里面,,,介词
+on,在...上面,,,介词
+under,在...下面,,,介词
+behind,在...后面,,,介词
+near,在...附近,,,介词
+next to,紧挨着,,,介词
+over,在...上方,,,介词
+in front of,在...前面,,,介词
+one,一,,,数字
+two,二,,,数字
+three,三,,,数字
+four,四,,,数字
+five,五,,,数字
+six,六,,,数字
+seven,七,,,数字
+eight,八,,,数字
+nine,九,,,数字
+ten,十,,,数字
+eleven,十一,,,数字
+twelve,十二,,,数字
+thirteen,十三,,,数字
+fourteen,十四,,,数字
+fifteen,十五,,,数字
+sixteen,十六,,,数字
+seventeen,十七,,,数字
+eighteen,十八,,,数字
+nineteen,十九,,,数字
+twenty,二十,,,数字
+thirty,三十,,,数字
+forty,四十,,,数字
+fifty,五十,,,数字
+hundred,百,,,数字

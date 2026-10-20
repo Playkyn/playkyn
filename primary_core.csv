@@ -1,0 +1,424 @@
+en,zh,level,category
+red,红色,primary,color
+blue,蓝色,primary,color
+yellow,黄色,primary,color
+green,绿色,primary,color
+black,黑色,primary,color
+white,白色,primary,color
+orange,橙色,primary,color
+pink,粉色,primary,color
+purple,紫色,primary,color
+brown,棕色,primary,color
+head,头,primary,body
+face,脸,primary,body
+nose,鼻子,primary,body
+mouth,嘴巴,primary,body
+eye,眼睛,primary,body
+ear,耳朵,primary,body
+arm,手臂,primary,body
+hand,手,primary,body
+finger,手指,primary,body
+leg,腿,primary,body
+foot,脚,primary,body
+body,身体,primary,body
+hair,头发,primary,body
+neck,脖子,primary,body
+cat,猫,primary,animal
+dog,狗,primary,animal
+pig,猪,primary,animal
+duck,鸭子,primary,animal
+rabbit,兔子,primary,animal
+panda,熊猫,primary,animal
+monkey,猴子,primary,animal
+elephant,大象,primary,animal
+bird,鸟,primary,animal
+tiger,老虎,primary,animal
+lion,狮子,primary,animal
+mouse,老鼠,primary,animal
+bear,熊,primary,animal
+horse,马,primary,animal
+cow,奶牛,primary,animal
+sheep,绵羊,primary,animal
+hen,母鸡,primary,animal
+giraffe,长颈鹿,primary,animal
+deer,鹿,primary,animal
+snake,蛇,primary,animal
+kangaroo,袋鼠,primary,animal
+whale,鲸鱼,primary,animal
+fish,鱼,primary,animal
+ant,蚂蚁,primary,animal
+bee,蜜蜂,primary,animal
+butterfly,蝴蝶,primary,animal
+rice,米饭,primary,food
+bread,面包,primary,food
+beef,牛肉,primary,food
+milk,牛奶,primary,food
+water,水,primary,food
+egg,鸡蛋,primary,food
+tofu,豆腐,primary,food
+hamburger,汉堡包,primary,food
+French fries,炸薯条,primary,food
+cake,蛋糕,primary,food
+hot dog,热狗,primary,food
+chicken,鸡肉,primary,food
+juice,果汁,primary,food
+tea,茶,primary,food
+coffee,咖啡,primary,food
+sandwich,三明治,primary,food
+salad,沙拉,primary,food
+ice cream,冰淇淋,primary,food
+apple,苹果,primary,food
+banana,香蕉,primary,food
+pear,梨,primary,food
+grape,葡萄,primary,food
+watermelon,西瓜,primary,food
+peach,桃子,primary,food
+strawberry,草莓,primary,food
+tomato,西红柿,primary,food
+potato,土豆,primary,food
+green beans,青豆,primary,food
+carrot,胡萝卜,primary,food
+cabbage,卷心菜,primary,food
+onion,洋葱,primary,food
+mutton,羊肉,primary,food
+pork,猪肉,primary,food
+noodles,面条,primary,food
+soup,汤,primary,food
+biscuit,饼干,primary,food
+candy,糖果,primary,food
+chocolate,巧克力,primary,food
+cheese,奶酪,primary,food
+jam,果酱,primary,food
+honey,蜂蜜,primary,food
+sausage,香肠,primary,food
+dumpling,饺子,primary,food
+breakfast,早餐,primary,food
+lunch,午餐,primary,food
+dinner,晚餐,primary,food
+pen,钢笔,primary,school
+pencil,铅笔,primary,school
+pencil-case,铅笔盒,primary,school
+book,书,primary,school
+bag,包,primary,school
+ruler,尺子,primary,school
+eraser,橡皮,primary,school
+crayon,蜡笔,primary,school
+notebook,笔记本,primary,school
+schoolbag,书包,primary,school
+comic book,漫画书,primary,school
+post card,明信片,primary,school
+newspaper,报纸,primary,school
+dictionary,字典,primary,school
+story-book,故事书,primary,school
+school,学校,primary,school
+classroom,教室,primary,school
+library,图书馆,primary,school
+playground,操场,primary,school
+gym,体育馆,primary,school
+art room,美术室,primary,school
+computer room,电脑室,primary,school
+music room,音乐室,primary,school
+washroom,卫生间,primary,school
+canteen,食堂,primary,school
+teachers office,教师办公室,primary,school
+window,窗户,primary,school
+board,黑板,primary,school
+light,灯,primary,school
+picture,图画,primary,school
+door,门,primary,school
+floor,地板,primary,school
+computer,电脑,primary,school
+desk,书桌,primary,school
+chair,椅子,primary,school
+father,爸爸,primary,family
+mother,妈妈,primary,family
+brother,兄弟,primary,family
+sister,姐妹,primary,family
+grandpa,爷爷/外公,primary,family
+grandma,奶奶/外婆,primary,family
+uncle,叔叔/舅舅,primary,family
+aunt,阿姨/姑姑,primary,family
+cousin,堂/表兄弟姐妹,primary,family
+friend,朋友,primary,family
+boy,男孩,primary,family
+girl,女孩,primary,family
+man,男人,primary,family
+woman,女人,primary,family
+teacher,老师,primary,people
+student,学生,primary,people
+doctor,医生,primary,people
+nurse,护士,primary,people
+driver,司机,primary,people
+farmer,农民,primary,people
+policeman,警察,primary,people
+singer,歌手,primary,people
+writer,作家,primary,people
+actor,男演员,primary,people
+artist,艺术家,primary,people
+engineer,工程师,primary,people
+cleaner,清洁工,primary,people
+jacket,夹克衫,primary,clothes
+shirt,衬衫,primary,clothes
+skirt,短裙,primary,clothes
+dress,连衣裙,primary,clothes
+T-shirt,T恤衫,primary,clothes
+sweater,毛衣,primary,clothes
+coat,外套,primary,clothes
+shorts,短裤,primary,clothes
+socks,袜子,primary,clothes
+shoes,鞋子,primary,clothes
+pants,裤子,primary,clothes
+hat,帽子,primary,clothes
+sunglasses,太阳镜,primary,clothes
+scarf,围巾,primary,clothes
+gloves,手套,primary,clothes
+jeans,牛仔裤,primary,clothes
+sneakers,网球鞋,primary,clothes
+boots,靴子,primary,clothes
+home,家,primary,place
+room,房间,primary,place
+bedroom,卧室,primary,place
+living room,客厅,primary,place
+kitchen,厨房,primary,place
+bathroom,卫生间,primary,place
+study,书房,primary,place
+zoo,动物园,primary,place
+shop,商店,primary,place
+supermarket,超市,primary,place
+hospital,医院,primary,place
+cinema,电影院,primary,place
+bookstore,书店,primary,place
+post office,邮局,primary,place
+park,公园,primary,place
+garden,花园,primary,place
+farm,农场,primary,place
+museum,博物馆,primary,place
+restaurant,餐馆,primary,place
+hotel,旅馆,primary,place
+bank,银行,primary,place
+airport,机场,primary,place
+station,车站,primary,place
+bus,公共汽车,primary,transport
+car,小汽车,primary,transport
+bike,自行车,primary,transport
+train,火车,primary,transport
+plane,飞机,primary,transport
+ship,轮船,primary,transport
+subway,地铁,primary,transport
+taxi,出租车,primary,transport
+boat,小船,primary,transport
+Monday,星期一,primary,time
+Tuesday,星期二,primary,time
+Wednesday,星期三,primary,time
+Thursday,星期四,primary,time
+Friday,星期五,primary,time
+Saturday,星期六,primary,time
+Sunday,星期日,primary,time
+morning,早上,primary,time
+afternoon,下午,primary,time
+evening,晚上,primary,time
+night,夜晚,primary,time
+today,今天,primary,time
+tomorrow,明天,primary,time
+yesterday,昨天,primary,time
+spring,春天,primary,time
+summer,夏天,primary,time
+autumn,秋天,primary,time
+winter,冬天,primary,time
+weekend,周末,primary,time
+often,经常,primary,time
+sometimes,有时,primary,time
+usually,通常,primary,time
+always,总是,primary,time
+never,从不,primary,time
+tonight,今晚,primary,time
+January,一月,primary,time
+February,二月,primary,time
+March,三月,primary,time
+April,四月,primary,time
+May,五月,primary,time
+June,六月,primary,time
+July,七月,primary,time
+August,八月,primary,time
+September,九月,primary,time
+October,十月,primary,time
+November,十一月,primary,time
+December,十二月,primary,time
+sun,太阳,primary,nature
+moon,月亮,primary,nature
+star,星星,primary,nature
+rain,雨,primary,nature
+snow,雪,primary,nature
+wind,风,primary,nature
+cloud,云,primary,nature
+tree,树,primary,nature
+flower,花,primary,nature
+grass,草,primary,nature
+river,河流,primary,nature
+lake,湖泊,primary,nature
+forest,森林,primary,nature
+sky,天空,primary,nature
+mountain,山,primary,nature
+sea,海,primary,nature
+world,世界,primary,nature
+earth,地球,primary,nature
+cloudy,多云的,primary,weather
+sunny,晴朗的,primary,weather
+rainy,下雨的,primary,weather
+snowy,下雪的,primary,weather
+windy,有风的,primary,weather
+weather,天气,primary,weather
+run,跑,primary,verb
+jump,跳,primary,verb
+swim,游泳,primary,verb
+read,阅读,primary,verb
+write,写,primary,verb
+draw,画画,primary,verb
+sing,唱歌,primary,verb
+dance,跳舞,primary,verb
+play,玩耍,primary,verb
+eat,吃,primary,verb
+drink,喝,primary,verb
+walk,走路,primary,verb
+fly,飞,primary,verb
+climb,攀爬,primary,verb
+sleep,睡觉,primary,verb
+wash,洗,primary,verb
+clean,打扫,primary,verb
+watch,看,primary,verb
+do,做,primary,verb
+go,去,primary,verb
+come,来,primary,verb
+have,有,primary,verb
+buy,买,primary,verb
+take,拿/带,primary,verb
+listen,听,primary,verb
+look,看,primary,verb
+wait,等待,primary,verb
+cook,做饭,primary,verb
+study,学习,primary,verb
+learn,学习,primary,verb
+speak,说,primary,verb
+say,说,primary,verb
+tell,告诉,primary,verb
+get to,到达,primary,verb
+take a trip,去旅行,primary,verb
+read a magazine,阅读杂志,primary,verb
+go to the cinema,去看电影,primary,verb
+ride a bike,骑自行车,primary,verb
+play the violin,拉小提琴,primary,verb
+make kites,做风筝,primary,verb
+collect stamps,集邮,primary,verb
+dive,跳水,primary,verb
+play football,踢足球,primary,verb
+play basketball,打篮球,primary,verb
+do homework,做作业,primary,verb
+do housework,做家务,primary,verb
+do morning exercises,做早操,primary,verb
+have English class,上英语课,primary,verb
+eat breakfast,吃早饭,primary,verb
+eat lunch,吃午饭,primary,verb
+eat dinner,吃晚饭,primary,verb
+go to school,去上学,primary,verb
+go to bed,去睡觉,primary,verb
+go home,回家,primary,verb
+get up,起床,primary,verb
+put on,穿上,primary,verb
+take off,脱下,primary,verb
+look at,看,primary,verb
+listen to,听,primary,verb
+play with,玩...,primary,verb
+go shopping,去购物,primary,verb
+go swimming,去游泳,primary,verb
+go fishing,去钓鱼,primary,verb
+go hiking,去远足,primary,verb
+sweep the floor,扫地,primary,verb
+wash the dishes,洗碗,primary,verb
+make the bed,铺床,primary,verb
+water the flowers,浇花,primary,verb
+empty the trash,倒垃圾,primary,verb
+clean the room,打扫房间,primary,verb
+watch TV,看电视,primary,verb
+wash my clothes,洗衣服,primary,verb
+visit grandparents,看望祖父母,primary,verb
+have a fever,发烧,primary,verb
+have a sore throat,喉咙痛,primary,verb
+have a cold,感冒,primary,verb
+hurt,受伤,primary,verb
+feel,感觉,primary,verb
+fall,摔倒,primary,verb
+big,大的,primary,adj
+small,小的,primary,adj
+tall,高的,primary,adj
+short,矮的/短的,primary,adj
+long,长的,primary,adj
+happy,快乐的,primary,adj
+sad,悲伤的,primary,adj
+hot,热的,primary,adj
+cold,冷的,primary,adj
+warm,温暖的,primary,adj
+cool,凉爽的,primary,adj
+fat,胖的,primary,adj
+thin,瘦的,primary,adj
+fast,快的,primary,adj
+slow,慢的,primary,adj
+new,新的,primary,adj
+old,旧的/老的,primary,adj
+young,年轻的,primary,adj
+strong,强壮的,primary,adj
+beautiful,美丽的,primary,adj
+nice,好的,primary,adj
+good,好的,primary,adj
+bad,坏的,primary,adj
+easy,容易的,primary,adj
+hard,困难的,primary,adj
+expensive,昂贵的,primary,adj
+cheap,便宜的,primary,adj
+funny,滑稽可笑的,primary,adj
+kind,亲切的,primary,adj
+strict,严格的,primary,adj
+smart,聪明的,primary,adj
+active,积极的,primary,adj
+quiet,安静的,primary,adj
+fresh,新鲜的,primary,adj
+healthy,健康的,primary,adj
+delicious,美味的,primary,adj
+sweet,甜的,primary,adj
+sour,酸的,primary,adj
+salty,咸的,primary,adj
+tasty,好吃的,primary,adj
+busy,忙碌的,primary,adj
+tired,疲劳的,primary,adj
+angry,生气的,primary,adj
+excited,兴奋的,primary,adj
+in,在...里面,primary,prep
+on,在...上面,primary,prep
+under,在...下面,primary,prep
+behind,在...后面,primary,prep
+near,在...附近,primary,prep
+next to,紧挨着,primary,prep
+over,在...上方,primary,prep
+in front of,在...前面,primary,prep
+one,一,primary,number
+two,二,primary,number
+three,三,primary,number
+four,四,primary,number
+five,五,primary,number
+six,六,primary,number
+seven,七,primary,number
+eight,八,primary,number
+nine,九,primary,number
+ten,十,primary,number
+eleven,十一,primary,number
+twelve,十二,primary,number
+thirteen,十三,primary,number
+fourteen,十四,primary,number
+fifteen,十五,primary,number
+sixteen,十六,primary,number
+seventeen,十七,primary,number
+eighteen,十八,primary,number
+nineteen,十九,primary,number
+twenty,二十,primary,number
+thirty,三十,primary,number
+forty,四十,primary,number
+fifty,五十,primary,number
