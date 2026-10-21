@@ -5520,23 +5520,22 @@ function finishSession(){
 }
 
 $('#btnLearnBack').onclick=()=>{
-  if(confirm('当前学习进度已保存，确定退出本轮学习吗？')){
-    Sfx.click();Speaker.stop();
-    if(session && session.isSprint){
-      saveSprintProgress();
-    } else if(session){
-      recordSession();
-    }
-    session=null;goHome();
+  if(!confirm('确定退出本轮学习吗？')) return; // 拦截
+        
+  // 先切屏退出去！
+  showScreen('s-home');
+  if(typeof goHome === 'function') goHome(); 
+
+  // 然后再去后台默默保存
+  try {
+    Sfx.click(); Speaker.stop();
+    if(session && session.isSprint) saveSprintProgress();
+    else if(session) recordSession();
+    session = null;
+  } catch(err) {
+    console.warn(err);
   }
 };
-$('#btnBackHome').onclick=()=>{ Sfx.click();goHome(); };
-$('#btnSummaryTopic').onclick=()=>{
-  Sfx.click();
-  if(levelupPending)return;
-  renderGoal();showScreen('s-goal');
-};
-}
 
 
 /* ═══════════════════════════════════════════════════════════
