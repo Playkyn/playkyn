@@ -2332,8 +2332,19 @@ async function spellWord(word, wordRate = 1.0, letterRate = 1.5) {
     const u = new SpeechSynthesisUtterance(text);
     u.lang = 'en-US';
     u.rate = localRate;
-    u.onend = r;
-    u.onerror = r;
+    
+    let isDone = false;
+    const finish = () => {
+      if(!isDone) { isDone = true; r(); }
+    };
+    
+    u.onend = finish;
+    u.onerror = finish;
+    
+    // 🚨 移动端防卡死：根据文本长度计算一个最长等待时间，超时强制往下走
+    const timeout = Math.max(1500, text.length * 500); 
+    setTimeout(finish, timeout);
+
     speechSynthesis.speak(u);
   });
 
@@ -5370,7 +5381,7 @@ function answerQuestion(ok){
   if(state.log.length>800) state.log.shift();
   if(!ok) session.requeue.push({en:item.en,isNew:false,q:null,previewed:true});
   save();
-  setTimeout(()=>{ session.locked=false;nextQuestion(); }, ok?820:1500);
+  setTimeout(()=>{ nextQuestion(); }, ok?820:1500);
 }
 /* ════════ 冲刺 · 批次休息弹窗 ════════ */
 function showBatchBreak(doneCount){
@@ -5414,6 +5425,7 @@ function showBatchBreak(doneCount){
 }
 
 function nextQuestion(){
+  session.locked = false;
   session.idx++;
   if(session.idx>=session.queue.length && session.requeue.length){
     session.queue.push(...session.requeue);session.requeue=[];
@@ -5458,14 +5470,9 @@ function trackGamePlayed(type){
 
 
 function finishSession(){
-  // ★ 冲刺完成，清除存档，并杀掉可能存在的延迟保存定时器
-  if(session && session.isSprint){
-    if (typeof sprintSaveTimer !== 'undefined' && sprintSaveTimer) clearTimeout(sprintSaveTimer);
-    localStorage.removeItem('wq_sprint_progress');
-  }
-function finishSession(){
   // ★ 冲刺完成，清除存档
   if(session && session.isSprint){
+    if (typeof sprintSaveTimer !== 'undefined' && sprintSaveTimer) clearTimeout(sprintSaveTimer);
     localStorage.removeItem('wq_sprint_progress');
   }
   if(!session.isSprint) recordSession();
@@ -5686,19 +5693,37 @@ $('#btnLmPrev').onclick = () => {
 /* ═══════════════════════════════════════════════════════════
    启动
    ═══════════════════════════════════════════════════════════ */
-  (async function init() {
+    (async function init() {
   const savedWordlistId = localStorage.getItem('selected_wordlist_id')?.trim();
 
-  // 1. 同时执行：检查解锁状态、拉取默认词库、拉取选中的自定义词库
-  const [isUnlocked, dbWords, customWords] = await Promise.all([
-    checkUnlock(),
-    loadWordlist(),
-    savedWordlistId 
-      ? sb.from('words').select('*').eq('wordlist_id', savedWordlistId).then(res => res.data) 
-      : null
+  // 🌟 新增：带超时机制的 Promise，防止移动端网络差导致死等白屏
+  const withTimeout = (promise, ms) => Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('网络超时')), ms))
   ]);
 
-  let finalWords = dbWords; // 默认先用数据库的默认词库
+  let isUnlocked = false, dbWords = [], customWords = [];
+
+  try {
+    // 1. 同时执行：检查解锁状态、拉取默认词库、拉取选中的自定义词库（最多等 6 秒）
+    const results = await withTimeout(Promise.all([
+      checkUnlock(),
+      loadWordlist(),
+      savedWordlistId 
+        ? sb.from('words').select('*').eq('wordlist_id', savedWordlistId).then(res => res.data) 
+        : Promise.resolve(null)
+    ]), 6000); 
+    
+    isUnlocked = results[0];
+    dbWords = results[1];
+    customWords = results[2];
+
+  } catch (e) {
+    console.warn('⚠️ 初始化网络较慢或失败，已自动降级使用本地词库', e);
+    // 如果超时或网络失败，就不走 Supabase 了，直接用本地 w.js 里的备用词库
+  }
+
+  let finalWords = dbWords || []; // 默认先用数据库的默认词库
 
   // 2. 如果咱们成功拿到了自定义词库，就检查权限！
   if (customWords && customWords.length > 0) {
@@ -5772,6 +5797,22 @@ function initPage(){
   applySound();
   applySkin();
   buildRuntimeUsers();
+  // 🌟 新增：首次点击屏幕解锁音频（放在这里最合适）
+  // ========================================================
+  document.addEventListener('touchstart', function unlockAudio() {
+    if(window.Sfx && typeof window.Sfx.unlock === 'function') {
+      window.Sfx.unlock();
+    }
+    document.removeEventListener('touchstart', unlockAudio);
+  }, { once: true });
+
+  // 考虑到有极少数人用电脑鼠标，顺手把鼠标点击也加上
+  document.addEventListener('mousedown', function unlockAudioMouse() {
+    if(window.Sfx && typeof window.Sfx.unlock === 'function') {
+      window.Sfx.unlock();
+    }
+    document.removeEventListener('mousedown', unlockAudioMouse);
+  }, { once: true });
 
   /* ★ 检查 Supabase 登录状态 */
   sb.auth.getSession().then(async ({data:{session}})=>{
