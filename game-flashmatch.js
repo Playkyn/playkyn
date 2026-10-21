@@ -121,11 +121,17 @@
     unlockAudio();
     injectStyle();
 
+    // 🌟 修改点 1：动态获取用户当前选中的词库
     let rawWords = options.words;
-    if (!rawWords && window.WORDS && Array.isArray(window.WORDS)) {
-      rawWords = window.WORDS;
+    if (!rawWords || rawWords.length === 0) {
+      if (typeof window.getGameWords === 'function') {
+        rawWords = window.getGameWords(15, 'all'); // 取15个词供随机配对
+      } else if (window.WORDS && Array.isArray(window.WORDS)) {
+        rawWords = window.WORDS;
+      }
     }
     const words = normalizeWords(rawWords);
+    
     // 如果词库太少，动态减少对子数
     const pairCount = Math.min(DEFAULT_PAIRS, words.length);
 
@@ -418,7 +424,15 @@
     }
     container.innerHTML = '';
     
-    instance = createGame(container, { words: window.WORDS });
+    // 🌟 修改点 2：全局入口传入动态获取的词库
+    let gameWords = null;
+    if (typeof window.getGameWords === 'function') {
+      gameWords = window.getGameWords(15, 'all');
+    } else {
+      gameWords = window.WORDS;
+    }
+    
+    instance = createGame(container, { words: gameWords });
 
     const backBtn = document.getElementById('btnFlashmatchBack');
     if (backBtn) {

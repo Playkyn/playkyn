@@ -774,192 +774,7 @@ input[type=range]:disabled::-webkit-slider-thumb{background:#ccc;cursor:not-allo
 .mc-loot-item .ct{font-size:14px;font-weight:900;color:var(--text)}
 
 /* ══════════ 场景故事 ══════════ */
-.scenario-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:14px}
-.scenario-card{
-  background:linear-gradient(160deg,rgba(255,255,255,.95),rgba(255,236,210,.9));
-  border:2px solid rgba(255,255,255,.95);border-radius:20px;padding:16px 18px;
-  cursor:pointer;transition:.18s;box-shadow:0 6px 18px rgba(255,107,157,.15);
-  display:flex;align-items:center;gap:14px;
-}
-.scenario-card:active{transform:scale(.97)}
-.scenario-card:hover{border-color:var(--pink);box-shadow:0 10px 28px rgba(255,107,157,.25)}
-.scenario-icon{font-size:42px;line-height:1;flex-shrink:0;filter:drop-shadow(0 4px 8px rgba(255,107,157,.25))}
-.scenario-info{flex:1;min-width:0}
-.scenario-unit{font-size:11px;font-weight:900;letter-spacing:1px;color:var(--muted);text-transform:uppercase;margin-bottom:2px;}
-.scenario-name{font-size:16px;font-weight:900;color:var(--text)}
-.scenario-desc{font-size:12px;color:var(--muted);margin-top:3px;font-weight:700;line-height:1.4}
-.scenario-count{
-  display:inline-block;font-size:10px;padding:3px 9px;border-radius:999px;
-  background:rgba(167,139,250,.18);color:var(--purple);font-weight:900;margin-top:6px;
-  letter-spacing:.5px;
-}
 
-.story-card{
-  background:rgba(255,255,255,.94);border:2px solid rgba(255,255,255,.95);
-  border-radius:20px;padding:18px 20px;margin-bottom:14px;
-  box-shadow:0 6px 18px rgba(255,107,157,.12);
-}
-.story-title{
-  display:flex;align-items:center;gap:12px;margin-bottom:16px;
-  padding-bottom:14px;border-bottom:1px dashed rgba(255,107,157,.18);
-}
-.story-title .st-icon{font-size:38px;line-height:1;flex-shrink:0}
-.story-title .st-info{flex:1;min-width:0}
-.story-title .st-name{font-size:17px;font-weight:900;color:var(--text)}
-.story-title .st-desc{font-size:12px;color:var(--muted);font-weight:700;margin-top:2px}
-
-.section-label{
-  font-size:12px;font-weight:900;color:var(--muted);letter-spacing:1px;
-  margin:4px 0 12px;padding-left:8px;border-left:3px solid var(--purple);
-}
-
-.word-sent-list{display:flex;flex-direction:column;gap:12px;margin-bottom:18px}
-
-.word-sent{
-  background:linear-gradient(150deg,#F5F2EE 0%,#EFEAE4 100%);
-  border:1px solid rgba(180,165,155,.28);
-  border-radius:16px;padding:14px 16px;
-  box-shadow:0 2px 10px rgba(120,105,95,.08),inset 0 1px 0 rgba(255,255,255,.6);
-  position:relative;overflow:hidden;
-}
-/* 可点击的单词 */
-.clickable-word {
-  cursor: pointer;
-  display: inline-block;
-  transition: transform 0.1s, color 0.1s;
-}
-.clickable-word:active {
-  transform: scale(0.9);
-  color: var(--pink) !important;
-}
-/* 普通单词的暗示线 */
-.normal-word {
-  border-bottom: 1px dashed rgba(107, 203, 255, 0.4);
-  padding-bottom: 1px;
-}
-/* 保留重点词原有的高亮背景 */
-.key-word {
-  color:#6B5B7B; font-weight:900;
-  background:linear-gradient(180deg,transparent 62%,rgba(180,168,200,.45) 62%);
-  padding:0 4px; border-radius:4px;
-}
-.word-sent::before{
-  content:"";position:absolute;left:0;top:0;bottom:0;width:3px;
-  background:linear-gradient(180deg,#B8A99A,#A8B5A0,#A3B5C4);
-  border-radius:3px 0 0 3px;opacity:.85;
-}
-
-.word-sent .ws-head{
-  display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;
-}
-.word-sent .ws-word{
-  font-size:18px;font-weight:900;letter-spacing:0;line-height:1.3;
-}
-.word-sent .ws-zh-mini{
-  font-size:11px;color:#9A8F84;font-weight:700;letter-spacing:.2px;
-}
-
-.word-sent .ws-speak{
-  margin-left:auto;
-  background:linear-gradient(150deg,#EDE7E0,#E0D8CE);
-  border:1px solid rgba(160,148,135,.35);
-  color:#7A6F63;
-  border-radius:50%;width:30px;height:30px;font-size:13px;line-height:1;
-  cursor:pointer;flex-shrink:0;font-family:inherit;padding:0;
-  transition:.2s cubic-bezier(.2,.8,.4,1);
-  display:flex;align-items:center;justify-content:center;
-  box-shadow:0 1px 3px rgba(120,105,95,.12);
-}
-.word-sent .ws-speak:hover{
-  background:linear-gradient(150deg,#E4DCD2,#D5CABE);
-  transform:translateY(-1px);
-  box-shadow:0 3px 8px rgba(120,105,95,.18);
-}
-.word-sent .ws-speak:active{transform:scale(.9)}
-
-.word-sent .ws-phonetic-mini{
-  font-family:'Lucida Sans Unicode',Menlo,monospace;
-  font-size:13px;color:#8B95A8;font-weight:800;
-  margin-bottom:6px;letter-spacing:.3px;
-}
-
-.word-sent .ws-en{
-  font-size:15px;line-height:1.65;color:#3D3630;font-weight:700;
-  letter-spacing:.1px;
-}
-.word-sent .ws-en .key-word{
-  color:#6B5B7B;font-weight:900;
-  background:linear-gradient(180deg,transparent 62%,rgba(180,168,200,.45) 62%);
-  padding:0 4px;border-radius:4px;
-  transition:.2s;
-}
-.word-sent .ws-en .key-word:hover{
-  background:linear-gradient(180deg,transparent 62%,rgba(180,168,200,.7) 62%);
-}
-
-.word-sent .ws-zh{
-  font-size:12px;color:#9A8F84;font-weight:700;
-  margin-top:6px;line-height:1.6;
-}
-
-
-.story-text{
-  background:linear-gradient(160deg,rgba(255,255,255,.96),rgba(245,240,255,.9));
-  border-radius:16px;padding:16px 18px;margin-bottom:18px;
-  border:2px solid rgba(255,255,255,.95);
-}
-.story-line{
-  font-size:16px;line-height:1.9;color:var(--text);font-weight:600;
-  padding:8px 0;display:flex;align-items:flex-start;gap:10px;
-}
-.story-line + .story-line{border-top:1px dashed rgba(255,107,157,.12)}
-.story-line .line-num{
-  font-size:11px;font-weight:900;color:var(--purple);
-  background:rgba(167,139,250,.15);border-radius:50%;
-  width:22px;height:22px;line-height:22px;text-align:center;flex-shrink:0;margin-top:2px;
-}
-.story-line .line-text{flex:1}
-.story-line .line-text .key-word{
-  color:#7c3aed;font-weight:900;background:linear-gradient(180deg,transparent 60%,rgba(167,139,250,.3) 60%);
-  padding:0 3px;border-radius:3px;cursor:pointer;
-}
-.story-line .speak-mini{
-  background:rgba(107,203,255,.15);border:none;color:#3b9edb;
-  border-radius:50%;width:30px;height:30px;font-size:13px;line-height:1;
-  cursor:pointer;flex-shrink:0;font-family:inherit;transition:.15s;
-  display:flex;align-items:center;justify-content:center;
-}
-.story-line .speak-mini:active{transform:scale(.85)}
-
-.story-zh{
-  margin-top:14px;padding-top:14px;border-top:2px dashed rgba(255,107,157,.18);
-  font-size:13px;line-height:1.8;color:var(--muted);font-weight:700;
-}
-
-.scenario-quiz{
-  background:rgba(255,255,255,.94);border:2px solid rgba(255,255,255,.95);
-  border-radius:20px;padding:20px;box-shadow:0 6px 18px rgba(255,107,157,.12);
-}
-.scenario-quiz .q-sentence{font-size:19px;line-height:1.7;font-weight:700;color:var(--text);margin-bottom:10px;}
-.scenario-quiz .q-hint{
-  font-size:13px;color:var(--purple);font-weight:800;margin-bottom:8px;
-  background:rgba(167,139,250,.1);border-radius:10px;padding:8px 12px;display:inline-block;
-}
-.scenario-quiz .blank{
-  display:inline-block;min-width:100px;border-bottom:3px solid var(--purple);
-  text-align:center;color:var(--purple);font-weight:900;padding:0 6px;
-}
-
-.scenario-result{text-align:center;padding:24px 18px;}
-.scenario-result .res-emoji{font-size:72px;line-height:1;margin-bottom:12px;filter:drop-shadow(0 6px 16px rgba(255,167,81,.3))}
-.scenario-result .res-title{font-size:22px;font-weight:900;color:var(--text);margin-bottom:6px}
-.scenario-result .res-score{
-  font-size:42px;font-weight:900;
-  background:linear-gradient(120deg,var(--pink),var(--orange),var(--yellow));
-  -webkit-background-clip:text;background-clip:text;color:transparent;
-  line-height:1.1;margin:10px 0
-}
-.scenario-result .res-sub{font-size:13px;color:var(--muted);font-weight:700;margin-bottom:16px}
 
 /* ══════════ 用户管理 ══════════ */
 .user-admin-item{
@@ -1653,14 +1468,7 @@ body.skin-boy .weak-tag{
     <div class="card" id="mcQuestion"></div>
   </section>
 
-  <section class="screen" id="s-game-scenario">
-    <div class="top-bar">
-      <button class="back-btn" id="btnScenarioBack">← 退出</button>
-      <span class="title">📖 场景故事</span>
-      <span class="spacer"></span>
-    </div>
-    <div id="scenarioContent"></div>
-  </section>
+
 
     <!-- 单词地鼠 -->
   <section class="screen" id="s-game-whack">
@@ -1860,10 +1668,23 @@ function showUnlockPrompt(){
     <button class="btn primary" onclick="closeModal()">知道了</button>
   `);
 }
-  const BASE_ACCOUNTS = [
-  { id:'u001', name:'用户', avatar:'🦊', role:'student',
-    defaults:{ dailyNew:10, allowedGroups:null } },
-  { id:'u002', name:'管理员', avatar:'👩', role:'parent', defaults:{} },
+const BASE_ACCOUNTS = [
+  { 
+    id: 'u001', 
+    authEmail: 'mudongfang10@gmail.com', // ⚠️ 换成你 Supabase Auth 里的真实邮箱
+    name: '用户', 
+    avatar: '🦊', 
+    role: 'student',
+    defaults: { dailyNew: 10, allowedGroups: null } 
+  },
+  { 
+    id: 'u002', 
+    authEmail: '495493831@qq.com',      // ⚠️ 换成你 Supabase Auth 里的真实邮箱
+    name: '管理员', 
+    avatar: '🙂', 
+    role: 'parent', 
+    defaults: {} 
+  }
 ];
 
 const CUSTOM_ACCOUNTS_KEY = 'wq_custom_accounts_v5';
@@ -2034,573 +1855,6 @@ ${hideSpell ? '' : `<button class="btn ghost small" data-spell="${esc(word)}" st
    ★ 分主题场景故事
    ═══════════════════════════════════════════════════════════ */
 
-const SCENARIOS = [
-  /* ══════════ U11 动物世界 ══════════ */
-  {
-    unit:'动物世界', icon:'🐘', name:'野生动物园之旅', color:'#ff6b9d',
-    desc:'认识来自世界各地的动物朋友',
-    sentences:[
-      {w:'tiger', en:'The [tiger] is a strong and beautiful animal.', zh:'老虎是一种强壮又美丽的动物。'},
-      {w:'flamingo', en:'Look at the pink [flamingo] standing in the water.', zh:'看那只站在水里的粉色火烈鸟。'},
-      {w:'kangaroo', en:'A [kangaroo] can jump very high.', zh:'袋鼠能跳得很高。'},
-      {w:'ostrich', en:'The [ostrich] is the largest bird in the world.', zh:'鸵鸟是世界上最大的鸟。'},
-      {w:'bear', en:'A [bear] sleeps in a cave in winter.', zh:'熊冬天在洞穴里睡觉。'},
-      {w:'elephant', en:'The [elephant] has a long trunk.', zh:'大象有长长的鼻子。'},
-      {w:'penguin', en:'A [penguin] lives in cold places.', zh:'企鹅生活在寒冷的地方。'},
-      {w:'camel', en:'A [camel] can walk in the desert for days.', zh:'骆驼能在沙漠里走好几天。'}
-    ],
-    story:[
-      'Welcome to the wildlife park! Today we will meet many animals.',
-      'First, we see a strong [tiger] sleeping under a tree.',
-      'Next to it, a pink [flamingo] stands in the lake.',
-      'A [kangaroo] jumps past us with its baby in its pocket.',
-      'The tall [ostrich] runs faster than a horse!',
-      'A big [bear] is looking for honey.',
-      'The [elephant] uses its trunk to drink water.',
-      'In the cold area, a [penguin] swims happily.',
-      'Finally, a [camel] walks slowly across the sand.',
-      'What a wonderful day with our animal friends!'
-    ],
-    storyZh:'欢迎来到野生动物园！今天我们会见到很多动物。首先，我们看到一只强壮的老虎在树下睡觉。旁边，一只粉色火烈鸟站在湖里。一只袋鼠带着宝宝从我们身边跳过。高高的鸵鸟跑得比马还快！一只大熊正在找蜂蜜。大象用鼻子喝水。在寒冷区，一只企鹅快乐地游泳。最后，一只骆驼慢慢走过沙地。和动物朋友们度过了美妙的一天！',
-    quizzes:[
-      {s:'The ___ is a strong and beautiful animal.', a:'tiger', h:'老虎'},
-      {s:'A ___ can jump very high.', a:'kangaroo', h:'袋鼠'},
-      {s:'The ___ has a long trunk.', a:'elephant', h:'大象'},
-      {s:'A ___ lives in cold places.', a:'penguin', h:'企鹅'},
-      {s:'A ___ can walk in the desert for days.', a:'camel', h:'骆驼'},
-      {s:'Look at the pink ___ standing in the water.', a:'flamingo', h:'火烈鸟'},
-      {s:'The ___ is the largest bird in the world.', a:'ostrich', h:'鸵鸟'},
-      {s:'A ___ sleeps in a cave in winter.', a:'bear', h:'熊'}
-    ]
-  },
-
-  /* ══════════ U11 自然景观 ══════════ */
-  {
-    unit:'自然景观', icon:'🏞️', name:'自然景观探索', color:'#4ade80',
-    desc:'从森林到沙漠，感受大自然的多样',
-    sentences:[
-      {w:'cool forest', en:'We walked through a [cool forest] in the morning.', zh:'早晨我们穿过一片微凉的森林。'},
-      {w:'coast', en:'The [coast] is beautiful at sunset.', zh:'日落时的海岸很美。'},
-      {w:'desert', en:'The [desert] is hot and dry during the day.', zh:'沙漠白天又热又干。'},
-      {w:'grassland', en:'Many animals live on the [grassland].', zh:'许多动物生活在草原上。'},
-      {w:'jungle', en:'The [jungle] is full of tall trees and animals.', zh:'丛林里长满了高树和动物。'},
-      {w:'lake', en:'We went swimming in the [lake].', zh:'我们在湖里游泳。'},
-      {w:'mountain', en:'They climbed the high [mountain].', zh:'他们爬上了高山。'},
-      {w:'stream', en:'A clear [stream] runs through the village.', zh:'一条清澈的溪流穿过村庄。'},
-      {w:'steep hill', en:'We had to climb a [steep hill] to get there.', zh:'我们不得不爬一个陡峭的山丘才能到那里。'},
-      {w:'bush', en:'A rabbit hid behind the [bush].', zh:'一只兔子躲在灌木丛后面。'},
-      {w:'shade', en:'We sat in the [shade] of a big tree.', zh:'我们坐在大树的阴凉处。'}
-    ],
-    story:[
-      'Last summer, we went on a nature trip.',
-      'We started in a [cool forest] and followed a [stream].',
-      'Then we climbed a [steep hill] and saw a beautiful [lake].',
-      'From the top, we could see the [coast] far away.',
-      'Next, we crossed a wide [grassland] and entered a [jungle].',
-      'We rested in the [shade] of a tree and watched a [bush] move.',
-      'Later, we reached a dry [desert] and a high [mountain].',
-      'It was an amazing journey through different landscapes!'
-    ],
-    storyZh:'去年夏天，我们去了一次自然之旅。我们从微凉的森林出发，沿着溪流走。然后我们爬了一个陡峭的山丘，看到了美丽的湖。从山顶，我们能看到远处的海岸。接着，我们穿过广阔的草原，进入丛林。我们在树荫下休息，看着灌木丛摇动。后来，我们到达了干燥的沙漠和高山。这是一次穿越不同景观的奇妙旅程！',
-    quizzes:[
-      {s:'We walked through a ___ in the morning.', a:'cool forest', h:'微凉的森林'},
-      {s:'The ___ is beautiful at sunset.', a:'coast', h:'海滨；海岸'},
-      {s:'The ___ is hot and dry during the day.', a:'desert', h:'沙漠'},
-      {s:'Many animals live on the ___.', a:'grassland', h:'草原'},
-      {s:'The ___ is full of tall trees and animals.', a:'jungle', h:'丛林'},
-      {s:'We went swimming in the ___.', a:'lake', h:'湖'},
-      {s:'A clear ___ runs through the village.', a:'stream', h:'溪流'},
-      {s:'We sat in the ___ of a big tree.', a:'shade', h:'阴凉处'}
-    ]
-  },
-
-  /* ══════════ U11 名词后缀 ══════════ */
-  {
-    unit:'名词后缀', icon:'📚', name:'学校项目展示', color:'#818cf8',
-    desc:'用名词后缀描述一次校园活动',
-    sentences:[
-      {w:'admiration', en:'She looked at the painting with [admiration].', zh:'她赞赏地看着那幅画。'},
-      {w:'announcement', en:'The [announcement] said the school trip was cancelled.', zh:'通知说学校旅行取消了。'},
-      {w:'attraction', en:'The new park is a popular [attraction].', zh:'新公园是一个受欢迎的景点。'},
-      {w:'celebration', en:'We had a big [celebration] for the school birthday.', zh:'我们为学校生日举行了盛大的庆典。'},
-      {w:'collection', en:'He showed us his stamp [collection].', zh:'他给我们看了他的邮票收藏。'},
-      {w:'completion', en:'The [completion] of the project took three months.', zh:'项目的完成花了三个月。'},
-      {w:'confirmation', en:'I received a [confirmation] of my booking.', zh:'我收到了预订的确认书。'},
-      {w:'connection', en:'There is a strong [connection] between the two events.', zh:'这两个事件之间有很强的联系。'},
-      {w:'creation', en:'The [creation] of the new app was exciting.', zh:'新应用的创作很令人兴奋。'},
-      {w:'development', en:'The [development] of the city is very fast.', zh:'城市的发展非常快。'},
-      {w:'disappointment', en:'To my [disappointment], the show was boring.', zh:'令我失望的是，演出很无聊。'},
-      {w:'discussion', en:'We had a [discussion] about the environment.', zh:'我们进行了一次关于环境的讨论。'},
-      {w:'education', en:'Every child should receive a good [education].', zh:'每个孩子都应该接受良好的教育。'},
-      {w:'enjoyment', en:'Reading brings me great [enjoyment].', zh:'阅读给我带来很大的乐趣。'},
-      {w:'entertainment', en:'The party was full of [entertainment].', zh:'派对充满了娱乐节目。'},
-      {w:'examination', en:'The final [examination] is next week.', zh:'期末考试在下周。'},
-      {w:'exploration', en:'The [exploration] of the cave was dangerous.', zh:'洞穴的勘探很危险。'},
-      {w:'improvement', en:'There is a clear [improvement] in your English.', zh:'你的英语有明显的改善。'},
-      {w:'information', en:'I need more [information] about the course.', zh:'我需要更多关于课程的信息。'},
-      {w:'invention', en:'The [invention] of the telephone changed the world.', zh:'电话的发明改变了世界。'},
-      {w:'invitation', en:'I got an [invitation] to her birthday party.', zh:'我收到了她生日派对的邀请函。'},
-      {w:'movement', en:'The [movement] of the dancers was beautiful.', zh:'舞者的动作很美。'},
-      {w:'pollution', en:'Air [pollution] is a serious problem.', zh:'空气污染是一个严重的问题。'},
-      {w:'prevention', en:'[prevention] of disease is better than cure.', zh:'预防疾病胜于治疗。'},
-      {w:'protection', en:'The [protection] of animals is important.', zh:'保护动物很重要。'},
-      {w:'relaxation', en:'Yoga is a good way for [relaxation].', zh:'瑜伽是一种很好的放松方式。'},
-      {w:'replacement', en:'We need a [replacement] for the broken window.', zh:'我们需要一个替代品来替换破窗户。'},
-      {w:'reservation', en:'I made a [reservation] at the restaurant.', zh:'我在餐厅预订了位子。'},
-      {w:'translation', en:'The [translation] of this poem is difficult.', zh:'这首诗的翻译很难。'}
-    ],
-    story:[
-      'Our class project was about the [development] of our city.',
-      'We started with a [discussion] about [pollution] and its [prevention].',
-      'For [information], we visited the library and found a book about the [invention] of the telephone.',
-      'The [translation] of old letters gave us a [connection] to the past.',
-      'We made a [collection] of photos for the [examination] of local history.',
-      'The [completion] of our work needed careful organisation.',
-      'To our [disappointment], we missed the [celebration] at school.',
-      'But we received an [invitation] to present our [creation] at the [attraction].',
-      'Our [attraction] was a model of the city with a [replacement] for the old bridge.',
-      'The [improvement] in our presentation won [admiration] from teachers.',
-      'We also got a [confirmation] that our [reservation] for the hall was successful.',
-      'The [announcement] of the results brought us great [enjoyment] and excitement.',
-      'This [exploration] was a wonderful part of our [education].',
-      'The [movement] of the project from idea to reality was a great [entertainment] for us.',
-      'And the [protection] of our environment became our new aim.',
-      'Finally, we enjoyed some [relaxation] after all the hard work.'
-    ],
-    storyZh:'我们班的项目是关于我们城市的发展。我们从讨论污染及其预防开始。为了获取信息，我们去图书馆，找到一本关于电话发明的书。旧信件的翻译让我们与过去有了联系。我们为地方历史的检查制作了一本照片集。完成工作需要仔细的组织。令我们失望的是，我们错过了学校的庆典。但我们收到了邀请，在景点展示我们的创作。我们的吸引力是一个城市模型，用替代品替换了旧桥。我们展示的改进赢得了老师的赞赏。我们还收到了确认书，确认我们预订大厅成功。结果的宣布给我们带来了极大的乐趣和兴奋。这次探索是我们教育中美妙的一部分。项目从想法到现实的运动对我们来说是一种巨大的娱乐。保护环境成了我们的新目标。最后，在所有的辛苦工作之后，我们享受了一些放松。',
-    quizzes:[
-      {s:'She looked at the painting with ___.', a:'admiration', h:'赞赏；钦佩'},
-      {s:'The ___ said the school trip was cancelled.', a:'announcement', h:'宣布；声明'},
-      {s:'The new park is a popular ___.', a:'attraction', h:'有吸引力的事物'},
-      {s:'We had a big ___ for the school birthday.', a:'celebration', h:'庆典'},
-      {s:'He showed us his stamp ___.', a:'collection', h:'收藏'},
-      {s:'The ___ of the project took three months.', a:'completion', h:'完成；结束'},
-      {s:'I received a ___ of my booking.', a:'confirmation', h:'证实；确认书'},
-      {s:'There is a strong ___ between the two events.', a:'connection', h:'连接；关系'},
-      {s:'The ___ of the new app was exciting.', a:'creation', h:'创造力；创作'},
-      {s:'The ___ of the city is very fast.', a:'development', h:'发展'}
-    ]
-  },
-
-  /* ══════════ U11 探险救助 ══════════ */
-  {
-    unit:'探险救助', icon:'🐾', name:'动物救助探险', color:'#2dd4bf',
-    desc:'一次为受伤野生动物筹款的远征',
-    sentences:[
-      {w:'expedition', en:'They went on an [expedition] to the mountains.', zh:'他们去山里探险。'},
-      {w:'extremely hard', en:'The team worked [extremely hard] to help the animals.', zh:'团队极其努力地帮助动物。'},
-      {w:'East Africa', en:'The rescue centre is in [East Africa].', zh:'救助中心在东非。'},
-      {w:'advertise', en:'They [advertise] the event on posters.', zh:'他们在海报上为活动打广告。'},
-      {w:'organise', en:'We need to [organise] a charity run.', zh:'我们需要组织一次慈善跑。'},
-      {w:'raise money', en:'The aim is to [raise money] for injured wildlife.', zh:'目的是为受伤的野生生物筹钱。'},
-      {w:'hard-working', en:'She is a [hard-working] volunteer.', zh:'她是一个工作努力的志愿者。'},
-      {w:'environmental project', en:'This is an [environmental project] for our school.', zh:'这是我们学校的一个环境项目。'},
-      {w:'injured wildlife', en:'The centre takes care of [injured wildlife].', zh:'中心照顾受伤的野生生物。'},
-      {w:'Animal Rescue Centre', en:'We visited the [Animal Rescue Centre].', zh:'我们参观了动物救助中心。'},
-      {w:'educational', en:'The trip was very [educational].', zh:'这次旅行很有教育意义。'},
-      {w:'aim', en:'Our [aim] is to protect animals.', zh:'我们的目标是保护动物。'},
-      {w:'order', en:'The teacher gave us an [order] to stay together.', zh:'老师命令我们待在一起。'},
-      {w:'in order to', en:'We study [in order to] help animals.', zh:'我们学习是为了帮助动物。'},
-      {w:'reason', en:'The [reason] for the project is to save wildlife.', zh:'这个项目的原因是拯救野生生物。'},
-      {w:'take part in', en:'Many students [take part in] the event.', zh:'许多学生参加这个活动。'},
-      {w:'row', en:'We sat in the front [row] of the bus.', zh:'我们坐在巴士的前排。'},
-      {w:'a range of', en:'They offer [a range of] activities.', zh:'他们提供一系列活动。'},
-      {w:'chain', en:'She wore a silver [chain] around her neck.', zh:'她脖子上戴着一条银链。'},
-      {w:'crowd', en:'A large [crowd] gathered to watch.', zh:'一大群人聚集观看。'},
-      {w:'provide', en:'The centre will [provide] food and water.', zh:'中心将提供食物和水。'},
-      {w:'serve', en:'Volunteers [serve] meals to the animals.', zh:'志愿者为动物提供食物。'},
-      {w:'benefit', en:'Exercise will [benefit] your health.', zh:'锻炼对你的健康有益。'},
-      {w:'support', en:'We want to [support] the rescue centre.', zh:'我们想支持救助中心。'},
-      {w:'take care of', en:'They [take care of] sick animals.', zh:'他们照顾生病的动物。'},
-      {w:'background', en:'She has a [background] in biology.', zh:'她有生物学背景。'},
-      {w:'curriculum', en:'The school [curriculum] includes environmental studies.', zh:'学校课程包括环境研究。'},
-      {w:'experience', en:'I have some [experience] with animals.', zh:'我有一些与动物相处的经历。'},
-      {w:'qualification', en:'He has a [qualification] in animal care.', zh:'他有动物护理资格。'},
-      {w:'location', en:'The [location] of the centre is near the forest.', zh:'中心的位置在森林附近。'},
-      {w:'recently', en:'They [recently] opened a new shelter.', zh:'他们最近开设了一个新收容所。'}
-    ],
-    story:[
-      'Last month, our class joined an [expedition] to [East Africa].',
-      'The [reason] was to help [injured wildlife] at the [Animal Rescue Centre].',
-      'We wanted to [raise money] and [support] their [environmental project].',
-      'Our [aim] was to [take care of] the animals and [benefit] the local area.',
-      'We had to [organise] a charity event and [advertise] it to the public.',
-      'A large [crowd] came, and many students [take part in] the run.',
-      'The centre has a [curriculum] for volunteers and offers [a range of] tasks.',
-      'We sat in the front [row] and listened to a talk about animal protection.',
-      'The staff [provide] food and [serve] the animals every day.',
-      'They have a good [background] and [qualification] in animal care.',
-      'The [location] is perfect, and they [recently] built a new [chain] fence.',
-      'It was [extremely hard] work, but everyone was [hard-working].',
-      'In [order] to help more, we will continue to [take part in] such projects.',
-      'This [experience] was very [educational] for all of us.'
-    ],
-    storyZh:'上个月，我们班参加了一次去东非的探险。原因是帮助动物救助中心里受伤的野生生物。我们想为他们的环境项目筹钱并提供支持。我们的目标是照顾动物，造福当地。我们必须组织一次慈善活动并向公众宣传。一大群人来了，许多学生参加了跑步。中心为志愿者提供课程，并提供一系列任务。我们坐在前排，听了一场关于动物保护的讲座。工作人员每天提供食物并为动物服务。他们有良好的背景和动物护理资格。位置很好，他们最近建了一个新的链条围栏。工作极其努力，但每个人都很勤奋。为了帮助更多，我们将继续参加这样的项目。这次经历对我们所有人都很有教育意义。',
-    quizzes:[
-      {s:'They went on an ___ to the mountains.', a:'expedition', h:'探险（队）；远征'},
-      {s:'The rescue centre is in ___.', a:'East Africa', h:'东非'},
-      {s:'They ___ the event on posters.', a:'advertise', h:'为…打广告'},
-      {s:'We need to ___ a charity run.', a:'organise', h:'组织'},
-      {s:'The aim is to ___ for injured wildlife.', a:'raise money', h:'筹钱'},
-      {s:'She is a ___ volunteer.', a:'hard-working', h:'工作努力的'},
-      {s:'We visited the ___.', a:'Animal Rescue Centre', h:'动物救助中心'},
-      {s:'The trip was very ___.', a:'educational', h:'有教育意义的'},
-      {s:'Our ___ is to protect animals.', a:'aim', h:'目标；意图'},
-      {s:'Many students ___ the event.', a:'take part in', h:'参加'}
-    ]
-  },
-
-  /* ══════════ U11 户外迷路 ══════════ */
-  {
-   unit:'户外迷路', icon:'🌲', name:'森林迷路记', color:'#fbbf24',
-    desc:'一次在森林中迷路又获救的经历',
-    sentences:[
-      {w:'hide', en:'The rabbit tried to [hide] in the bushes.', zh:'兔子试图躲在灌木丛里。'},
-      {w:'among the trees', en:'We got lost [among the trees].', zh:'我们在树丛中迷路了。'},
-      {w:'behind the rocks', en:'A small animal was [behind the rocks].', zh:'一只小动物在岩石后面。'},
-      {w:'delighted', en:'We were [delighted] to see the path.', zh:'看到小路我们很高兴。'},
-      {w:'disappointed', en:'We were [disappointed] when it started to rain.', zh:'开始下雨时我们很失望。'},
-      {w:'catch - caught', en:'We tried to [catch - caught] the last bus.', zh:'我们试图赶上末班车。'},
-      {w:'completely dark', en:'It became [completely dark] very quickly.', zh:'天很快完全黑了。'},
-      {w:'main reason', en:'The [main reason] we got lost was the fog.', zh:'我们迷路的主要原因是雾。'},
-      {w:'rare', en:'We saw a [rare] bird in the forest.', zh:'我们在森林里看到一只稀有的鸟。'},
-      {w:'make sense', en:'The map didn’t [make sense] to us.', zh:'我们看不懂这张地图。'},
-      {w:'set off', en:'We [set off] early in the morning.', zh:'我们一大早就出发了。'},
-      {w:'wrong direction', en:'We walked in the [wrong direction].', zh:'我们走错了方向。'},
-      {w:'in the darkness', en:'We couldn’t see anything [in the darkness].', zh:'在黑暗中我们什么也看不见。'},
-      {w:'challenging', en:'The hike was very [challenging].', zh:'徒步旅行非常有挑战性。'},
-      {w:'exhausting', en:'The long walk was [exhausting].', zh:'长途步行让人筋疲力尽。'},
-      {w:'expect', en:'We didn’t [expect] to get lost.', zh:'我们没预料到会迷路。'},
-      {w:'empty hut', en:'We found an [empty hut] in the woods.', zh:'我们在树林里发现一个空置的小木屋。'},
-      {w:'locked', en:'The door was [locked], so we couldn’t get in.', zh:'门锁着，我们进不去。'},
-      {w:'lie down - lay down', en:'We had to [lie down - lay down] on the ground.', zh:'我们不得不躺在地上。'},
-      {w:'for ages', en:'We waited [for ages] for help.', zh:'我们等了很长时间才等到帮助。'},
-      {w:'grab', en:'I [grab]bed my bag and ran.', zh:'我抓起包就跑。'},
-      {w:'frightened', en:'We were [frightened] by the strange noises.', zh:'我们被奇怪的声音吓到了。'}
-    ],
-    story:[
-      'One day, we decided to [set off] for a walk in the forest.',
-      'We didn’t [expect] the weather to change so fast.',
-      'Soon we were lost [among the trees] and [behind the rocks].',
-      'The [main reason] was that the map didn’t [make sense].',
-      'We walked in the [wrong direction] and it became [completely dark].',
-      'We were [frightened] and [exhausting] after hours of walking.',
-      'We tried to [catch - caught] a signal on our phones, but there was none.',
-      'We found an [empty hut], but it was [locked].',
-      'So we had to [lie down - lay down] on the ground and wait [for ages].',
-      'We were [disappointed] and cold [in the darkness].',
-      'Suddenly, we heard a [rare] sound and saw a light.',
-      'We were [delighted] to see a rescue team!',
-      'I [grab]bed my things and ran to them.',
-      'It was a [challenging] experience, but we learned a lot.',
-      'Next time, we will [hide] a map in our bag!'
-    ],
-    storyZh:'有一天，我们决定出发去森林散步。我们没预料到天气变化这么快。很快我们就在树丛中和岩石后迷路了。主要原因是地图我们看不懂。我们走错了方向，天很快完全黑了。走了几个小时后，我们又怕又累。我们试图用手机找信号，但没有。我们发现一个空置的小木屋，但门锁着。所以我们不得不躺在地上，等了很长时间。在黑暗中我们又失望又冷。突然，我们听到一个稀有的声音，看到一束光。我们高兴地看到救援队！我抓起东西跑向他们。这是一次有挑战性的经历，但我们学到了很多。下次，我们会把地图藏在包里！',
-    quizzes:[
-      {s:'The rabbit tried to ___ in the bushes.', a:'hide', h:'躲藏'},
-      {s:'We got lost ___.', a:'among the trees', h:'在树丛中'},
-      {s:'We were ___ to see the path.', a:'delighted', h:'高兴的'},
-      {s:'It became ___ very quickly.', a:'completely dark', h:'完全天黑'},
-      {s:'The ___ we got lost was the fog.', a:'main reason', h:'主要原因'},
-      {s:'We ___ early in the morning.', a:'set off', h:'出发；动身'},
-      {s:'We walked in the ___.', a:'wrong direction', h:'错误的方向'},
-      {s:'The hike was very ___.', a:'challenging', h:'有挑战性的'},
-      {s:'We found an ___ in the woods.', a:'empty hut', h:'空置的小木屋'},
-      {s:'We waited ___ for help.', a:'for ages', h:'持续很长时间'}
-    ]
-  },
-
-  /* ══════════ U11 夜行住宿 ══════════ */
-  {
-    unit:'夜行住宿', icon:'🌙', name:'午夜奇遇', color:'#a78bfa',
-    desc:'在招待所度过的惊险一夜',
-    sentences:[
-      {w:'appear', en:'A deer [appear]ed near the hostel.', zh:'一只鹿出现在招待所附近。'},
-      {w:'imagine', en:'Can you [imagine] sleeping outside?', zh:'你能想象睡在户外吗？'},
-      {w:'excitement', en:'There was great [excitement] when we saw the animal.', zh:'看到那只动物时我们非常激动。'},
-      {w:'chance', en:'We had a [chance] to see a rare bird.', zh:'我们有机会看到一只稀有的鸟。'},
-      {w:'notice', en:'Did you [notice] the strange sound?', zh:'你注意到那个奇怪的声音了吗？'},
-      {w:'approach', en:'We saw a bear [approach] the campsite.', zh:'我们看到一只熊靠近营地。'},
-      {w:'female', en:'A [female] deer was with her baby.', zh:'一只雌鹿和她的宝宝在一起。'},
-      {w:'overnight', en:'We stayed [overnight] at the hostel.', zh:'我们在招待所住了一夜。'},
-      {w:'at sunrise', en:'We left [at sunrise] to continue our trip.', zh:'我们在日出时离开继续旅行。'},
-      {w:'reach', en:'We [reach]ed the hostel before midnight.', zh:'我们在午夜前到达了招待所。'},
-      {w:'hostel', en:'The [hostel] was small but comfortable.', zh:'招待所虽小但很舒适。'},
-      {w:'midnight', en:'At [midnight], we heard a noise outside.', zh:'午夜时，我们听到外面有声音。'}
-    ],
-    story:[
-      'Last summer, we stayed at a small [hostel] in the mountains.',
-      'We [reach]ed it just before [midnight] and went to bed.',
-      'At [midnight], I heard a strange sound and couldn’t [imagine] what it was.',
-      'I decided to [notice] more carefully and looked out the window.',
-      'A [female] deer with her baby began to [approach] the garden.',
-      'They seemed to [appear] from nowhere!',
-      'In the morning, we woke up [at sunrise] full of [excitement].',
-      'We had a [chance] to see them again before we left.',
-      'It was a wonderful [overnight] adventure.'
-    ],
-    storyZh:'去年夏天，我们住在山里的一个小招待所。我们在午夜前到达，然后上床睡觉。午夜时，我听到一个奇怪的声音，无法想象那是什么。我决定更仔细地注意，向窗外看去。一只雌鹿和她的宝宝开始靠近花园。它们似乎从无处出现！早上，我们在日出时醒来，充满激动。离开前我们有机会再次看到它们。这是一次美妙的过夜冒险。',
-    quizzes:[
-      {s:'A deer ___ed near the hostel.', a:'appear', h:'出现'},
-      {s:'Can you ___ sleeping outside?', a:'imagine', h:'想象'},
-      {s:'There was great ___ when we saw the animal.', a:'excitement', h:'激动'},
-      {s:'We had a ___ to see a rare bird.', a:'chance', h:'机会'},
-      {s:'Did you ___ the strange sound?', a:'notice', h:'注意到'},
-      {s:'We saw a bear ___ the campsite.', a:'approach', h:'靠近'},
-      {s:'A ___ deer was with her baby.', a:'female', h:'雌性的'},
-      {s:'We stayed ___ at the hostel.', a:'overnight', h:'一整夜'},
-      {s:'We left ___ to continue our trip.', a:'at sunrise', h:'在日出时'},
-      {s:'We ___ed the hostel before midnight.', a:'reach', h:'到达'}
-    ]
-  },
-
-  /* ══════════ U12 交流方式 ══════════ */
-  {
-    unit:'交流方式', icon:'💬', name:'我们的交流方式', color:'#6bcbff',
-    desc:'用各种方式和朋友保持联系',
-    sentences:[
-      {w:'call friends', en:'I often [call friends] in the evening.', zh:'我晚上经常给朋友打电话。'},
-      {w:'check the time', en:'I use my phone to [check the time].', zh:'我用手机核实时间。'},
-      {w:'go online', en:'We [go online] to do homework.', zh:'我们上网做作业。'},
-      {w:'listen to music', en:'I [listen to music] on the bus.', zh:'我在公交车上听音乐。'},
-      {w:'play games', en:'They [play games] after school.', zh:'他们放学后打游戏。'},
-      {w:'share videos', en:'We [share videos] with each other.', zh:'我们互相分享视频。'},
-      {w:'take selfies', en:'She likes to [take selfies] with her friends.', zh:'她喜欢和朋友拍自拍照。'},
-      {w:'text friends', en:'I [text friends] when I’m busy.', zh:'我忙的时候给朋友发信息。'},
-      {w:'ask', en:'Can I [ask] you a question?', zh:'我能问你一个问题吗？'},
-      {w:'ask for', en:'He will [ask for] help if needed.', zh:'如果需要他会寻求帮助。'},
-      {w:'speak (a language)', en:'They [speak (a language)] English very well.', zh:'他们英语讲得很好。'},
-      {w:'talk', en:'We [talk] about our day at school.', zh:'我们谈论在学校的一天。'},
-      {w:'say', en:'What did you [say] to him?', zh:'你对他说了什么？'},
-      {w:'tell', en:'Please [tell] me the truth.', zh:'请告诉我真相。'},
-      {w:'tell a joke', en:'He can [tell a joke] very well.', zh:'他很会讲笑话。'},
-      {w:'tell a lie', en:'You should never [tell a lie].', zh:'你永远不应该撒谎。'},
-      {w:'tell the truth', en:'It’s important to [tell the truth].', zh:'实话实说很重要。'}
-    ],
-    story:[
-      'My friends and I use many ways to communicate.',
-      'After school, I [call friends] or [text friends] to [ask] about homework.',
-      'Sometimes we [go online] to [share videos] and [listen to music].',
-      'We also [play games] together and [take selfies].',
-      'I always [check the time] before we start.',
-      'When we meet, we [talk] about everything and [say] what we think.',
-      'I can [tell] them my secrets, and they [tell the truth] to me.',
-      'My friend can [tell a joke] and make everyone laugh.',
-      'We never [tell a lie] to each other.',
-      'I can also [speak (a language)] English with them.',
-      'If I need help, I just [ask for] it.',
-      'Good communication keeps our friendship strong!'
-    ],
-    storyZh:'我和朋友们用很多方式交流。放学后，我给朋友打电话或发信息问作业。有时我们上网分享视频、听音乐。我们也一起打游戏、拍自拍照。开始前我总是核实时间。见面时，我们谈论一切，说出自己的想法。我可以告诉他们我的秘密，他们也对我实话实说。我朋友会讲笑话，让每个人大笑。我们从不互相撒谎。我还能和他们讲英语。如果需要帮助，我就寻求帮助。良好的沟通让我们的友谊更牢固！',
-    quizzes:[
-      {s:'I often ___ in the evening.', a:'call friends', h:'打电话给朋友'},
-      {s:'I use my phone to ___.', a:'check the time', h:'核实时间'},
-      {s:'We ___ to do homework.', a:'go online', h:'上网'},
-      {s:'I ___ on the bus.', a:'listen to music', h:'听音乐'},
-      {s:'They ___ after school.', a:'play games', h:'打游戏'},
-      {s:'We ___ with each other.', a:'share videos', h:'分享视频'},
-      {s:'She likes to ___ with her friends.', a:'take selfies', h:'拍自拍照'},
-      {s:'I ___ when I’m busy.', a:'text friends', h:'给朋友发信息'},
-      {s:'Can I ___ you a question?', a:'ask', h:'问；要求'},
-      {s:'He will ___ help if needed.', a:'ask for', h:'寻求…'}
-    ]
-  },
-
-  /* ══════════ U12 否定前缀 ══════════ */
-  {
-    unit:'否定前缀', icon:'🚫', name:'反义词大集合', color:'#fb7185',
-    desc:'用否定前缀表达相反的意思',
-    sentences:[
-      {w:'unfriendly', en:'The new student was [unfriendly] at first.', zh:'新同学一开始不友善。'},
-      {w:'uncomfortable', en:'This chair is very [uncomfortable].', zh:'这把椅子很不舒服。'},
-      {w:'unbelievable', en:'The magic show was [unbelievable]!', zh:'魔术表演难以置信！'},
-      {w:'unfair', en:'It’s [unfair] to blame him.', zh:'责怪他是不公平的。'},
-      {w:'unhealthy', en:'Eating too much sugar is [unhealthy].', zh:'吃太多糖是不健康的。'},
-      {w:'unsociable', en:'He is a bit [unsociable] and likes to be alone.', zh:'他有点不爱社交，喜欢独处。'},
-      {w:'incorrect', en:'Your answer is [incorrect].', zh:'你的答案不准确。'},
-      {w:'inexpensive', en:'This restaurant is [inexpensive].', zh:'这家餐厅不贵。'},
-      {w:'incomplete', en:'My homework is [incomplete].', zh:'我的作业未完成。'},
-      {w:'impossible', en:'It’s [impossible] to finish in one day.', zh:'一天内完成是不可能的。'},
-      {w:'impolite', en:'It’s [impolite] to interrupt others.', zh:'打断别人是不礼貌的。'},
-      {w:'impatient', en:'Don’t be so [impatient]; wait a minute.', zh:'别这么不耐烦，等一下。'},
-      {w:'unexpected', en:'The rain was [unexpected].', zh:'这场雨出乎意料。'}
-    ],
-    story:[
-      'Today was full of surprises, some good and some bad.',
-      'The weather was [unexpected]; it rained all morning.',
-      'I felt [uncomfortable] because I forgot my umbrella.',
-      'My friend was [unfriendly] because he was in a hurry.',
-      'It was [unfair] to blame me for being late.',
-      'The test was [impossible] to finish, and my answers were [incorrect].',
-      'My work was [incomplete], which was [unhealthy] for my grades.',
-      'Waiting for the bus made me [impatient].',
-      'The bus driver was [impolite] and didn’t say sorry.',
-      'But later, I found an [inexpensive] café and had a great lunch.',
-      'The magic show was [unbelievable]!',
-      'I realized being [unsociable] isn’t always good.',
-      'So I decided to be more friendly and patient.'
-    ],
-    storyZh:'今天充满了意外，有好有坏。天气出乎意料，下了一上午雨。我感到不舒服，因为忘了带伞。我朋友因为赶时间而不友善。因为迟到而责怪我是不公平的。考试不可能完成，我的答案不准确。我的作业未完成，这对我的成绩不健康。等公交让我不耐烦。公交司机不礼貌，也没说抱歉。但后来，我找到一家不贵的咖啡馆，吃了一顿很棒的午餐。魔术表演难以置信！我意识到不爱社交并不总是好事。所以我决定更友好、更耐心。',
-    quizzes:[
-      {s:'The new student was ___ at first.', a:'unfriendly', h:'不友善的'},
-      {s:'This chair is very ___.', a:'uncomfortable', h:'不舒服的'},
-      {s:'The magic show was ___!', a:'unbelievable', h:'难以置信的'},
-      {s:'It’s ___ to blame him.', a:'unfair', h:'不公平的'},
-      {s:'Eating too much sugar is ___.', a:'unhealthy', h:'不健康的'},
-      {s:'He is a bit ___ and likes to be alone.', a:'unsociable', h:'不爱社交的'},
-      {s:'Your answer is ___.', a:'incorrect', h:'不准确的'},
-      {s:'This restaurant is ___.', a:'inexpensive', h:'不贵的'},
-      {s:'My homework is ___.', a:'incomplete', h:'未完成的'},
-      {s:'It’s ___ to finish in one day.', a:'impossible', h:'不可能的'},
-      {s:'It’s ___ to interrupt others.', a:'impolite', h:'不礼貌的'},
-      {s:'Don’t be so ___; wait a minute.', a:'impatient', h:'不耐烦的'},
-      {s:'The rain was ___.', a:'unexpected', h:'出乎意料的'}
-    ]
-  },
-
-  /* ══════════ U12 科技挑战 ══════════ */
-  {
-    unit:'科技挑战', icon:'📱', name:'科技挑战', color:'#f59e0b',
-    desc:'接受科技带来的新挑战',
-    sentences:[
-      {w:'technology', en:'Modern [technology] changes our lives.', zh:'现代科技改变我们的生活。'},
-      {w:'take up the challenge', en:'I decided to [take up the challenge] and learn coding.', zh:'我决定接受挑战，学习编程。'},
-      {w:'surprisingly', en:'[surprisingly], it was easier than I thought.', zh:'令人惊讶的是，它比我想的容易。'},
-      {w:'be ready for', en:'You must [be ready for] the test.', zh:'你必须为考试做好准备。'},
-      {w:'on the way to school', en:'I listen to podcasts [on the way to school].', zh:'我在上学路上听播客。'},
-      {w:'later than usual', en:'I woke up [later than usual] today.', zh:'我今天比平常晚醒。'},
-      {w:'conversation', en:'We had a long [conversation] about apps.', zh:'我们关于应用进行了一次长对话。'},
-      {w:'normally', en:'I [normally] get up at seven.', zh:'我通常七点起床。'}
-    ],
-    story:[
-      '[technology] is everywhere in our lives.',
-      'Last week, I decided to [take up the challenge] and build a small app.',
-      '[surprisingly], I finished it in two days!',
-      'Now I [be ready for] the school tech fair.',
-      'I [normally] walk to school, but today I was [later than usual].',
-      'So I listened to music [on the way to school].',
-      'I had a [conversation] with my friend about the new app.',
-      'It was a great experience!'
-    ],
-    storyZh:'科技在我们的生活中无处不在。上周，我决定接受挑战，制作一个小应用。令人惊讶的是，我两天就完成了！现在我准备好参加学校科技展了。我通常走路去学校，但今天比平常晚。所以我在上学路上听了音乐。我和朋友关于新应用进行了一次对话。这是一次很棒的经历！',
-    quizzes:[
-      {s:'Modern ___ changes our lives.', a:'technology', h:'科技；技术'},
-      {s:'I decided to ___ and learn coding.', a:'take up the challenge', h:'接受挑战'},
-      {s:'___, it was easier than I thought.', a:'surprisingly', h:'令人惊讶地'},
-      {s:'You must ___ the test.', a:'be ready for', h:'为…准备好'},
-      {s:'I listen to podcasts ___.', a:'on the way to school', h:'在上学路上'},
-      {s:'I woke up ___ today.', a:'later than usual', h:'比平常晚'},
-      {s:'We had a long ___ about apps.', a:'conversation', h:'对话；谈话'},
-      {s:'I ___ get up at seven.', a:'normally', h:'通常'}
-    ]
-  },
-
-  /* ══════════ U12 申请比赛 ══════════ */
-  {
-    unit:'申请比赛', icon:'🏆', name:'申请比赛', color:'#22c55e',
-    desc:'填写申请表，参加创作比赛',
-    sentences:[
-      {w:'apply online', en:'You can [apply online] for the competition.', zh:'你可以在网上申请比赛。'},
-      {w:'challenge', en:'The [challenge] is to create an app.', zh:'挑战是创作一个应用。'},
-      {w:'author', en:'The [author] of the best story will win.', zh:'最佳故事的作者会赢。'},
-      {w:'final', en:'The [final] will be held next month.', zh:'决赛将在下个月举行。'},
-      {w:'will be provided', en:'All materials [will be provided].', zh:'所有材料将会被提供。'},
-      {w:'will be held', en:'The event [will be held] in the town hall.', zh:'活动将会在市政厅举办。'},
-      {w:'take place', en:'The competition will [take place] on Saturday.', zh:'比赛将在周六发生。'},
-      {w:'fill in an online form', en:'Please [fill in an online form] to enter.', zh:'请填写线上的表格来参加。'},
-      {w:'application', en:'Send your [application] before Friday.', zh:'在周五前提交你的申请。'},
-      {w:'accept', en:'We will [accept] only ten students.', zh:'我们只接受十名学生。'},
-      {w:'hear from us', en:'You will [hear from us] soon.', zh:'你很快就会收到我们的来信。'},
-      {w:'create an app', en:'You need to [create an app] for the challenge.', zh:'你需要为挑战创作一个应用软件。'},
-      {w:'solve a problem', en:'Your app should [solve a problem].', zh:'你的应用应该解决一个问题。'},
-      {w:'be connected to', en:'The app must [be connected to] the internet.', zh:'应用必须与互联网相连。'},
-      {w:'environment', en:'We want to protect the [environment].', zh:'我们想保护环境。'},
-      {w:'recycling bin', en:'Put the bottle in the [recycling bin].', zh:'把瓶子放进再循环垃圾桶。'},
-      {w:'rubbish', en:'Don’t throw [rubbish] on the ground.', zh:'不要把垃圾扔在地上。'}
-    ],
-    story:[
-      'Our school is organizing a technology competition.',
-      'To enter, you must [apply online] and [fill in an online form].',
-      'The [challenge] is to [create an app] that can [solve a problem].',
-      'Your app should [be connected to] the internet and help the [environment].',
-      'For example, it could find the nearest [recycling bin] for [rubbish].',
-      'The [final] [will be held] in the main hall and [take place] next month.',
-      'All equipment [will be provided] by the school.',
-      'Send your [application] before Friday; we will [accept] only ten teams.',
-      'You will [hear from us] by email.',
-      'The [author] of the best app will win a prize!'
-    ],
-    storyZh:'我们学校正在组织一场科技比赛。要参加，你必须在网上申请并填写线上的表格。挑战是创作一个能解决问题的应用。你的应用应该与互联网相连，并帮助环境。例如，它可以为垃圾找到最近的再循环垃圾桶。决赛将在主厅举行，下个月发生。所有设备将由学校提供。在周五前提交申请；我们只接受十支队伍。你会通过邮件收到我们的来信。最佳应用的作者将赢得奖品！',
-    quizzes:[
-      {s:'You can ___ for the competition.', a:'apply online', h:'网上申请'},
-      {s:'The ___ is to create an app.', a:'challenge', h:'挑战'},
-      {s:'The ___ of the best story will win.', a:'author', h:'作者'},
-      {s:'The ___ will be held next month.', a:'final', h:'决赛'},
-      {s:'All materials ___.', a:'will be provided', h:'将会被提供'},
-      {s:'The event ___ in the town hall.', a:'will be held', h:'将会被举办'},
-      {s:'The competition will ___ on Saturday.', a:'take place', h:'发生'},
-      {s:'Please ___ to enter.', a:'fill in an online form', h:'填写线上的表格'},
-      {s:'Send your ___ before Friday.', a:'application', h:'申请；请求'},
-      {s:'We will ___ only ten students.', a:'accept', h:'接受'},
-      {s:'You will ___ soon.', a:'hear from us', h:'收到我们的来信'},
-      {s:'You need to ___ for the challenge.', a:'create an app', h:'创作一个应用软件'},
-      {s:'Your app should ___.', a:'solve a problem', h:'解决一个问题'},
-      {s:'The app must ___ the internet.', a:'be connected to', h:'与…相连'},
-      {s:'We want to protect the ___.', a:'environment', h:'环境'},
-      {s:'Put the bottle in the ___.', a:'recycling bin', h:'再循环垃圾桶'},
-      {s:'Don’t throw ___ on the ground.', a:'rubbish', h:'垃圾'}
-    ]
-  },
-
-  /* ══════════ U12 沟通媒体 ══════════ */
-  {
-    unit:'沟通媒体', icon:'📺', name:'媒体沟通', color:'#c084fc',
-    desc:'了解媒体和沟通的奥秘',
-    sentences:[
-      {w:'have something to do with', en:'Does this [have something to do with] the new project?', zh:'这和那个新项目有关吗？'},
-      {w:'communication', en:'Good [communication] is important in a team.', zh:'良好的沟通在团队中很重要。'},
-      {w:'the rest', en:'I will finish [the rest] of the work tomorrow.', zh:'我明天会完成剩余部分的工作。'},
-      {w:'secret', en:'Can you keep a [secret]?', zh:'你能保守秘密吗？'},
-      {w:'judge', en:'The [judge] will choose the winner.', zh:'评委将选出获胜者。'},
-      {w:'present', en:'She will [present] the show tonight.', zh:'她今晚将主持节目。'},
-      {w:'on sale', en:'The new tablet is [on sale] now.', zh:'新平板电脑现在有售。'},
-      {w:'tablet', en:'I read books on my [tablet].', zh:'我在平板电脑上看书。'},
-      {w:'compete in the final for the first prize', en:'They will [compete in the final for the first prize].', zh:'他们将在决赛中竞争第一名。'},
-      {w:'reasonably priced refreshments', en:'There will be [reasonably priced refreshments] at the event.', zh:'活动上会有价格合理的饮品茶点。'},
-      {w:'will be available', en:'Tickets [will be available] at the door.', zh:'门票将可在门口获得。'},
-      {w:'hire headphones and chargers', en:'You can [hire headphones and chargers] at the desk.', zh:'你可以在服务台租用头戴式耳机和充电器。'},
-      {w:'consider', en:'Please [consider] joining our club.', zh:'请考虑加入我们的俱乐部。'}
-    ],
-    story:[
-      'The school media club is preparing a big show.',
-      'It will [have something to do with] [communication] and technology.',
-      'The [judge] will watch and [present] the awards.',
-      'We will [compete in the final for the first prize].',
-      'You can [hire headphones and chargers] if you need them.',
-      'There will be [reasonably priced refreshments] and drinks.',
-      'Tickets [will be available] online and at the door.',
-      'A new [tablet] is [on sale] as a prize.',
-      'Please [consider] joining us for [the rest] of the afternoon.',
-      'Can you keep a [secret]? The winner is a surprise!'
-    ],
-    storyZh:'学校媒体俱乐部正在准备一场大型演出。它将与沟通和技术有关。评委将观看并主持颁奖。我们将在决赛中竞争第一名。如果你需要，可以租用头戴式耳机和充电器。会有价格合理的饮品茶点。门票将可在网上和门口获得。一台新平板电脑作为奖品有售。请考虑加入我们，度过下午剩余部分。你能保守秘密吗？获胜者是个惊喜！',
-    quizzes:[
-      {s:'Does this ___ the new project?', a:'have something to do with', h:'与...有关'},
-      {s:'Good ___ is important in a team.', a:'communication', h:'沟通；交流'},
-      {s:'I will finish ___ of the work tomorrow.', a:'the rest', h:'剩余部分'},
-      {s:'Can you keep a ___?', a:'secret', h:'秘密'},
-      {s:'The ___ will choose the winner.', a:'judge', h:'评委'},
-      {s:'She will ___ the show tonight.', a:'present', h:'主持'},
-      {s:'The new tablet is ___ now.', a:'on sale', h:'有售；上市'},
-      {s:'I read books on my ___.', a:'tablet', h:'平板电脑'},
-      {s:'They will ___.', a:'compete in the final for the first prize', h:'在决赛中竞争第一名'},
-      {s:'There will be ___ at the event.', a:'reasonably priced refreshments', h:'价格合理的饮品茶点'},
-      {s:'Tickets ___ at the door.', a:'will be available', h:'将可获得'},
-      {s:'You can ___ at the desk.', a:'hire headphones and chargers', h:'租用头戴式耳机和充电器'},
-      {s:'Please ___ joining our club.', a:'consider', h:'考虑'}
-    ]
-  }
-];
 
 
 
@@ -3531,7 +2785,6 @@ function renderLogin(){
   }
 }
 
-
 function askPassword(account){
   openModal(`
     <div style="text-align:center;margin-bottom:18px">
@@ -3544,32 +2797,71 @@ function askPassword(account){
     <div class="field">
       <input type="password" id="pwdInput" class="text-input" placeholder="请输入密码" maxlength="30" style="text-align:center;font-size:18px">
     </div>
-    <div class="form-err" id="pwdErr" style="margin-top:10px;min-height:18px"></div>
+    <div class="form-err" id="pwdErr" style="margin-top:10px;min-height:18px;color:#ff4d4f"></div>
     <button class="btn primary" id="btnLoginSubmit" style="margin-top:6px">进入</button>
     <button class="btn ghost small" id="btnPwdCancel" style="margin-top:10px">取消</button>
   `);
 
   const input = document.getElementById('pwdInput');
   const err = document.getElementById('pwdErr');
+  const btn = document.getElementById('btnLoginSubmit');
 
-  const doSubmit = () => {
+  const doSubmit = async () => {
     const v = input.value;
     if (!v) { err.textContent = '请输入密码'; Sfx.error(); return; }
-    if (v !== account.pwd) {
-      err.textContent = '密码不对，再试试'; Sfx.error();
-      input.value = ''; input.focus(); return;
+    
+    // 防止重复点击
+    btn.disabled = true;
+    btn.textContent = '验证中...';
+    err.textContent = '';
+
+    // 🌟 核心改造：呼叫 Supabase 官方 Auth 验证密码
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: account.authEmail, // 在 BASE_ACCOUNTS 里绑定的邮箱
+      password: v
+    });
+
+    if (error) {
+      err.textContent = '密码不对，再试试'; 
+      Sfx.error();
+      input.value = ''; 
+      input.focus();
+      btn.disabled = false;
+      btn.textContent = '进入';
+      return;
     }
 
-    // ★ 依然保留 2 台设备锁死检查（使用 phone 而不是 id）
-    const devCheck = checkDeviceAllowed(account.id);
-    if (!devCheck.ok) {
-      err.innerHTML = '⚠️ ' + esc(devCheck.reason) + '<br><span style="font-size:11px">请联系管理员解绑</span>';
-      Sfx.error(); return;
-    }
-    if (devCheck.isNew) bindDevice(account.id);
+    // 🌟 验证成功，拿到官方生成的真实 UUID
+    const realUUID = data.user.id;
+
+            // ★ 呼叫云端 API 检查并绑定设备
+        const fp = getDeviceFp(); // 获取你原本生成的设备指纹
+        const { data: devCheck, error: devErr } = await supabase.rpc('verify_and_bind_device', {
+            p_device_fp: fp
+        });
+
+        if (devErr || !devCheck || !devCheck.ok) {
+            err.innerHTML = '⚠️ ' + esc(devCheck?.reason || '设备校验失败') + '<br><span style="font-size:11px">请联系管理员解绑</span>';
+            Sfx.error();
+            await supabase.auth.signOut(); // 锁定失败，清除登录状态
+            btn.disabled = false;
+            btn.textContent = '进入';
+            return;
+        }
+        // 注意：不需要再判断 bindDevice 了，因为 RPC 里面已经自动处理了插入。
     
-    closeModal(); Sfx.finish();
-    doLogin(account);
+    // 可选：去 profiles 表把最新的配额拉下来
+    const { data: profile } = await supabase.from('profiles').select('*').eq('id', realUUID).single();
+
+    closeModal(); 
+    Sfx.finish();
+    
+    // 将原本的前端 account 信息，混合真实的 UUID 和 数据库数据，传给 doLogin
+    doLogin({
+      ...account,
+      id: realUUID,      // 覆盖掉原来的 u001
+      dbData: profile    // 把数据库里的最新资料带过去
+    });
   };
 
   document.getElementById('btnLoginSubmit').onclick = doSubmit;
@@ -3577,7 +2869,6 @@ function askPassword(account){
   input.onkeydown = e => { if (e.key === 'Enter') doSubmit(); };
   setTimeout(() => input.focus(), 120);
 }
-
 
 function doLogin(account){
   let rtUser = findRuntimeUser(account.id);
@@ -4763,7 +4054,7 @@ const GAME_REGISTRY = {
   match: { name: '连连看', desc: '中英配对消除', icon: '🔗', script: 'game-match.js', initFn: 'startMatchGame' },
   sheep: { name: '趣味消词', desc: '可调难度 · 可全词库', icon: '🧩', script: 'game-sheep.js', initFn: 'showSheepSetup' },
   minecraft: { name: '单词矿工', desc: '多层矿山 · 采集稀有矿物', icon: '⛏️', script: 'game-minecraft.js', initFn: 'showMcDifficulty' },
-  scenario: { name: '场景故事', desc: '分主题探索 · 语境中学单词', icon: '📖', script: 'game-scenario.js', initFn: 'startScenarioGame' },
+ 
   whack: {
     name: '单词地鼠', desc: '眼疾手快 · 敲出正确释义',
     icon: `<svg viewBox="0 0 64 64" width="52" height="52" style="filter: drop-shadow(0 3px 5px rgba(0,0,0,0.15));"><rect x="10" y="4" width="44" height="24" rx="4" fill="#fff5e1" stroke="#8b5a2b" stroke-width="3"/><text x="32" y="22" font-family="sans-serif" font-size="14" font-weight="900" fill="#5c3a1e" text-anchor="middle">词</text><circle cx="14" cy="36" r="6" fill="#fbbf24"/><circle cx="50" cy="36" r="6" fill="#fbbf24"/><ellipse cx="32" cy="46" rx="20" ry="16" fill="#fbbf24"/><ellipse cx="32" cy="48" rx="12" ry="8" fill="#fff"/><circle cx="24" cy="42" r="2.5" fill="#000"/><circle cx="40" cy="42" r="2.5" fill="#000"/></svg>`,
@@ -5024,16 +4315,17 @@ function renderStudentCards(){
       Sfx.click();openStudentDetail(u);
     });
     card.querySelectorAll('[data-act]').forEach(btn=>{
-  btn.addEventListener('click',(e)=>{
+  btn.addEventListener('click', async (e)=>{
     e.stopPropagation();Sfx.click();
     const act=btn.dataset.act;
     if(act==='edit') editUser(u);
     else if(act==='reset') resetUser(u);
     else if(act==='unbind'){
       if(!confirm(`确定解绑「${u.name}」的所有设备吗？\n解绑后他可以在任意设备上登录。`))return;
-      unbindDevice(u.id);
-      Sfx.finish();
-      alert(`✅ 已解绑「${u.name}」的设备`);
+// 呼叫云端 API 删除该用户所有绑定的设备
+await supabase.rpc('unbind_user_devices', { p_target_id: u.id });
+Sfx.finish();
+alert(`✅ 已解绑「${u.name}」的设备`);
     }
   });
 });
@@ -5777,6 +5069,21 @@ const CORRECT_PHRASES=['太棒了！','答对啦！','真厉害！','正确！',
 const COMBO_PHRASES=['连击好爽！','你太强了！','无人能挡！','继续冲！','超神了！'];
 const WRONG_PHRASES=['没关系，再试试！','记住它，下次一定行！','别灰心，快看答案～','加油，小狐相信你！'];
 
+function formatAiSentence(text, targetWord) {
+  return text.split(/(\s+)/).map(part => {
+    if (/^\s+$/.test(part)) return part;
+    const match = part.match(/^([a-zA-Z'-]+)(.*)$/);
+    if (match) {
+      const word = match[1];
+      const punctuation = match[2];
+      const isTarget = word.toLowerCase() === targetWord.toLowerCase();
+      const cls = isTarget ? 'ai-word target-word' : 'ai-word';
+      return `<span class="${cls}" data-word="${word}">${word}</span>${punctuation}`;
+    }
+    return part;
+  }).join('');
+}
+
 function renderLearn(){
   const item=session.queue[session.idx];
   const w=getWord(item.en);
@@ -5788,8 +5095,7 @@ function renderLearn(){
   if(session.combo>=2) scoreEl.innerHTML=`<span class="combo-fire">🔥 x${session.combo}</span>`;
   else scoreEl.innerHTML='';
 
-  // ===== 1. 新词预览模式 =====
-  if(item.isNew && !item.previewed){
+    if(item.isNew && !item.previewed){
     card.innerHTML=`
       <div class="preview">
         <div class="badge">✨ 新 词 ✨</div>
@@ -5799,19 +5105,18 @@ function renderLearn(){
           <span class="tag" style="background:${GROUP_COLOR[w.g] || '#8b93b8'}22;color:${GROUP_COLOR[w.g] || '#8b93b8'}">${w.g}</span>
         </div>
         
-        <!-- 👇 新增的 AI 造句区域 -->
+        <!-- AI 造句区域 -->
         <div style="margin-top:16px;">
           <button class="btn ghost small" id="btnAiExample" style="width:auto;padding:8px 20px;display:inline-block;border-color:var(--purple);color:var(--purple);font-weight:900;">🤖 AI 老师造句</button>
           <div id="aiExampleBox" style="display:none;margin-top:14px;background:rgba(167,139,250,.1);border:1px dashed var(--purple);border-radius:12px;padding:14px;text-align:left;font-size:14px;line-height:1.6;animation:fadeIn .3s ease;"></div>
         </div>
-        <!-- 👆 新增结束 -->
 
         <button class="btn primary" id="btnGot" style="margin-top:22px">✨ 我记住了</button>
       </div>`;
     say('认识一个新朋友！');
     setTimeout(()=>Speaker.speak(w.en),180);
     
-    // AI 造句按钮事件
+    // 👇 绑定 AI 造句按钮事件
     const btnAi = $('#btnAiExample');
     if(btnAi){
       btnAi.onclick = async () => {
@@ -5828,14 +5133,106 @@ function renderLearn(){
           if (error) throw error;
           if (data.error) throw new Error(data.error);
           
+          // 清除 AI 可能带有的 markdown 标记
+          let cleanEn = data.en.replace(/\*\*|<[^>]+>/g, '');
+          
           box.style.display = 'block';
           box.innerHTML = `
-            <div style="color:var(--purple);font-weight:900;font-size:12px;margin-bottom:6px;">✨ AI 语境记忆 ${data.cached ? '(极速缓存)' : ''}</div>
-            <div style="font-weight:900;color:var(--text);margin-bottom:6px;font-size:15px;">${data.en}</div>
+            <div style="color:var(--purple);font-weight:900;font-size:12px;margin-bottom:6px;">✨ AI 语境记忆 ${data.cached ? '(极速缓存)' : ''} <span style="font-weight:700;color:var(--muted);font-size:10px;margin-left:6px;">(点击单词可发音查义)</span></div>
+            <div class="ai-sentence" style="font-size:15px; margin-bottom:6px;">${formatAiSentence(cleanEn, w.en)}</div>
             <div style="color:var(--muted);font-weight:700;">${data.zh}</div>
           `;
           
-          if (window.Speaker) window.Speaker.speak(data.en);
+          // 自动朗读整个句子
+          if (window.Speaker) window.Speaker.speak(cleanEn);
+
+          // 绑定点击查词事件
+          box.querySelectorAll('.ai-word').forEach(wordSpan => {
+            wordSpan.onclick = (e) => {
+              e.stopPropagation();
+              const wordStr = wordSpan.dataset.word;
+              
+              if (window.Speaker) window.Speaker.speak(wordStr, 0.82);
+              
+              const dictWord = typeof getWord === 'function' ? getWord(wordStr) : null;
+              
+              if (dictWord) {
+                openModal(`
+                  <div class="modal-title">📖 单词释义</div>
+                  <div style="text-align:center;margin-bottom:14px;">
+                    ${renderWordCardBlock(dictWord.en, true)}
+                    <div class="zh-big" style="margin-top:14px;font-size:22px;">${esc(dictWord.zh)}</div>
+                    <button class="btn ghost small" id="modalSpeakBtn" style="margin-top:12px;width:auto;padding:8px 20px;">🔊 听发音</button>
+                  </div>
+                  <button class="btn primary" onclick="closeModal()">我知道了</button>
+                `);
+                document.getElementById('modalSpeakBtn').onclick = () => Speaker.speak(dictWord.en, 0.8);
+              } else {
+                // 如果本地词库没有，让 AI 现查！
+                openModal(`
+                  <div class="modal-title">🔍 拓展词汇</div>
+                  <div style="text-align:center;padding:20px 0;">
+                    <div style="font-size:32px;font-weight:900;color:var(--text);">${esc(wordStr)}</div>
+                    <div id="aiDictResult" style="font-size:14px;color:var(--muted);font-weight:700;margin-top:12px;">
+                      ⏳ AI 老师查字典中...
+                    </div>
+                    <button class="btn ghost small" id="modalAiDictSpeakBtn" style="margin-top:16px;width:auto;padding:8px 20px;display:none;">🔊 听发音</button>
+                  </div>
+                  <button class="btn primary" onclick="closeModal()">返回句子</button>
+                `);
+
+                const speakBtn = document.getElementById('modalAiDictSpeakBtn');
+                if (speakBtn) {
+                  speakBtn.onclick = () => {
+                    Sfx.click();
+                    // 👇 直接调用浏览器原生语音，确保 100% 发声
+                    if ('speechSynthesis' in window) {
+                      window.speechSynthesis.cancel(); // 停掉之前的
+                      const u = new SpeechSynthesisUtterance(wordStr);
+                      u.lang = 'en-US';
+                      u.rate = 0.8;
+                      window.speechSynthesis.speak(u);
+                    } else if (window.Speaker) {
+                      window.Speaker.speak(wordStr, 0.8); // 万一浏览器不支持，再用旧方案
+                    }
+                  };
+                }
+
+                sb.functions.invoke('quick-service', {
+                  body: { word: wordStr, action: 'dict' }
+                }).then(({ data, error }) => {
+                  const resultEl = document.getElementById('aiDictResult');
+                  if (!resultEl) return;
+                  
+                  if (error || data.error) {
+                    resultEl.innerHTML = '<span style="color:var(--red);">查询失败，请检查网络</span>';
+                    return;
+                  }
+                  
+                                   resultEl.innerHTML = `
+                    <div style="font-family:monospace;font-size:16px;color:#3b9edb;margin-bottom:8px;">${data.ph || ''}</div>
+                    <div style="font-size:18px;color:var(--text);font-weight:900;">${data.zh || '无释义'}</div>
+                  `;
+                  
+                  if (speakBtn) speakBtn.style.display = 'inline-block';
+
+                  // 👇 查完自动读一遍
+                  if ('speechSynthesis' in window) {
+                    window.speechSynthesis.cancel();
+                    const u = new SpeechSynthesisUtterance(wordStr);
+                    u.lang = 'en-US';
+                    u.rate = 0.8;
+                    window.speechSynthesis.speak(u);
+                  }
+
+                }).catch(err => {
+                  console.error(err);
+                  const resultEl = document.getElementById('aiDictResult');
+                  if (resultEl) resultEl.innerHTML = '<span style="color:var(--red);">网络开小差了</span>';
+                });
+              }
+            };
+          });
           
         } catch (err) {
           console.error('AI 造句失败:', err);
@@ -6518,5 +5915,38 @@ window.addEventListener('pagehide', () => {
     </script>
     <script src="game-hud.js"></script>
 <script src="word-pool.js"></script>
+
+<style>
+/* ══════════ AI 逐词点读样式 ══════════ */
+.ai-sentence {
+  display: inline; /* 改为 inline，让标点符号跟单词连贯 */
+  line-height: 1.8;
+}
+.ai-word {
+  cursor: pointer;
+  display: inline-block;
+  padding: 0 2px;
+  border-radius: 4px;
+  transition: transform 0.1s, color 0.1s, background 0.1s;
+  font-weight: 700;
+  color: var(--text);
+  border-bottom: 1px dashed rgba(107, 203, 255, 0.5);
+}
+/* 目标词的高亮背景 */
+.ai-word.target-word {
+  color: #6B5B7B;
+  font-weight: 900;
+  border-bottom: none;
+  background: linear-gradient(180deg, transparent 62%, rgba(180,168,200,.45) 62%);
+}
+/* 点击时的动效 */
+.ai-word:active {
+  transform: scale(0.9);
+  color: var(--pink) !important;
+  background: rgba(255, 107, 157, 0.1);
+}
+</style>
+
+
 </body>
 </html>

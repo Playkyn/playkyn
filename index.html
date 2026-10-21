@@ -726,6 +726,7 @@ const supabaseUrl = 'https://zuhymqoxyqgpkxoaygtl.supabase.co';
 const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp1aHltcW94eXFncGt4b2F5Z3RsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE4OTkwOTgsImV4cCI6MjEwNzQ3NTA5OH0.T5-KpCzs69mh3K6DNvwo_LdgLnKbos6PoaI7j9tgVZE';
 const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
 
+
 /* ════════ 弹窗 ════════ */
 function openModal(html){
   document.getElementById('modalCard').innerHTML = html;
@@ -823,9 +824,26 @@ document.getElementById('navLogin').onclick = async ()=>{
     if (error) {
       errEl.style.color = '#DC2626';
       errEl.textContent = error.message;
-    } else {
-      closeModal();
-      setTimeout(()=>{ window.location.href = 'wordgame.html'; }, 300);
+     } else {
+        // 1. 生成简易设备指纹
+       const fp = navigator.userAgent + '-' + window.screen.width + 'x' + window.screen.height;
+        
+        // 2. 呼叫云端 API 检查并绑定设备
+        const { data: devCheck, error: devErr } = await sb.rpc('verify_and_bind_device', {
+            p_device_fp: fp
+        });
+
+        // 3. 如果被拦截，或者报错
+        if (devErr || !devCheck || !devCheck.ok) {
+            errEl.style.color = '#DC2626';
+            errEl.textContent = '⚠️ ' + (devCheck?.reason || '设备校验失败，请联系管理员解绑');
+            await sb.auth.signOut(); // 强制退出登录，清除本地状态
+            return; // 🚨 拦截成功，直接 return，不执行下面的跳转！
+        }
+
+        // 4. 设备校验通过，正常进入游戏
+        closeModal();
+        setTimeout(()=>{ window.location.href = 'wordgame.html'; }, 300);
     }
   };
 

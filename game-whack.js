@@ -182,8 +182,13 @@
     injectStyle();
 
     let rawWords = options.words;
-    if (!rawWords && window.WORDS && Array.isArray(window.WORDS)) {
-      rawWords = window.WORDS;
+    if (!rawWords || rawWords.length === 0) {
+      // 优先使用页面提供的动态词库（取 30 个词以便地鼠游戏随机抽取）
+      if (typeof window.getGameWords === 'function') {
+        rawWords = window.getGameWords(30, 'all');
+      } else if (window.WORDS && Array.isArray(window.WORDS)) {
+        rawWords = window.WORDS;
+      }
     }
     const words = normalizeWords(rawWords);
 
@@ -475,7 +480,15 @@
     }
     container.innerHTML = '';
     
-    instance = createGame(container, { words: window.WORDS });
+      // 在这里调用动态取词
+    let gameWords = null;
+    if (typeof window.getGameWords === 'function') {
+      gameWords = window.getGameWords(30, 'all');
+    } else {
+      gameWords = window.WORDS;
+    }
+    
+    instance = createGame(container, { words: gameWords });
 
     const backBtn = document.getElementById('btnWhackBack');
     if (backBtn) {

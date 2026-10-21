@@ -1,22 +1,14 @@
-// 👇 每次上线更新代码，务必把 v1.1.1 改成 v1.1.2、v1.1.3 ...
-const CACHE_NAME = 'playkyn-v1.1.1';
+const CACHE_NAME = 'playkyn-v1.2.0'; // 👈 必须修改版本号！
 
-// 👇 需要离线缓存的所有文件清单（请确保这些文件真实存在）
 const PRECACHE_ASSETS = [
-  // 页面基础
   './',
   './index.html',
   './user.html',
   './wordgame.html',
   './membership.js',
-  
-  // 核心架构与公共组件
   './game-registry.js',
-  './game-access.js',
   './game-hud.js',
   './word-pool.js',
-
-  // --- 老游戏（按需核对文件名，确保没写错）---
   './game-runner.js',
   './game-guardian.js',
   './game-ai.js',
@@ -27,32 +19,25 @@ const PRECACHE_ASSETS = [
   './game-scenario.js',
   './game-whack.js',
   './game-flashmatch.js',
-
-  // --- 新游戏 ---
   './game-racer.js',
-  // ⚠️ 等你写好了下面两个文件，记得删掉前面的 // 符号
-  // './game-shooter.js',
-  // './game-maze.js'
+  './game-shooter.js',
+  './game-maze.js'
 ];
 
-// 1. 安装阶段：把清单里的文件全部下载并缓存
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      console.log('正在预缓存离线游戏资源...');
       return cache.addAll(PRECACHE_ASSETS);
-    }).then(() => self.skipWaiting()) // 强制新 SW 立刻接管
+    }).then(() => self.skipWaiting())
   );
 });
 
-// 2. 激活阶段：清理旧版本缓存
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
-            console.log('清理旧缓存:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -61,34 +46,44 @@ self.addEventListener('activate', e => {
   );
 });
 
-// 3. 拦截请求阶段：优先用缓存，断网也能秒开游戏
 self.addEventListener('fetch', e => {
-  // 只处理 GET 请求，避开接口的 POST 等操作
+  // 只处理 GET 请求
   if (e.request.method !== 'GET') return;
+  // 忽略非 http/https 请求（比如浏览器插件请求）
+  if (!e.request.url.startsWith('http')) return;
 
   e.respondWith(
     caches.match(e.request).then(cachedResponse => {
-      // 如果缓存里有（说明是静态文件），直接瞬间返回，并顺便静默发个网络请求更新它
+      // 如果缓存里有（比如 JS、CSS、HTML），瞬间返回缓存，同时静默去后台拉最新版
       if (cachedResponse) {
         fetch(e.request).then(networkResponse => {
-          if (networkResponse && networkResponse.status === 200) {
-            caches.open(CACHE_NAME).then(cache => cache.put(e.request, networkResponse));
+          // 🚨 核心修复：只有状态码为 200 且不是重定向的响应，才能放入缓存！
+          if (networkResponse && networkResponse.status === 200 && !networkResponse.redirected) {
+            const responseClone = networkResponse.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(e.request, responseClone));
           }
-        }).catch(() => { /* 断网时静默失败，不影响体验 */ });
-        
+        }).catch(() => {}); // 断网静默失败
         return cachedResponse;
       }
 
-      // 如果缓存里没有（比如是新文件或 API 请求），就去网络拿，拿到了顺手存下来
+      // 缓存没有，直接去网络拿
       return fetch(e.request).then(networkResponse => {
-        if (networkResponse && networkResponse.status === 200 && e.request.url.match(/\.(js|css|html|png|jpg|svg|woff2)$/)) {
+        // 🚨 核心修复：一样要判断 redirected，重定向直接返回，千万别试图缓存
+        if (!networkResponse || networkResponse.status !== 200 || networkResponse.redirected) {
+          return networkResponse;
+        }
+        
+        // 如果是静态文件，顺手存下来
+        if (e.request.url.match(/\.(js|css|html|png|jpg|svg|woff2|json)$/)) {
           const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(e.request, responseClone));
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(e.request, responseClone);
+          });
         }
         return networkResponse;
       }).catch(() => {
-        // 网络也挂了，没有缓存，返回 404 页面或者占位
-        return new Response('断网且无缓存', { status: 404 });
+        // 断网且没缓存，返回 404
+        return new Response('Offline', { status: 404 });
       });
     })
   );
