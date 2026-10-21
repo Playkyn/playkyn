@@ -362,9 +362,9 @@ let __currentUser = null;
     openUploadModal();
   };
 // ★ 渲染学习报告 + 学习设置
-document.getElementById('content').insertAdjacentHTML('beforeend',
-  renderStudyReport(user.id) + renderSettingsCard(profile)
-);
+  document.getElementById('content').insertAdjacentHTML('beforeend',
+    renderDeviceCard() + renderStudyReport(user.id) + renderSettingsCard(profile)
+  );
 
 // ★ 绑定设置卡片的事件
 const rng = document.getElementById('dailyRange');
@@ -1283,6 +1283,48 @@ function renderSettingsCard(profile){
         font-weight:600">建议从每天 10 个开始，坚持比数量更重要</div>
     </div>`;
 }
+/* ════════ 设备管理卡片 ════════ */
+function renderDeviceCard(){
+  return `
+    <div style="border:2px dashed #FF4D8D;border-radius:14px;
+      padding:24px;background:#FFF0F5;margin-top:24px">
+      <h3 style="margin:0 0 8px;font-size:16px;font-weight:700; color:#FF4D8D;">
+        🛡️ 账号设备管理
+      </h3>
+      <div style="font-size:13px;color:#8A8A8A;font-weight:600; line-height:1.6; margin-bottom:16px;">
+        为了保护您的学习数据，当前账号最多绑定 <b>2 台</b> 设备。<br>
+        如果您更换了手机或电脑，请点击下方按钮解除绑定。
+      </div>
+      <button class="btn danger" id="btnUnbind" style="width:100%; border-color:#FF4D8D; color:#FF4D8D;">
+        🔓 解除所有设备绑定
+      </button>
+    </div>
+  `;
+}
+
+// 绑定解绑按钮事件
+document.addEventListener('click', async (e) => {
+  if(e.target && e.target.id === 'btnUnbind'){
+    if(!confirm('⚠️ 确定要解除当前账号的所有设备绑定吗？\n解绑后您可以前往新设备重新登录。')) return;
+    
+    const btn = e.target;
+    btn.textContent = '解绑中...';
+    btn.disabled = true;
+
+    try{
+      const { error } = await sb.rpc('unbind_user_devices', { p_target_id: __currentUser.id });
+      if(error) throw error;
+      
+      alert('✅ 已成功解除所有设备的绑定！');
+      btn.textContent = '🔓 解除所有设备绑定';
+      btn.disabled = false;
+    }catch(err){
+      alert('解绑失败：' + err.message);
+      btn.textContent = '🔓 解除所有设备绑定';
+      btn.disabled = false;
+    }
+  }
+});
 </script>
 
 </body>
