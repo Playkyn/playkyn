@@ -541,14 +541,27 @@ input[type=range]:disabled::-webkit-slider-thumb{background:#ccc;cursor:not-allo
 
 /* ══════════ 游戏样式 ══════════ */
 .game-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-.game-card{background:linear-gradient(160deg,rgba(255,255,255,.95),rgba(255,236,210,.9));
-  border:2px solid rgba(255,255,255,.95);border-radius:20px;padding:20px 12px;
-  text-align:center;cursor:pointer;transition:.18s;box-shadow:0 6px 18px rgba(255,107,157,.15)}
+.game-card{
+  background:linear-gradient(160deg,rgba(255,255,255,.95),rgba(255,236,210,.9));
+  border:2px solid rgba(255,255,255,.95);border-radius:20px;
+  padding:20px 12px; cursor:pointer;transition:.18s;
+  box-shadow:0 6px 18px rgba(255,107,157,.15);
+  
+  /* 🌟 新增：强制垂直居中，防止图标乱跑 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden; /* 防止内容溢出边界 */
+}
+
 .game-card:active{transform:scale(.96)}
 .game-card:hover{border-color:var(--pink);box-shadow:0 10px 28px rgba(255,107,157,.25)}
-.game-card .gi{font-size:44px;line-height:1}
-.game-card .gn{font-size:15px;font-weight:900;color:var(--text);margin-top:10px}
-.game-card .gd{font-size:11px;color:var(--muted);font-weight:700;margin-top:4px;line-height:1.4}
+
+/* 🌟 优化图标和文字的间距 */
+.game-card .gi{font-size:44px;line-height:1; display: flex; justify-content: center; align-items: center;}
+.game-card .gn{font-size:15px;font-weight:900;color:var(--text);margin-top:10px; text-align: center;}
+.game-card .gd{font-size:11px;color:var(--muted);font-weight:700;margin-top:4px;line-height:1.4; text-align: center;}
 
 .duel-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
 .duel-side{flex:1;text-align:center;position:relative}
@@ -3012,12 +3025,37 @@ function showMasterPanel(){
    用户菜单
    ═══════════════════════════════════════════════════════════ */
 function openUserMenu(){
-  // 直接跳转到全屏个人中心
-  window.location.href = 'user.html';
+  openModal(`
+    <div style="text-align:center;margin-bottom:18px">
+      <div style="font-size:56px;line-height:1">${esc(currentUser.avatar)}</div>
+      <div style="font-size:17px;font-weight:900;margin-top:8px">${esc(currentUser.name)}</div>
+      <div style="margin-top:6px"><span class="badge-role ${currentUser.role}">${isParent()?'家长':'学生'}</span></div>
+    </div>
+    
+    <!-- 1. 进入个人中心按钮 -->
+    <button class="btn primary" id="btnGoProfile" style="margin-bottom:10px">📊 进入个人中心</button>
+    
+    <!-- 2. 退出登录按钮 -->
+    <button class="btn ghost small" id="menuLogout">🚪 退出登录</button>
+  `);
+
+  // 绑定跳转个人中心事件
+  $('#btnGoProfile').onclick = () => {
+    try { Sfx.click(); } catch(e) {}
+    window.location.href = 'user.html';
+  };
+  
+  // 绑定退出登录事件
+  $('#menuLogout').onclick = () => {
+    try { Sfx.click(); } catch(e) {}
+    closeModal();
+    logout(); // 调用游戏里自带的退出逻辑
+  };
 }
 
-
-
+// 重新绑定头像点击事件
+$('#userChipHome').onclick = () => { openUserMenu(); };
+$('#userChipGoal').onclick = () => { openUserMenu(); };
 /* ═══════════════════════════════════════════════════════════
    目标页
    ═══════════════════════════════════════════════════════════ */
@@ -4170,10 +4208,7 @@ function showGamesScreen(){
     const card = document.createElement('div');
     card.className = 'game-card';
     
-    // 如果是矿工或故事，就让它占满一整行
-    if (gameId === 'minecraft' || gameId === 'scenario') {
-      card.style.gridColumn = '1 / -1';
-    }
+    
 
     card.innerHTML = `
       <div class="gi">${game.icon}</div>
