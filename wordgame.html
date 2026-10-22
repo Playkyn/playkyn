@@ -1267,9 +1267,9 @@ body.skin-boy .weak-tag{
       </div>
       <div id="sumLevelUp" style="margin-top:16px"></div>
       <div class="muted small" style="text-align:center;margin-top:16px;font-weight:700" id="sumNext"></div>
-      <button class="btn primary" id="btnBackHome" onclick="goHome()" style="margin-top:22px">🏠 返回主页</button>
+      <button class="btn primary" id="btnBackHome" onclick="window.location.href='wordgame.html'" style="margin-top:22px">🏠 返回主页</button>
       <button class="btn ghost small" id="btnSummaryGame" style="margin-top:10px">🎮 玩小游戏</button>
-      <button class="btn ghost small" id="btnSummaryTopic" onclick="if(state.goal){renderGoal();showScreen('s-goal');}" style="margin-top:10px">🔄 切换主题</button>
+      <button class="btn ghost small" id="btnSummaryTopic" onclick="window.location.href='wordgame.html'" style="margin-top:10px">🔄 切换主题</button>
     </div>
   </section>
 
@@ -5348,6 +5348,25 @@ function answerQuestion(ok){
   state.groupStats[w.g]=state.groupStats[w.g]||{ok:0,bad:0};
   if(ok) state.groupStats[w.g].ok++; else state.groupStats[w.g].bad++;
   state.log.push({en:item.en,ok,t:vnow(),mode:q.mode});
+   // 🌟 强行记录当天的答题时长和历史
+  const todayStr = getLocalDateStr();
+  if(!state.history) state.history = [];
+  let todayRecord = state.history.find(r => r.date === todayStr);
+  
+  if (!todayRecord) {
+    // 如果今天还没有记录，就新建一条
+    todayRecord = { date: todayStr, duration: 0, total: 0, correct: 0, newCount: 0 };
+    state.history.push(todayRecord);
+  }
+  
+  // 累加数据
+  todayRecord.total++;
+  if (ok) todayRecord.correct++;
+  todayRecord.duration += 10000; // 每答一题大约算 10 秒（10000毫秒）
+  if (item.isNew) {
+    todayRecord.newCount++;
+    item.isNew = false; // 记录过一次后，就不再是新词
+  }
   if(state.log.length>800) state.log.shift();
   if(!ok) session.requeue.push({en:item.en,isNew:false,q:null,previewed:true});
   save();
@@ -5445,7 +5464,8 @@ function finishSession(){
     if (typeof sprintSaveTimer !== 'undefined' && sprintSaveTimer) clearTimeout(sprintSaveTimer);
     localStorage.removeItem('wq_sprint_progress');
   }
-  if(!session.isSprint) recordSession();
+  // 🌟 无论是不是冲刺，都计入学习记录
+recordSession(); 
   const total=session.correct+session.wrong;
   const acc=total?Math.round(session.correct/total*100):0;
 

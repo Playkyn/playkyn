@@ -2,6 +2,7 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="theme-color" content="#ffffff">
 <title>我的账号 · Playkyn</title>
@@ -259,15 +260,25 @@ function loadStudyData(userId){
 function renderStudyReport(userId){
   const state = loadStudyData(userId);
   
-  // 🌟 获取本地时间的 YYYY-MM-DD (修复时区问题)
-  const today = (function() {
-    const d = new Date();
-    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  })();
+  // 日期计算
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  
+  const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay(); 
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - dayOfWeek + 1);
+  monday.setHours(0,0,0,0);
+  
+  const weekDateStrs = [];
+  for(let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    weekDateStrs.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+  }
 
   if(!state || !state.history || state.history.length === 0){
     return `
-      <div class="card" style="text-align:center; padding:40px 20px; margin-top:24px; border:1px solid #EBEBEB; border-radius:14px; background:#fff;">
+      <div style="text-align:center; padding:40px 20px; margin-top:24px; border:1px solid #EBEBEB; border-radius:14px; background:#fff;">
         <div style="font-size:42px;margin-bottom:8px">📊</div>
         <div style="font-size:15px;font-weight:900;color:#0A0A0A;margin-bottom:6px">学习报告</div>
         <div style="font-size:13px;color:#8A8A8A;line-height:1.6">还没有学习记录，去游戏里学一轮吧～</div>
@@ -277,48 +288,30 @@ function renderStudyReport(userId){
   const history = state.history || [];
   const bank = state.bank || {};
   
-  // 今日数据
-  const todayRecs = history.filter(r => r.date === today);
+  // 汇总数据
+  const todayRecs = history.filter(r => r.date === todayStr);
   const todayDur = todayRecs.reduce((a,r) => a + r.duration, 0);
   const todayTotal = todayRecs.reduce((a,r) => a + r.total, 0);
   const todayCorrect = todayRecs.reduce((a,r) => a + r.correct, 0);
   const todayNew = todayRecs.reduce((a,r) => a + r.newCount, 0);
 
-  // 近7天数据
-  const days = [];
-  for(let i = 6; i >= 0; i--){
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-    const recs = history.filter(r => r.date === ds);
-    days.push({
-      label: (d.getMonth()+1) + '/' + d.getDate(),
-      dur: recs.reduce((a,r) => a + r.duration, 0)
-    });
-  }
-  const maxDur = Math.max(1, ...days.map(d => d.dur));
-  const weekDur = days.reduce((a,d) => a + d.dur, 0);
+  const weekRecs = history.filter(r => weekDateStrs.includes(r.date));
+  const weekDur = weekRecs.reduce((a,r) => a + r.duration, 0);
+  const weekTotal = weekRecs.reduce((a,r) => a + r.total, 0);
+  const weekCorrect = weekRecs.reduce((a,r) => a + r.correct, 0);
+  const weekNew = weekRecs.reduce((a,r) => a + r.newCount, 0);
+  const activeDays = [...new Set(weekRecs.map(r => r.date))].length;
 
-  // 累计与易错词
+  // 里程碑
+  let milestoneMsg = "本周还没有开始学习哦，快去破冰吧！", milestoneIcon = "🐣";
+  if(activeDays === 7) { milestoneMsg = "满勤达人！这周一天都没落下！"; milestoneIcon = "👑"; }
+  else if(weekNew >= 100) { milestoneMsg = "词汇大爆发！本周新词破百！"; milestoneIcon = "🚀"; }
+  else if(weekTotal >= 200) { milestoneMsg = "刷题狂魔！本周答题量破 200！"; milestoneIcon = "🔥"; }
+  else if(activeDays >= 4) { milestoneMsg = "稳步前进！保持节奏！"; milestoneIcon = "🏃"; }
+
   const learned = Object.values(bank).filter(b => b.seen > 0).length;
   const mastered = Object.values(bank).filter(b => b.m >= 0.7).length;
   const weak = Object.values(bank).filter(b => b.seen > 0 && b.m < 0.4).length;
-
-  const topWrongWords = Object.entries(bank)
-    .filter(([en, b]) => b.bad > 0)
-    .sort((a, b) => b[1].bad - a[1].bad)
-    .slice(0, 10)
-    .map(([en, b]) => ({ en, bad: b.bad }));
-
-  // 模块游玩情况
-  const gamesPlayed = state.game?.gamesPlayed || {};
-  const gameNames = {
-    ai: '🤖 人机对决', listen: '🎧 听音选图', match: '🔗 连连看', 
-    sheep: '🧩 趣味消词', minecraft: '⛏️ 单词矿工', scenario: '📖 场景故事',
-    runner: '🏃 单词跑酷', guardian: '🏰 守护王国', whack: '🔨 单词地鼠',
-    flashmatch: '🎴 记忆闪配', racer: '🏎️ 单词赛车', shooter: '🎯 单词射击', maze: '🗺️ 单词迷宫'
-  };
-  const playedList = Object.keys(gamesPlayed).filter(k => gamesPlayed[k]);
 
   const fmtDur = ms => {
     if(!ms || ms < 0) return '0 分';
@@ -329,86 +322,157 @@ function renderStudyReport(userId){
   };
 
   return `
-    <!-- 今日概览 -->
-    <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;">
-      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
-        <span>📅</span> 今日学习报告
-      </h3>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayDur > 0 ? fmtDur(todayDur) : '0 分'}</div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">⏱️ 学习时长</div>
+    <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;" id="report-container">
+      
+      <!-- Tab 切换 & 下载按钮 -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div style="display:flex; background:#F5F5F5; border-radius:8px; padding:4px;">
+          <button onclick="switchReportTab('day')" id="tab-day" style="padding:6px 16px; border:none; border-radius:6px; font-weight:700; font-size:13px; cursor:pointer; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#0A0A0A;">按天</button>
+          <button onclick="switchReportTab('week')" id="tab-week" style="padding:6px 16px; border:none; border-radius:6px; font-weight:700; font-size:13px; cursor:pointer; background:transparent; color:#8A8A8A;">按周</button>
         </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayTotal}</div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">📝 答题数</div>
-        </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayTotal ? Math.round(todayCorrect/todayTotal*100) + '%' : '0%'}</div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">🎯 正确率</div>
-        </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayNew}</div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">✨ 新学词</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 近7天趋势 -->
-    <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;">
-      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">📈 近 7 天学习趋势（共 ${fmtDur(weekDur)}）</h3>
-      <div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:6px 0;">
-        ${days.map(d => {
-          const h = Math.max(4, (d.dur / maxDur) * 100);
-          return `
-            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
-              <div style="width:100%;height:${h}%;background:${d.dur > 0 ? 'linear-gradient(180deg,#FFA751,#FF4D8D)' : '#F0F0F0'};border-radius:6px 6px 2px 2px;min-height:4px"></div>
-              <div style="font-size:9px;color:#8A8A8A;font-weight:700;margin-top:4px">${d.label}</div>
-            </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <!-- 词汇积累 & 游玩模块 -->
-    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top:24px;">
-      <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff;">
-        <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">📚 词汇积累</h3>
-        <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px;font-weight:700;">
-          <span style="color:#0A0A0A;">已学单词</span><span>${learned}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px;font-weight:700;color:#22c55e;">
-          <span>已掌握</span><span>${mastered}</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#ef4444;">
-          <span>需加强</span><span>${weak}</span>
-        </div>
+        <button onclick="downloadWeeklyReport()" id="btn-download-report" style="display:none; padding:6px 12px; border:1px solid #EBEBEB; background:#fff; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; color:#525252;">📥 下载周报</button>
       </div>
 
-      <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff;">
-        <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">🎮 探索模块</h3>
-        ${playedList.length > 0 ? `
-          <div style="display:flex;flex-wrap:wrap;gap:6px;">
-            ${playedList.map(g => `<span style="font-size:11px;background:#F0F7FF;color:#1677FF;padding:4px 8px;border-radius:6px;font-weight:700;">${gameNames[g] || g}</span>`).join('')}
+      <!-- 视图：按天 -->
+      <div id="view-day">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px; margin-bottom:16px;">
+          <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayDur > 0 ? fmtDur(todayDur) : '0 分'}</div>
+            <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">⏱️ 今日时长</div>
           </div>
-        ` : `<div style="font-size:12px;color:#8A8A8A;">尚未探索小游戏</div>`}
+          <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayTotal}</div>
+            <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">📝 今日答题</div>
+          </div>
+          <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayTotal ? Math.round(todayCorrect/todayTotal*100) + '%' : '0%'}</div>
+            <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">🎯 今日正确率</div>
+          </div>
+          <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayNew}</div>
+            <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">✨ 今日新学</div>
+          </div>
+        </div>
+        <!-- 词汇点击清单 -->
+        <div onclick="showWordListModal('all')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:#FAFAFA; border-radius:10px; margin-bottom:8px;">
+          <span style="font-size:14px; font-weight:700; color:#0A0A0A;">已学单词</span><span style="font-size:16px; font-weight:900;">${learned} ›</span>
+        </div>
+        <div onclick="showWordListModal('mastered')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:#F0FDF4; border-radius:10px; margin-bottom:8px;">
+          <span style="font-size:14px; font-weight:700; color:#166534;">已掌握</span><span style="font-size:16px; font-weight:900; color:#22c55e;">${mastered} ›</span>
+        </div>
+        <div onclick="showWordListModal('weak')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:#FEF2F2; border-radius:10px;">
+          <span style="font-size:14px; font-weight:700; color:#991B1B;">需加强</span><span style="font-size:16px; font-weight:900; color:#ef4444;">${weak} ›</span>
+        </div>
+      </div>
+
+      <!-- 视图：按周 (周报卡片) -->
+      <div id="view-week" style="display:none;">
+        <div style="background:linear-gradient(180deg, #FFF8FB, #fff); border:1px solid #FFD1E3; border-radius:14px; padding:20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <h3 style="margin:0;font-size:16px;font-weight:900;color:#0A0A0A;">📅 本周学习战报</h3>
+            <span style="font-size:12px; background:#FF4D8D; color:#fff; padding:2px 8px; border-radius:10px; font-weight:700;">${weekDateStrs[0].slice(5)} ~ ${weekDateStrs[6].slice(5)}</span>
+          </div>
+          <div style="background:#FFF0F5; border:1px dashed #FF4D8D; border-radius:12px; padding:14px; margin-bottom:16px; display:flex; gap:12px; align-items:center;">
+            <div style="font-size:28px;">${milestoneIcon}</div>
+            <div style="font-size:13px; font-weight:800; color:#FF4D8D; line-height:1.5;">${milestoneMsg}</div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div style="background:#FAFAFA; border-radius:10px; padding:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#0A0A0A;">${fmtDur(weekDur)}</div>
+              <div style="font-size:11px; color:#8A8A8A; font-weight:700; margin-top:4px;">⏱️ 本周时长</div>
+            </div>
+            <div style="background:#FAFAFA; border-radius:10px; padding:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#0A0A0A;">${activeDays} <span style="font-size:12px;color:#8A8A8A;">/ 7 天</span></div>
+              <div style="font-size:11px; color:#8A8A8A; font-weight:700; margin-top:4px;">📅 打卡天数</div>
+            </div>
+            <div style="background:#FAFAFA; border-radius:10px; padding:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#FF4D8D;">${weekNew}</div>
+              <div style="font-size:11px; color:#8A8A8A; font-weight:700; margin-top:4px;">✨ 本周新词</div>
+            </div>
+            <div style="background:#FAFAFA; border-radius:10px; padding:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#FF4D8D;">${weekTotal ? Math.round(weekCorrect/weekTotal*100) + '%' : '—'}</div>
+              <div style="font-size:11px; color:#8A8A8A; font-weight:700; margin-top:4px;">🎯 本周正确率</div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- 易错词 TOP 10 -->
+    <!-- 近7天趋势 (一直显示) -->
     <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;">
-      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">🚨 易错词 TOP 10</h3>
-      ${topWrongWords.length > 0 ? `
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
-          ${topWrongWords.map((w, i) => `
-            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;">
-              <span style="font-size:13px;font-weight:700;color:#991B1B;">${i+1}. ${w.en}</span>
-              <span style="font-size:11px;font-weight:900;color:#DC2626;background:#FEE2E2;padding:2px 6px;border-radius:10px;">错 ${w.bad} 次</span>
-            </div>
-          `).join('')}
-        </div>
-      ` : `<div style="font-size:12px;color:#8A8A8A;">暂无错题，继续保持！</div>`}
+      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">📈 近 7 天趋势</h3>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:6px 0;">
+        ${(() => {
+           const last7Days = [];
+           for(let i = 6; i >= 0; i--){
+             const d = new Date(); d.setDate(d.getDate() - i);
+             const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+             const recs = history.filter(r => r.date === ds);
+             last7Days.push({ label: (d.getMonth()+1) + '/' + d.getDate(), dur: recs.reduce((a,r) => a + r.duration, 0) });
+           }
+           const maxDur = Math.max(1, ...last7Days.map(d => d.dur));
+           return last7Days.map(d => {
+             const h = Math.max(4, (d.dur / maxDur) * 100);
+             return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+                <div style="width:100%;height:${h}%;background:${d.dur > 0 ? 'linear-gradient(180deg,#FFA751,#FF4D8D)' : '#F0F0F0'};border-radius:6px 6px 2px 2px;min-height:4px"></div>
+                <div style="font-size:9px;color:#8A8A8A;font-weight:700;margin-top:4px">${d.label}</div>
+             </div>`;
+           }).join('');
+        })()}
+      </div>
     </div>
   `;
+}
+
+/* ======== Tab 切换逻辑 ======== */
+function switchReportTab(tab) {
+  const viewDay = document.getElementById('view-day');
+  const viewWeek = document.getElementById('view-week');
+  const tabDay = document.getElementById('tab-day');
+  const tabWeek = document.getElementById('tab-week');
+  const btnDownload = document.getElementById('btn-download-report');
+
+  if (tab === 'day') {
+    viewDay.style.display = 'block';
+    viewWeek.style.display = 'none';
+    tabDay.style.background = '#fff'; tabDay.style.color = '#0A0A0A'; tabDay.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    tabWeek.style.background = 'transparent'; tabWeek.style.color = '#8A8A8A'; tabWeek.style.boxShadow = 'none';
+    btnDownload.style.display = 'none';
+  } else {
+    viewDay.style.display = 'none';
+    viewWeek.style.display = 'block';
+    tabWeek.style.background = '#fff'; tabWeek.style.color = '#0A0A0A'; tabWeek.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    tabDay.style.background = 'transparent'; tabDay.style.color = '#8A8A8A'; tabDay.style.boxShadow = 'none';
+    btnDownload.style.display = 'block';
+  }
+}
+
+/* ======== 下载周报为图片 ======== */
+function downloadWeeklyReport() {
+  const node = document.getElementById('view-week');
+  const btn = document.getElementById('btn-download-report');
+  const originalText = btn.textContent;
+  btn.textContent = '生成中...';
+  btn.disabled = true;
+
+  // 使用 html2canvas 截图
+  html2canvas(node, {
+    scale: 2, // 高清
+    backgroundColor: '#ffffff',
+    useCORS: true
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `Playkyn_周报_${new Date().getTime()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }).catch(err => {
+    console.error('生成图片失败', err);
+    alert('生成失败，请检查网络或稍后重试');
+    btn.textContent = originalText;
+    btn.disabled = false;
+  });
 }
 
 function renderSettingsCard(profile){
@@ -631,6 +695,66 @@ async function editNickname(){
     msg.textContent = '✅ 保存成功'; msg.style.color = '#16a34a';
     setTimeout(()=>{ document.getElementById('nickOverlay').remove(); location.reload(); }, 800);
   };
+}
+/* ======== 全局：词汇清单弹窗 ======== */
+function showWordListModal(type) {
+  // 1. 从本地读取最新数据
+  const state = loadStudyData(__currentUser.id);
+  if(!state || !state.bank) return;
+  const bank = state.bank;
+
+  let list = Object.entries(bank).filter(([en, b]) => b.seen > 0);
+  let title = '';
+  
+  if (type === 'all') {
+    title = '📚 已学单词';
+    list.sort((a, b) => b[1].seen - a[1].seen);
+  } else if (type === 'mastered') {
+    title = '✅ 已掌握单词';
+    list = list.filter(([en, b]) => b.m >= 0.7);
+    list.sort((a, b) => b[1].m - a[1].m);
+  } else if (type === 'weak') {
+    title = '🚨 需加强单词';
+    list = list.filter(([en, b]) => b.m < 0.4);
+    list.sort((a, b) => b[1].bad - a[1].bad); // 按错误次数排
+  }
+
+  // 2. 生成列表 HTML
+  let listHtml = list.map(([en, b]) => {
+    let badge = '';
+    if (b.m >= 0.7) badge = `<span style="color:#22c55e;background:#DCFCE7;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;">掌握 ${Math.round(b.m*100)}%</span>`;
+    else if (b.m < 0.4) badge = `<span style="color:#ef4444;background:#FEE2E2;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;">错 ${b.bad} 次</span>`;
+    else badge = `<span style="color:#f59e0b;background:#FEF3C7;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;">熟悉中</span>`;
+
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #EBEBEB;">
+        <div>
+          <div style="font-size:15px; font-weight:700; color:#0A0A0A;">${en}</div>
+        </div>
+        <div>${badge}</div>
+      </div>
+    `;
+  }).join('');
+
+  if (list.length === 0) {
+    listHtml = `<div style="text-align:center;padding:40px 0;color:#8A8A8A;font-size:14px;">暂无相关单词</div>`;
+  }
+
+  // 3. 插入弹窗
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;animation:popIn .2s ease-out;">
+      <div style="padding:20px 24px; border-bottom:1px solid #EBEBEB; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:17px; font-weight:900; color:#0A0A0A;">${title} (${list.length})</h3>
+        <button style="background:none;border:none;font-size:24px;color:#aaa;cursor:pointer;" onclick="this.closest('div').parentElement.parentElement.remove()">✕</button>
+      </div>
+      <div style="padding:0 24px; overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch;">
+        ${listHtml}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
 }
 </script>
 </body>
