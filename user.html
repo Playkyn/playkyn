@@ -24,175 +24,48 @@ body{
   min-height:100vh;-webkit-font-smoothing:antialiased;
   line-height:1.55;font-size:15px;
 }
-
-/* ════════ 导航栏 ════════ */
-.nav{
-  position:fixed;top:0;left:0;right:0;z-index:1000;
-  background:rgba(255,255,255,.85);
-  backdrop-filter:saturate(180%) blur(20px);
-  -webkit-backdrop-filter:saturate(180%) blur(20px);
-  border-bottom:1px solid var(--border);
-}
-.nav-inner{
-  max-width:880px;margin:0 auto;
-  display:flex;align-items:center;height:60px;
-  padding:0 24px;gap:16px;
-}
-.nav-logo{
-  font-size:18px;font-weight:700;letter-spacing:-.02em;
-  color:var(--text);text-decoration:none;
-  display:flex;align-items:center;gap:8px;flex-shrink:0;
-}
-.nav-logo-mark{
-  width:26px;height:26px;border-radius:7px;
-  background:var(--accent);
-  display:flex;align-items:center;justify-content:center;
-  color:#fff;font-size:14px;font-weight:800;
-  font-family:Georgia,serif;
-}
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;background:rgba(255,255,255,.85);backdrop-filter:saturate(180%) blur(20px);-webkit-backdrop-filter:saturate(180%) blur(20px);border-bottom:1px solid var(--border);}
+.nav-inner{max-width:880px;margin:0 auto;display:flex;align-items:center;height:60px;padding:0 24px;gap:16px;}
+.nav-logo{font-size:18px;font-weight:700;letter-spacing:-.02em;color:var(--text);text-decoration:none;display:flex;align-items:center;gap:8px;flex-shrink:0;}
+.nav-logo-mark{width:26px;height:26px;border-radius:7px;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;font-family:Georgia,serif;}
 .nav-spacer{flex:1}
-.nav-btn{
-  font-size:14px;font-weight:600;
-  padding:8px 14px;border-radius:8px;
-  border:none;cursor:pointer;font-family:inherit;
-  transition:.15s;white-space:nowrap;
-  text-decoration:none;color:var(--text-2);
-  background:transparent;
-}
+.nav-btn{font-size:14px;font-weight:600;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap;text-decoration:none;color:var(--text-2);background:transparent;}
 .nav-btn:hover{background:var(--bg-soft);color:var(--text)}
 
-/* ════════ 主容器 ════════ */
-.wrap{
-  max-width:880px;margin:0 auto;
-  padding:100px 24px 60px;
-}
-
-/* ════════ 用户卡片 ════════ */
-.user-card{
-  border:1px solid var(--border);
-  border-radius:14px;padding:32px;
-  background:#fff;margin-bottom:24px;
-}
-.user-head{
-  display:flex;align-items:center;gap:20px;
-  padding-bottom:24px;
-  border-bottom:1px solid var(--border);
-  margin-bottom:24px;
-}
-.user-avatar{
-  width:64px;height:64px;border-radius:50%;
-  background:var(--accent-soft);
-  color:var(--accent);
-  display:flex;align-items:center;justify-content:center;
-  font-size:26px;font-weight:700;
-  font-family:Georgia,serif;flex-shrink:0;
-}
+.wrap{max-width:880px;margin:0 auto;padding:100px 24px 60px;}
+.user-card{border:1px solid var(--border);border-radius:14px;padding:32px;background:#fff;margin-bottom:24px;}
+.user-head{display:flex;align-items:center;gap:20px;padding-bottom:24px;border-bottom:1px solid var(--border);margin-bottom:24px;}
+.user-avatar{width:64px;height:64px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;font-family:Georgia,serif;flex-shrink:0;}
 .user-info{flex:1;min-width:0}
-.user-name{
-  font-size:22px;font-weight:700;letter-spacing:-.02em;
-  margin-bottom:4px;
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-}
+.user-name{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
 .user-email{font-size:14px;color:var(--text-3);font-weight:500}
 
-/* 状态徽章 */
-.badge{
-  display:inline-flex;align-items:center;gap:4px;
-  font-size:11px;font-weight:700;
-  padding:4px 10px;border-radius:999px;
-  letter-spacing:.02em;
-}
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;letter-spacing:.02em;}
 .badge.free{background:#F5F5F5;color:var(--text-2)}
 .badge.pro{background:var(--accent-soft);color:var(--accent)}
 .badge.pro::before{content:"●";font-size:8px}
 
-/* ════════ 信息列表 ════════ */
-.info-list{
-  display:flex;flex-direction:column;
-}
-.info-row{
-  display:flex;align-items:center;justify-content:space-between;
-  padding:14px 0;
-  border-bottom:1px solid var(--border);
-  gap:16px;
-}
+.info-list{display:flex;flex-direction:column;}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:16px;}
 .info-row:last-child{border-bottom:none}
-.info-label{
-  font-size:14px;color:var(--text-3);font-weight:500;
-}
-.info-value{
-  font-size:14px;color:var(--text);font-weight:600;
-  text-align:right;word-break:break-all;
-}
-.info-value.mono{
-  font-family:'SF Mono',Menlo,Consolas,monospace;
-  font-size:13px;
-}
+.info-label{font-size:14px;color:var(--text-3);font-weight:500;}
+.info-value{font-size:14px;color:var(--text);font-weight:600;text-align:right;word-break:break-all;}
 
-/* ════════ 解锁提示 ════════ */
-.upgrade-card{
-  border:1px solid var(--border);
-  border-radius:14px;padding:24px;
-  background:var(--accent-soft);
-  margin-bottom:24px;
-}
-.upgrade-title{
-  font-size:16px;font-weight:700;letter-spacing:-.01em;
-  margin-bottom:8px;
-  display:flex;align-items:center;gap:8px;
-}
-.upgrade-desc{
-  font-size:14px;color:var(--text-2);line-height:1.7;
-  margin-bottom:16px;
-}
-
-/* ════════ 操作按钮组 ════════ */
-.action-group{
-  display:flex;gap:10px;flex-wrap:wrap;
-  margin-bottom:24px;
-}
-.btn{
-  border:none;border-radius:10px;
-  padding:12px 22px;font-size:15px;font-weight:600;
-  cursor:pointer;font-family:inherit;
-  transition:.15s;text-decoration:none;
-  display:inline-flex;align-items:center;justify-content:center;
-  gap:8px;letter-spacing:-.01em;
-}
+.action-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
+.btn{border:none;border-radius:10px;padding:12px 22px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.01em;}
 .btn.primary{background:var(--text);color:#fff}
 .btn.primary:hover{background:#000;transform:translateY(-1px)}
-.btn.ghost{
-  background:#fff;color:var(--text);
-  border:1px solid var(--border);
-}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border);}
 .btn.ghost:hover{background:var(--bg-soft)}
-.btn.danger{
-  background:#fff;color:#DC2626;
-  border:1px solid #FECACA;
-}
+.btn.danger{background:#fff;color:#DC2626;border:1px solid #FECACA;}
 .btn.danger:hover{background:#FEF2F2}
 
-/* ════════ 空状态 / 加载 ════════ */
-.center-box{
-  text-align:center;padding:80px 20px;
-}
-.spinner{
-  width:28px;height:28px;border-radius:50%;
-  border:3px solid var(--border);
-  border-top-color:var(--text);
-  animation:spin .8s linear infinite;
-  margin:0 auto 16px;
-}
+.center-box{text-align:center;padding:80px 20px;}
+.spinner{width:28px;height:28px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--text);animation:spin .8s linear infinite;margin:0 auto 16px;}
 @keyframes spin{to{transform:rotate(360deg)}}
 .center-text{font-size:14px;color:var(--text-3);font-weight:500}
 
-/* ════════ 页脚 ════════ */
-.footer{
-  text-align:center;padding:40px 24px 32px;
-  font-size:12px;color:var(--text-3);
-  border-top:1px solid var(--border);
-  margin-top:40px;
-}
+.footer{text-align:center;padding:40px 24px 32px;font-size:12px;color:var(--text-3);border-top:1px solid var(--border);margin-top:40px;}
 .footer a{color:var(--text-3);text-decoration:none}
 .footer a:hover{color:var(--text)}
 
@@ -237,10 +110,9 @@ body{
 <script src="membership.js"></script>
 <script>
 const supabaseUrl = 'https://zuhymqoxyqgpkxoaygtl.supabase.co';
-const supabaseKey = 'sb_publishable_y69bIL3lNMFR6kz5apgAEw_GMOkaBJu';
+const supabaseKey = 'sb_publishable_y69bIL3lNMFR6kz5apgAEw_GMOkaBJu'; // ⚠️ 记得检查你的 Key
 const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
 
-/* ════════ 工具 ════════ */
 function fmtDate(iso){
   if(!iso) return '—';
   const d = new Date(iso);
@@ -249,24 +121,16 @@ function fmtDate(iso){
   const day = String(d.getDate()).padStart(2,'0');
   return `${y}-${m}-${day}`;
 }
-function fmtDateTime(iso){
-  if(!iso) return '—';
-  const d = new Date(iso);
-  const pad = n => String(n).padStart(2,'0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
-}
 function escapeHtml(s){
   return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
-/* ════════ 退出 ════════ */
 document.getElementById('navLogout').onclick = async ()=>{
   if(!confirm('确定要退出登录吗？')) return;
   await sb.auth.signOut();
   window.location.href = 'index.html';
 };
 
-/* ════════ 主逻辑 ════════ */
 let __currentUser = null;
 
 (async function init(){
@@ -276,7 +140,6 @@ let __currentUser = null;
   __currentUser = session.user;
   const user = session.user;
 
-  // ★ 惰性结算 + 拉最新 profile（会按 50% 折算到期额度）
   const profile = await settleAndLoad(sb, user.id);
   const m = parseMembership(profile);
   window.__membership = m;
@@ -287,7 +150,6 @@ let __currentUser = null;
   const displayName = (profile && profile.display_name) || shortName;
   const initial = (displayName[0] || 'U').toUpperCase();
   const registeredAt = user.created_at;
-
   const badgeHtml = renderMembershipBadge(m);
 
   const upgradeHtml = m.isVip ? `
@@ -304,13 +166,8 @@ let __currentUser = null;
     </div>
   `;
 
-  const statusText = m.isVip
-    ? `${m.tierName}（${m.expiresAtStr} 到期）`
-    : (m.credits > 0 ? '体验版' : '免费版');
-
-  const quotaText = m.isVip
-    ? `${m.quotaRemaining} / ${m.quotaTotal} 词（本周期）`
-    : `${m.credits} 词（永久）`;
+  const statusText = m.isVip ? `${m.tierName}（${m.expiresAtStr} 到期）` : (m.credits > 0 ? '体验版' : '免费版');
+  const quotaText = m.isVip ? `${m.quotaRemaining} / ${m.quotaTotal} 词（本周期）` : `${m.credits} 词（永久）`;
 
   document.getElementById('content').innerHTML = `
     <div class="user-card">
@@ -319,13 +176,12 @@ let __currentUser = null;
         <div class="user-info">
           <div class="user-name">
             ${escapeHtml(displayName)}
-            <button onclick="editNickname()" title="修改昵称"
-              style="background:none;border:none;cursor:pointer;padding:0;
-              font-size:14px;color:#8A8A8A;line-height:1">✏️</button>
+            <button onclick="editNickname()" title="修改昵称" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;color:#8A8A8A;line-height:1">✏️</button>
             ${badgeHtml}
           </div>
           <div class="user-email">${escapeHtml(email)}</div>
         </div>
+      </div>
 
       ${renderQuotaBar(m)}
 
@@ -345,119 +201,269 @@ let __currentUser = null;
       <a href="index.html" class="btn ghost">返回主页</a>
       <button class="btn danger" id="btnLogout2">退出登录</button>
     </div>
+    
     <div style="border:1px solid #EBEBEB;border-radius:14px;padding:24px;background:#fff;margin-top:24px">
       <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">我的词库</h3>
       <div id="myWordlistsBody" style="color:#8A8A8A;font-size:14px">加载中...</div>
     </div>
   `;
 
-  document.getElementById('btnLogout2').onclick = ()=>{
-    document.getElementById('navLogout').click();
-  };
-  document.getElementById('btnUpload').onclick = ()=>{
-    if(!m.canUpload){
-      showUpgradeModal();
-      return;
-    }
-    openUploadModal();
-  };
-// ★ 渲染学习报告 + 学习设置
+  document.getElementById('btnLogout2').onclick = ()=>{ document.getElementById('navLogout').click(); };
+  document.getElementById('btnUpload').onclick = ()=>{ if(!m.canUpload){ showUpgradeModal(); return; } openUploadModal(); };
+
+  // 🌟 插入设备管理、学习报告、学习设置
   document.getElementById('content').insertAdjacentHTML('beforeend',
     renderDeviceCard() + renderStudyReport(user.id) + renderSettingsCard(profile)
   );
 
-// ★ 绑定设置卡片的事件
-const rng = document.getElementById('dailyRange');
-const valEl = document.getElementById('dailyVal');
-if(rng){
-  rng.oninput = () => { valEl.textContent = rng.value; };
-  rng.onchange = async () => {
-    const v = +rng.value;
-    const { error } = await sb.from('profiles')
-      .update({ daily_new: v }).eq('id', user.id);
-    if(error){ alert('保存失败：' + error.message); return; }
+  // 绑定设置卡片事件
+  const rng = document.getElementById('dailyRange');
+  const valEl = document.getElementById('dailyVal');
+  if(rng){
+    rng.oninput = () => { valEl.textContent = rng.value; };
+    rng.onchange = async () => {
+      const v = +rng.value;
+      const { error } = await sb.from('profiles').update({ daily_new: v }).eq('id', user.id);
+      if(error){ alert('保存失败：' + error.message); return; }
+      try{
+        const KEY = 'wq_runtime_v5_' + user.id;
+        const raw = localStorage.getItem(KEY);
+        if(raw){
+          const p = JSON.parse(raw);
+          if(!p.settings) p.settings = {};
+          p.settings.dailyNew = v;
+          localStorage.setItem(KEY, JSON.stringify(p));
+        }
+      }catch(e){}
+      const t = document.createElement('div');
+      t.textContent = '✅ 已保存';
+      t.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#0A0A0A;color:#fff;padding:10px 20px;border-radius:10px;z-index:99999;font-weight:700;font-size:13px';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 1200);
+    };
+  }
 
-    // 同步到本地（这样游戏页下次会读到新值）
-    try{
-      const KEY = 'wq_runtime_v5_' + user.id;
-      const raw = localStorage.getItem(KEY);
-      if(raw){
-        const p = JSON.parse(raw);
-        if(!p.settings) p.settings = {};
-        p.settings.dailyNew = v;
-        localStorage.setItem(KEY, JSON.stringify(p));
-      }
-    }catch(e){}
-
-    // 提示
-    const t = document.createElement('div');
-    t.textContent = '✅ 已保存';
-    t.style.cssText = 'position:fixed;left:50%;top:50%;' +
-      'transform:translate(-50%,-50%);background:#0A0A0A;color:#fff;' +
-      'padding:10px 20px;border-radius:10px;z-index:99999;' +
-      'font-weight:700;font-size:13px';
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 1200);
-  };
-}
-
-
-// ★ 绑定设置卡片事件
-const __rng = document.getElementById('dailyRange');
-const __valEl = document.getElementById('dailyVal');
-if(__rng){
-  __rng.oninput = () => { __valEl.textContent = __rng.value; };
-  __rng.onchange = async () => {
-    const v = +__rng.value;
-    const { error } = await sb.from('profiles')
-      .update({ daily_new: v }).eq('id', user.id);
-    if(error){ alert('保存失败：' + error.message); return; }
-
-    // 同步到本地（游戏页下次会读到新值）
-    try{
-      const KEY = 'wq_runtime_v5_' + user.id;
-      const raw = localStorage.getItem(KEY);
-      if(raw){
-        const p = JSON.parse(raw);
-        if(!p.settings) p.settings = {};
-        p.settings.dailyNew = v;
-        localStorage.setItem(KEY, JSON.stringify(p));
-      }
-    }catch(e){}
-
-    const t = document.createElement('div');
-    t.textContent = '✅ 已保存';
-    t.style.cssText = 'position:fixed;left:50%;top:50%;' +
-      'transform:translate(-50%,-50%);background:#0A0A0A;color:#fff;' +
-      'padding:10px 20px;border-radius:10px;z-index:99999;' +
-      'font-weight:700;font-size:13px';
-    document.body.appendChild(t);
-    setTimeout(() => t.remove(), 1200);
-  };
-}
   await renderWordlists();
 })();
+
+/* ======== 学习报告渲染 (终极整理版) ======== */
+function loadStudyData(userId){
+  try{
+    const raw = localStorage.getItem('wq_runtime_v5_' + userId);
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    return p.state || null;
+  }catch(e){ return null; }
+}
+
+function renderStudyReport(userId){
+  const state = loadStudyData(userId);
+  
+  // 🌟 获取本地时间的 YYYY-MM-DD (修复时区问题)
+  const today = (function() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  })();
+
+  if(!state || !state.history || state.history.length === 0){
+    return `
+      <div class="card" style="text-align:center; padding:40px 20px; margin-top:24px; border:1px solid #EBEBEB; border-radius:14px; background:#fff;">
+        <div style="font-size:42px;margin-bottom:8px">📊</div>
+        <div style="font-size:15px;font-weight:900;color:#0A0A0A;margin-bottom:6px">学习报告</div>
+        <div style="font-size:13px;color:#8A8A8A;line-height:1.6">还没有学习记录，去游戏里学一轮吧～</div>
+      </div>`;
+  }
+
+  const history = state.history || [];
+  const bank = state.bank || {};
+  
+  // 今日数据
+  const todayRecs = history.filter(r => r.date === today);
+  const todayDur = todayRecs.reduce((a,r) => a + r.duration, 0);
+  const todayTotal = todayRecs.reduce((a,r) => a + r.total, 0);
+  const todayCorrect = todayRecs.reduce((a,r) => a + r.correct, 0);
+  const todayNew = todayRecs.reduce((a,r) => a + r.newCount, 0);
+
+  // 近7天数据
+  const days = [];
+  for(let i = 6; i >= 0; i--){
+    const d = new Date();
+    d.setDate(d.getDate() - i);
+    const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const recs = history.filter(r => r.date === ds);
+    days.push({
+      label: (d.getMonth()+1) + '/' + d.getDate(),
+      dur: recs.reduce((a,r) => a + r.duration, 0)
+    });
+  }
+  const maxDur = Math.max(1, ...days.map(d => d.dur));
+  const weekDur = days.reduce((a,d) => a + d.dur, 0);
+
+  // 累计与易错词
+  const learned = Object.values(bank).filter(b => b.seen > 0).length;
+  const mastered = Object.values(bank).filter(b => b.m >= 0.7).length;
+  const weak = Object.values(bank).filter(b => b.seen > 0 && b.m < 0.4).length;
+
+  const topWrongWords = Object.entries(bank)
+    .filter(([en, b]) => b.bad > 0)
+    .sort((a, b) => b[1].bad - a[1].bad)
+    .slice(0, 10)
+    .map(([en, b]) => ({ en, bad: b.bad }));
+
+  // 模块游玩情况
+  const gamesPlayed = state.game?.gamesPlayed || {};
+  const gameNames = {
+    ai: '🤖 人机对决', listen: '🎧 听音选图', match: '🔗 连连看', 
+    sheep: '🧩 趣味消词', minecraft: '⛏️ 单词矿工', scenario: '📖 场景故事',
+    runner: '🏃 单词跑酷', guardian: '🏰 守护王国', whack: '🔨 单词地鼠',
+    flashmatch: '🎴 记忆闪配', racer: '🏎️ 单词赛车', shooter: '🎯 单词射击', maze: '🗺️ 单词迷宫'
+  };
+  const playedList = Object.keys(gamesPlayed).filter(k => gamesPlayed[k]);
+
+  const fmtDur = ms => {
+    if(!ms || ms < 0) return '0 分';
+    const m = Math.round(ms / 60000);
+    if(m < 1) return '<1 分';
+    if(m < 60) return m + ' 分';
+    return Math.floor(m/60) + 'h' + (m%60 ? m%60 + 'm' : '');
+  };
+
+  return `
+    <!-- 今日概览 -->
+    <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;">
+      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px;">
+        <span>📅</span> 今日学习报告
+      </h3>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayDur > 0 ? fmtDur(todayDur) : '0 分'}</div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">⏱️ 学习时长</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayTotal}</div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">📝 答题数</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayTotal ? Math.round(todayCorrect/todayTotal*100) + '%' : '0%'}</div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">🎯 正确率</div>
+        </div>
+        <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+          <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayNew}</div>
+          <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">✨ 新学词</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 近7天趋势 -->
+    <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;">
+      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">📈 近 7 天学习趋势（共 ${fmtDur(weekDur)}）</h3>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:6px 0;">
+        ${days.map(d => {
+          const h = Math.max(4, (d.dur / maxDur) * 100);
+          return `
+            <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+              <div style="width:100%;height:${h}%;background:${d.dur > 0 ? 'linear-gradient(180deg,#FFA751,#FF4D8D)' : '#F0F0F0'};border-radius:6px 6px 2px 2px;min-height:4px"></div>
+              <div style="font-size:9px;color:#8A8A8A;font-weight:700;margin-top:4px">${d.label}</div>
+            </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- 词汇积累 & 游玩模块 -->
+    <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top:24px;">
+      <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff;">
+        <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">📚 词汇积累</h3>
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px;font-weight:700;">
+          <span style="color:#0A0A0A;">已学单词</span><span>${learned}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px;font-weight:700;color:#22c55e;">
+          <span>已掌握</span><span>${mastered}</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:13px;font-weight:700;color:#ef4444;">
+          <span>需加强</span><span>${weak}</span>
+        </div>
+      </div>
+
+      <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff;">
+        <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">🎮 探索模块</h3>
+        ${playedList.length > 0 ? `
+          <div style="display:flex;flex-wrap:wrap;gap:6px;">
+            ${playedList.map(g => `<span style="font-size:11px;background:#F0F7FF;color:#1677FF;padding:4px 8px;border-radius:6px;font-weight:700;">${gameNames[g] || g}</span>`).join('')}
+          </div>
+        ` : `<div style="font-size:12px;color:#8A8A8A;">尚未探索小游戏</div>`}
+      </div>
+    </div>
+
+    <!-- 易错词 TOP 10 -->
+    <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;">
+      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">🚨 易错词 TOP 10</h3>
+      ${topWrongWords.length > 0 ? `
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          ${topWrongWords.map((w, i) => `
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:#FEF2F2;border:1px solid #FECACA;border-radius:8px;">
+              <span style="font-size:13px;font-weight:700;color:#991B1B;">${i+1}. ${w.en}</span>
+              <span style="font-size:11px;font-weight:900;color:#DC2626;background:#FEE2E2;padding:2px 6px;border-radius:10px;">错 ${w.bad} 次</span>
+            </div>
+          `).join('')}
+        </div>
+      ` : `<div style="font-size:12px;color:#8A8A8A;">暂无错题，继续保持！</div>`}
+    </div>
+  `;
+}
+
+function renderSettingsCard(profile){
+  const daily = (profile && profile.daily_new) || 10;
+  return `
+    <div style="border:1px solid #EBEBEB;border-radius:14px;padding:24px;background:#fff;margin-top:24px">
+      <h3 style="margin:0 0 6px;font-size:16px;font-weight:700">⚙️ 学习设置</h3>
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;margin-bottom:14px">设置会同步到账号，换设备也生效</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:#525252">每日新词量</span>
+        <span id="dailyVal" style="font-size:16px;font-weight:900;color:#FF4D8D">${daily}</span>
+      </div>
+      <input type="range" id="dailyRange" min="3" max="20" value="${daily}" style="width:100%">
+      <div style="font-size:11px;color:#8A8A8A;margin-top:6px;font-weight:600">建议从每天 10 个开始，坚持比数量更重要</div>
+    </div>`;
+}
+
+function renderDeviceCard(){
+  return `
+    <div style="border:2px dashed #FF4D8D;border-radius:14px;padding:24px;background:#FFF0F5;margin-top:24px">
+      <h3 style="margin:0 0 8px;font-size:16px;font-weight:700; color:#FF4D8D;">🛡️ 账号设备管理</h3>
+      <div style="font-size:13px;color:#8A8A8A;font-weight:600; line-height:1.6; margin-bottom:16px;">
+        为了保护您的学习数据，当前账号最多绑定 <b>2 台</b> 设备。<br>如果您更换了手机或电脑，请点击下方按钮解除绑定。
+      </div>
+      <button class="btn danger" id="btnUnbind" style="width:100%; border-color:#FF4D8D; color:#FF4D8D;">🔓 解除所有设备绑定</button>
+    </div>
+  `;
+}
+
+// 绑定解绑按钮事件
+document.addEventListener('click', async (e) => {
+  if(e.target && e.target.id === 'btnUnbind'){
+    if(!confirm('⚠️ 确定要解除当前账号的所有设备绑定吗？\n解绑后您可以前往新设备重新登录。')) return;
+    const btn = e.target;
+    btn.textContent = '解绑中...'; btn.disabled = true;
+    try{
+      const { error } = await sb.rpc('unbind_user_devices', { p_target_id: __currentUser.id });
+      if(error) throw error;
+      alert('✅ 已成功解除所有设备的绑定！');
+      btn.textContent = '🔓 解除所有设备绑定'; btn.disabled = false;
+    }catch(err){
+      alert('解绑失败：' + err.message);
+      btn.textContent = '🔓 解除所有设备绑定'; btn.disabled = false;
+    }
+  }
+});
 
 /* ======== 加载词库列表 ======== */
 async function renderWordlists() {
   const body = document.getElementById('myWordlistsBody');
   if (!body) return;
+ const { data, error } = await sb.from('wordlists').select('id, name, description, word_count, is_public, owner_id, created_at').or(`owner_id.eq.${__currentUser.id},is_public.eq.true`).order('created_at', { ascending: false });
 
- const { data, error } = await sb
-  .from('wordlists')
-  .select('id, name, description, word_count, is_public, owner_id, created_at')
-  .or(`owner_id.eq.${__currentUser.id},is_public.eq.true`)
-  .order('created_at', { ascending: false });
-
-  if (error || !data) {
-    body.textContent = '加载失败: ' + (error?.message || '未知');
-    return;
-  }
-
-  if (data.length === 0) {
-    body.innerHTML = '<div style="color:#8A8A9A; font-size:14px; text-align:center; padding:20px;">暂无词库，点击上方按钮上传吧～</div>';
-    return;
-  }
+  if (error || !data) { body.textContent = '加载失败: ' + (error?.message || '未知'); return; }
+  if (data.length === 0) { body.innerHTML = '<div style="color:#8A8A9A; font-size:14px; text-align:center; padding:20px;">暂无词库，点击上方按钮上传吧～</div>'; return; }
 
   let html = '';
   const currentWordlistId = localStorage.getItem('selected_wordlist_id');
@@ -470,9 +476,7 @@ async function renderWordlists() {
           <div style="font-weight:bold; font-size:14px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; color:${isSelected ? '#1677FF' : '#333'};">
             ${isSelected ? '✅ ' : ''}${escapeHtml(item.name)}
           </div>
-          <div style="font-size:12px; color:#8A8A9A; margin-top:4px;">
-            ${item.word_count || 0} 个词 · ${item.is_public ? '公开' : '私有'}
-          </div>
+          <div style="font-size:12px; color:#8A8A9A; margin-top:4px;">${item.word_count || 0} 个词 · ${item.is_public ? '公开' : '私有'}</div>
         </div>
         <div style="display:flex; gap:8px; flex-shrink:0;">
           ${isSelected 
@@ -489,200 +493,17 @@ async function renderWordlists() {
   body.innerHTML = html;
 }
 
-/* ======== 选择词库 ======== */
 function selectWordlist(wordlistId, wordlistName) {
   const m = window.__membership;
-  if (!m || (!m.isVip && m.credits <= 0)) {
-    showUpgradeModal();
-    return;
-  }
+  if (!m || (!m.isVip && m.credits <= 0)) { showUpgradeModal(); return; }
   localStorage.setItem('selected_wordlist_id', String(wordlistId).trim());
   localStorage.setItem('selected_wordlist_name', String(wordlistName).trim());
   alert(`✅ 已选择词库：${wordlistName}，即将进入游戏...`);
   window.location.href = 'wordgame.html';
 }
 
-/* ════════ 上传弹窗 ════════ */
-function openUploadModal(){
-  const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
-  modal.innerHTML = `
-    <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto">
-      <h3 style="margin:0 0 8px;font-size:17px">上传词表</h3>
-      <p style="margin:0 0 16px;color:#666;font-size:13px;line-height:1.6">
-        CSV 格式，第一行写列名。<br>
-        <b>最少两列：</b>word, meaning<br>
-        <b>支持更多列：</b>word, meaning, phonetic, unit, group
-      </p>
-      <div style="background:#f5f5f5;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;margin-bottom:16px">
-        word,meaning,phonetic,unit,group<br>
-        abandon,放弃,/əˈbændən/,U1,核心词<br>
-        ability,能力,/əˈbɪləti/,U1,核心词
-      </div>
-      <input type="text" id="uploadName" placeholder="词库名称（如：KET 核心词汇）"
-             style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:12px">
-      <input type="file" id="uploadFile" accept=".csv,.txt" style="margin-bottom:16px">
-      <div id="uploadStatus" style="font-size:13px;color:#666;min-height:20px;margin-bottom:12px"></div>
-      <div style="display:flex;gap:8px">
-        <button id="uploadStart" style="flex:1;padding:12px;background:#0A0A0A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">开始上传</button>
-        <button id="uploadCancel" style="flex:1;padding:12px;background:#f5f5f5;color:#333;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">取消</button>
-      </div>
-    </div>
-  `;
-  document.body.appendChild(modal);
-
-  const status = modal.querySelector('#uploadStatus');
-  const btnStart = modal.querySelector('#uploadStart');
-
-  modal.querySelector('#uploadCancel').onclick = ()=> modal.remove();
-
-  btnStart.onclick = async ()=>{
-    const name = modal.querySelector('#uploadName').value.trim();
-    const fileInput = modal.querySelector('#uploadFile');
-    if(!name){ status.textContent = '请填写词库名称'; status.style.color = '#dc2626'; return; }
-    if(!fileInput.files.length){ status.textContent = '请选择 CSV 文件'; status.style.color = '#dc2626'; return; }
-
-    const file = fileInput.files[0];
-    status.textContent = '读取文件...';
-    status.style.color = '#666';
-
-    try{
-      const text = await file.text();
-      const words = parseCSV(text);
-      if(!words.length){
-        status.textContent = '文件解析失败：没找到有效的单词行';
-        status.style.color = '#dc2626';
-        return;
-      }
-
-      // ★ 额度预检
-      const fresh = await loadMembership(sb, __currentUser.id, true);
-      const m2 = parseMembership(fresh);
-      window.__membership = m2;
-
-      if(words.length > m2.totalAvailable){
-        const need = words.length - m2.totalAvailable;
-        status.innerHTML = `⚠️ 额度不足：本次需 ${words.length} 词，当前可用 ${m2.totalAvailable} 词，还差 <b>${need}</b> 词`;
-        status.style.color = '#dc2626';
-        setTimeout(()=>{
-          modal.remove();
-          showUpgradeModal();
-        }, 1600);
-        return;
-      }
-
-      status.textContent = `解析到 ${words.length} 个单词，正在上传...`;
-
-      const { data: wl, error: e1 } = await sb.from('wordlists').insert({
-        name: name,
-        description: `由 ${__currentUser.email} 上传`,
-        is_public: false,
-        owner_id: __currentUser.id
-      }).select().single();
-
-      if(e1){ status.textContent = '创建词库失败：' + e1.message; status.style.color = '#dc2626'; return; }
-
-      const BATCH = 500;
-      for(let i = 0; i < words.length; i += BATCH){
-        const batch = words.slice(i, i + BATCH).map((w, idx) => ({
-          wordlist_id: wl.id,
-          word: w.word,
-          meaning: w.meaning,
-          phonetic: w.phonetic || null,
-          unit: w.unit || null,
-          "group": w.group || null,
-          sort_order: i + idx
-        }));
-        const { error: e2 } = await sb.from('words').insert(batch);
-        if(e2){ status.textContent = '插入单词失败：' + e2.message; status.style.color = '#dc2626'; return; }
-        status.textContent = `已上传 ${Math.min(i + BATCH, words.length)} / ${words.length}`;
-      }
-
-      await sb.from('wordlists').update({ word_count: words.length }).eq('id', wl.id);
-
-      // ★ 扣减额度
-      try{
-        await consumeQuota(sb, __currentUser.id, words.length);
-        const updated = await loadMembership(sb, __currentUser.id, true);
-        window.__membership = parseMembership(updated);
-      }catch(err){
-        status.textContent = '⚠️ 扣减额度失败：' + err.message;
-        status.style.color = '#dc2626';
-        return;
-      }
-
-      status.textContent = `✅ 上传成功！共 ${words.length} 个单词`;
-      status.style.color = '#22c55e';
-      setTimeout(()=>{
-        modal.remove();
-        // 刷新页面，让额度条立即更新
-        window.location.reload();
-      }, 1500);
-
-    }catch(e){
-      status.textContent = '出错：' + e.message;
-      status.style.color = '#dc2626';
-    }
-  };
-}
-
-/* ════════ CSV 解析 ════════ */
-function parseCSV(text){
-  const lines = text.split(/\r?\n/).filter(l => l.trim());
-  if(lines.length < 2) return [];
-
-  const headers = parseLine(lines[0]).map(h => h.trim().toLowerCase());
-  const idxMap = {
-    word: headers.indexOf('word'),
-    meaning: headers.indexOf('meaning'),
-    phonetic: headers.indexOf('phonetic'),
-    unit: headers.indexOf('unit'),
-    group: headers.indexOf('group')
-  };
-
-  if(idxMap.word < 0 || idxMap.meaning < 0) return [];
-
-  const words = [];
-  for(let i = 1; i < lines.length; i++){
-    const cols = parseLine(lines[i]);
-    const word = cols[idxMap.word]?.trim();
-    const meaning = cols[idxMap.meaning]?.trim();
-    if(!word || !meaning) continue;
-    words.push({
-      word, meaning,
-      phonetic: idxMap.phonetic >= 0 ? (cols[idxMap.phonetic]?.trim() || '') : '',
-      unit: idxMap.unit >= 0 ? (cols[idxMap.unit]?.trim() || '') : '',
-      group: idxMap.group >= 0 ? (cols[idxMap.group]?.trim() || '') : ''
-    });
-  }
-  return words;
-}
-
-function parseLine(line){
-  const result = [];
-  let cur = '';
-  let inQuote = false;
-  for(let i = 0; i < line.length; i++){
-    const c = line[i];
-    if(c === '"'){
-      if(inQuote && line[i+1] === '"'){ cur += '"'; i++; }
-      else inQuote = !inQuote;
-    } else if(c === ',' && !inQuote){
-      result.push(cur);
-      cur = '';
-    } else {
-      cur += c;
-    }
-  }
-  result.push(cur);
-  return result;
-}
-
-/* ════════ 删除词库 ════════ */
 async function deleteWordlist(wordlistId) {
-  if (!confirm('确定要删除这个词库吗？里面的所有单词也会被一起删除，且无法恢复！')) {
-    return;
-  }
+  if (!confirm('确定要删除这个词库吗？里面的所有单词也会被一起删除，且无法恢复！')) { return; }
   try {
     const { error: wordsError } = await sb.from('words').delete().eq('wordlist_id', wordlistId);
     if (wordsError) throw wordsError;
@@ -690,642 +511,127 @@ async function deleteWordlist(wordlistId) {
     if (listError) throw listError;
     alert('删除成功！');
     renderWordlists();
-  } catch (error) {
-    console.error('删除失败:', error);
-    alert('删除失败：' + (error.message || '未知错误，请检查控制台'));
-  }
+  } catch (error) { alert('删除失败：' + (error.message || '未知错误')); }
 }
 
-/* ═══════════════════════════════════════════════════
-   升级 / 兑换弹窗
-   ═══════════════════════════════════════════════════ */
+/* ======== 各种弹窗（保留原有） ======== */
+function openUploadModal(){
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto">
+      <h3 style="margin:0 0 8px;font-size:17px">上传词表</h3>
+      <p style="margin:0 0 16px;color:#666;font-size:13px;line-height:1.6">CSV 格式，第一行写列名。<br><b>最少两列：</b>word, meaning<br><b>支持更多列：</b>word, meaning, phonetic, unit, group</p>
+      <div style="background:#f5f5f5;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;margin-bottom:16px">word,meaning,phonetic,unit,group<br>abandon,放弃,/əˈbændən/,U1,核心词</div>
+      <input type="text" id="uploadName" placeholder="词库名称" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:12px">
+      <input type="file" id="uploadFile" accept=".csv,.txt" style="margin-bottom:16px">
+      <div id="uploadStatus" style="font-size:13px;color:#666;min-height:20px;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <button id="uploadStart" style="flex:1;padding:12px;background:#0A0A0A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">开始上传</button>
+        <button id="uploadCancel" style="flex:1;padding:12px;background:#f5f5f5;color:#333;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">取消</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  const status = modal.querySelector('#uploadStatus');
+  modal.querySelector('#uploadCancel').onclick = ()=> modal.remove();
+  modal.querySelector('#uploadStart').onclick = async ()=>{
+    const name = modal.querySelector('#uploadName').value.trim();
+    const fileInput = modal.querySelector('#uploadFile');
+    if(!name){ status.textContent = '请填写词库名称'; status.style.color = '#dc2626'; return; }
+    if(!fileInput.files.length){ status.textContent = '请选择 CSV 文件'; status.style.color = '#dc2626'; return; }
+    const file = fileInput.files[0];
+    status.textContent = '读取文件...'; status.style.color = '#666';
+    try{
+      const text = await file.text();
+      const words = parseCSV(text);
+      if(!words.length){ status.textContent = '解析失败'; status.style.color = '#dc2626'; return; }
+      const fresh = await loadMembership(sb, __currentUser.id, true);
+      const m2 = parseMembership(fresh);
+      if(words.length > m2.totalAvailable){ status.innerHTML = `⚠️ 额度不足`; setTimeout(()=>{ modal.remove(); showUpgradeModal(); }, 1600); return; }
+      status.textContent = `正在上传...`;
+      const { data: wl, error: e1 } = await sb.from('wordlists').insert({ name, description: `由 ${__currentUser.email} 上传`, is_public: false, owner_id: __currentUser.id }).select().single();
+      if(e1){ status.textContent = '失败：' + e1.message; return; }
+      const BATCH = 500;
+      for(let i = 0; i < words.length; i += BATCH){
+        const batch = words.slice(i, i + BATCH).map((w, idx) => ({ wordlist_id: wl.id, word: w.word, meaning: w.meaning, phonetic: w.phonetic || null, unit: w.unit || null, "group": w.group || null, sort_order: i + idx }));
+        await sb.from('words').insert(batch);
+      }
+      await sb.from('wordlists').update({ word_count: words.length }).eq('id', wl.id);
+      await consumeQuota(sb, __currentUser.id, words.length);
+      status.textContent = `✅ 上传成功！`; status.style.color = '#22c55e';
+      setTimeout(()=>{ modal.remove(); window.location.reload(); }, 1500);
+    }catch(e){ status.textContent = '出错：' + e.message; }
+  };
+}
 
-/* ── 升级弹窗（3 档对比）── */
+function parseCSV(text){
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if(lines.length < 2) return [];
+  const headers = parseLine(lines[0]).map(h => h.trim().toLowerCase());
+  const idxMap = { word: headers.indexOf('word'), meaning: headers.indexOf('meaning'), phonetic: headers.indexOf('phonetic'), unit: headers.indexOf('unit'), group: headers.indexOf('group') };
+  if(idxMap.word < 0 || idxMap.meaning < 0) return [];
+  const words = [];
+  for(let i = 1; i < lines.length; i++){
+    const cols = parseLine(lines[i]);
+    const word = cols[idxMap.word]?.trim(); const meaning = cols[idxMap.meaning]?.trim();
+    if(!word || !meaning) continue;
+    words.push({ word, meaning, phonetic: idxMap.phonetic >= 0 ? (cols[idxMap.phonetic]?.trim() || '') : '', unit: idxMap.unit >= 0 ? (cols[idxMap.unit]?.trim() || '') : '', group: idxMap.group >= 0 ? (cols[idxMap.group]?.trim() || '') : '' });
+  }
+  return words;
+}
+function parseLine(line){
+  const result=[]; let cur=''; let inQuote=false;
+  for(let i=0;i<line.length;i++){ const c=line[i]; if(c==='"'){ if(inQuote&&line[i+1]==='"'){cur+='"';i++;} else inQuote=!inQuote; } else if(c===','&&!inQuote){result.push(cur);cur='';} else cur+=c; }
+  result.push(cur); return result;
+}
+
 function showUpgradeModal(){
   if(document.getElementById('vipModalOverlay')) return;
-
   const rows = Object.entries(MEMBERSHIP_TIERS).map(([key,t])=>{
     const hot = key === 'quarterly';
-    return `
-      <div style="border:2px solid ${hot?'#FF4D8D':'#EBEBEB'};
-        border-radius:12px;padding:14px;margin-bottom:10px;
-        position:relative;background:${hot?'#FFF8FB':'#fff'}">
-        ${hot?`<div style="position:absolute;top:-8px;right:12px;
-          background:#FF4D8D;color:#fff;font-size:10px;font-weight:900;
-          padding:2px 8px;border-radius:99px">推荐</div>`:''}
-        <div style="display:flex;justify-content:space-between;
-          align-items:center;gap:10px">
-          <div>
-            <div style="font-size:15px;font-weight:900;color:#0A0A0A">${t.name}</div>
-            <div style="font-size:11px;color:#8A8A8A;margin-top:2px">
-              ${t.quota} 词 · ${t.days} 天
-            </div>
-          </div>
-          <div style="font-size:22px;font-weight:900;color:#FF4D8D">
-            ¥${t.price}
-          </div>
-        </div>
-      </div>`;
+    return `<div style="border:2px solid ${hot?'#FF4D8D':'#EBEBEB'};border-radius:12px;padding:14px;margin-bottom:10px;position:relative;background:${hot?'#FFF8FB':'#fff'}">${hot?`<div style="position:absolute;top:-8px;right:12px;background:#FF4D8D;color:#fff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px">推荐</div>`:''}<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div style="font-size:15px;font-weight:900;color:#0A0A0A">${t.name}</div><div style="font-size:11px;color:#8A8A8A;margin-top:2px">${t.quota} 词 · ${t.days} 天</div></div><div style="font-size:22px;font-weight:900;color:#FF4D8D">¥${t.price}</div></div></div>`;
   }).join('');
-
   document.body.insertAdjacentHTML('beforeend', `
-    <div id="vipModalOverlay" style="position:fixed;inset:0;
-      background:rgba(0,0,0,.55);z-index:99999;display:flex;
-      align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px">
-      <div style="background:#fff;border-radius:16px;padding:24px;
-        width:100%;max-width:380px;max-height:85vh;overflow-y:auto;
-        position:relative;animation:popIn .2s ease-out">
-        <button onclick="document.getElementById('vipModalOverlay').remove()"
-          style="position:absolute;top:10px;right:14px;background:none;
-          border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button>
-
-        <div style="font-size:18px;font-weight:900;color:#0A0A0A;
-          margin-bottom:6px">升级 Playkyn 会员</div>
-        <div style="font-size:12px;color:#8A8A8A;line-height:1.6;
-          margin-bottom:16px">
-          有效期内可用固定词数额度定制词库；<br>
-          额度用完不结转，到期未用按 50% 转永久。
-        </div>
-
-        ${rows}
-
-        <div style="font-size:12px;color:#8A8A8A;text-align:center;
-          margin:14px 0 10px;line-height:1.6">
-          也可以按 ¥0.3/词 单独购买，永久有效
-        </div>
-
-        <button onclick="document.getElementById('vipModalOverlay').remove();showRedeemModal()"
-          style="width:100%;padding:12px;background:#0A0A0A;color:#fff;
-          border:none;border-radius:10px;font-size:14px;font-weight:900;
-          cursor:pointer;margin-bottom:8px">
-          🎟️ 我已购买，输入解锁码
-        </button>
-
-        <div style="font-size:11px;color:#8A8A8A;text-align:center;
-          line-height:1.7;border-top:1px dashed #EBEBEB;padding-top:12px;
-          margin-top:8px">
-          客服微信：<b style="color:#0A0A0A">Playkyn</b><br>
-          邮箱：<b style="color:#0A0A0A">495493831@qq.com</b>
-        </div>
-      </div>
-    </div>
-    <style>@keyframes popIn{
-      0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}
-    }</style>
+    <div id="vipModalOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px"><div style="background:#fff;border-radius:16px;padding:24px;width:100%;max-width:380px;max-height:85vh;overflow-y:auto;position:relative;animation:popIn .2s ease-out"><button onclick="document.getElementById('vipModalOverlay').remove()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button><div style="font-size:18px;font-weight:900;color:#0A0A0A;margin-bottom:6px">升级 Playkyn 会员</div><div style="font-size:12px;color:#8A8A8A;line-height:1.6;margin-bottom:16px">有效期内可用固定词数额度定制词库；<br>额度用完不结转，到期未用按 50% 转永久。</div>${rows}<div style="font-size:12px;color:#8A8A8A;text-align:center;margin:14px 0 10px;line-height:1.6">也可以按 ¥0.3/词 单独购买，永久有效</div><button onclick="document.getElementById('vipModalOverlay').remove();showRedeemModal()" style="width:100%;padding:12px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin-bottom:8px">🎟️ 我已购买，输入解锁码</button><div style="font-size:11px;color:#8A8A8A;text-align:center;line-height:1.7;border-top:1px dashed #EBEBEB;padding-top:12px;margin-top:8px">客服微信：<b style="color:#0A0A0A">Playkyn</b><br>邮箱：<b style="color:#0A0A0A">495493831@qq.com</b></div></div></div><style>@keyframes popIn{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}</style>
   `);
 }
 
-/* ── 兑换解锁码弹窗 ── */
 function showRedeemModal(){
   if(document.getElementById('redeemOverlay')) return;
-
   document.body.insertAdjacentHTML('beforeend', `
-    <div id="redeemOverlay" style="position:fixed;inset:0;
-      background:rgba(0,0,0,.55);z-index:100000;display:flex;
-      align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px">
-      <div style="background:#fff;border-radius:16px;padding:26px;
-        width:100%;max-width:360px;position:relative;animation:popIn .2s ease-out">
-        <button onclick="document.getElementById('redeemOverlay').remove()"
-          style="position:absolute;top:10px;right:14px;background:none;
-          border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button>
-
-        <div style="text-align:center;font-size:36px;margin-bottom:8px">🎟️</div>
-        <div style="font-size:17px;font-weight:900;text-align:center;
-          color:#0A0A0A;margin-bottom:6px">输入解锁码</div>
-        <div style="font-size:12px;color:#8A8A8A;text-align:center;
-          line-height:1.6;margin-bottom:20px">
-          从客服获取的解锁码，输入即可开通
-        </div>
-
-        <input id="redeemInput" type="text" placeholder="PLAY-XXXX-XXXX"
-          style="width:100%;padding:14px;border:1.5px solid #EBEBEB;
-          border-radius:10px;font-size:16px;text-align:center;
-          font-family:monospace;letter-spacing:1px;font-weight:700;
-          outline:none;box-sizing:border-box;text-transform:uppercase">
-
-        <div id="redeemMsg" style="font-size:13px;text-align:center;
-          margin:12px 0;min-height:20px;font-weight:700"></div>
-
-        <button id="btnDoRedeem"
-          style="width:100%;padding:13px;background:#0A0A0A;color:#fff;
-          border:none;border-radius:10px;font-size:15px;font-weight:900;
-          cursor:pointer">
-          立即兑换
-        </button>
-      </div>
-    </div>
+    <div id="redeemOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px"><div style="background:#fff;border-radius:16px;padding:26px;width:100%;max-width:360px;position:relative;animation:popIn .2s ease-out"><button onclick="document.getElementById('redeemOverlay').remove()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button><div style="text-align:center;font-size:36px;margin-bottom:8px">🎟️</div><div style="font-size:17px;font-weight:900;text-align:center;color:#0A0A0A;margin-bottom:6px">输入解锁码</div><div style="font-size:12px;color:#8A8A8A;text-align:center;line-height:1.6;margin-bottom:20px">从客服获取的解锁码，输入即可开通</div><input id="redeemInput" type="text" placeholder="PLAY-XXXX-XXXX" style="width:100%;padding:14px;border:1.5px solid #EBEBEB;border-radius:10px;font-size:16px;text-align:center;font-family:monospace;letter-spacing:1px;font-weight:700;outline:none;box-sizing:border-box;text-transform:uppercase"><div id="redeemMsg" style="font-size:13px;text-align:center;margin:12px 0;min-height:20px;font-weight:700"></div><button id="btnDoRedeem" style="width:100%;padding:13px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:900;cursor:pointer">立即兑换</button></div></div>
   `);
-
-  const input = document.getElementById('redeemInput');
-  const msg   = document.getElementById('redeemMsg');
-  const btn   = document.getElementById('btnDoRedeem');
-
+  const input = document.getElementById('redeemInput'); const msg = document.getElementById('redeemMsg'); const btn = document.getElementById('btnDoRedeem');
   setTimeout(()=>input.focus(), 120);
-
   const doRedeem = async ()=>{
     const code = input.value.trim();
     if(!code){ msg.textContent='请输入解锁码'; msg.style.color='#DC2626'; return; }
-
-    btn.disabled = true;
-    btn.textContent = '兑换中...';
-    msg.textContent = '';
-
+    btn.disabled = true; btn.textContent = '兑换中...'; msg.textContent = '';
     const res = await redeemCode(sb, code);
-
-    if(res && res.ok){
-      msg.textContent = '🎉 ' + (res.msg || '兑换成功');
-      msg.style.color = '#16a34a';
-      btn.textContent = '完成';
-      setTimeout(()=>{
-        document.getElementById('redeemOverlay').remove();
-        location.reload();
-      }, 1200);
-    } else {
-      msg.textContent = '❌ ' + ((res && res.msg) || '兑换失败');
-      msg.style.color = '#DC2626';
-      btn.disabled = false;
-      btn.textContent = '立即兑换';
-    }
+    if(res && res.ok){ msg.textContent = '🎉 ' + (res.msg || '兑换成功'); msg.style.color = '#16a34a'; setTimeout(()=>{ document.getElementById('redeemOverlay').remove(); location.reload(); }, 1200); }
+    else { msg.textContent = '❌ ' + ((res && res.msg) || '兑换失败'); msg.style.color = '#DC2626'; btn.disabled = false; btn.textContent = '立即兑换'; }
   };
-
-  btn.onclick = doRedeem;
-  input.onkeydown = e => { if(e.key === 'Enter') doRedeem(); };
+  btn.onclick = doRedeem; input.onkeydown = e => { if(e.key === 'Enter') doRedeem(); };
 }
-/* ════════ 修改昵称 ════════ */
+
 async function editNickname(){
   if(document.getElementById('nickOverlay')) return;
-
-  const { data: { session } } = await sb.auth.getSession();
-  if(!session) return;
-  const { data: profile } = await sb.from('profiles')
-    .select('display_name').eq('id', session.user.id).single();
+  const { data: { session } } = await sb.auth.getSession(); if(!session) return;
+  const { data: profile } = await sb.from('profiles').select('display_name').eq('id', session.user.id).single();
   const current = (profile && profile.display_name) || '';
-
   document.body.insertAdjacentHTML('beforeend', `
-    <div id="nickOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);
-      z-index:100000;display:flex;align-items:center;justify-content:center;
-      backdrop-filter:blur(4px);padding:20px">
-      <div style="background:#fff;border-radius:16px;padding:26px;
-        width:100%;max-width:360px;position:relative">
-        <button onclick="document.getElementById('nickOverlay').remove()"
-          style="position:absolute;top:10px;right:14px;background:none;
-          border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button>
-
-        <div style="font-size:17px;font-weight:900;text-align:center;
-          color:#0A0A0A;margin-bottom:6px">修改昵称</div>
-        <div style="font-size:12px;color:#8A8A8A;text-align:center;
-          line-height:1.6;margin-bottom:20px">
-          别人在排行榜、成就页看到的就是这个名字
-        </div>
-
-        <input id="nickInput" type="text" maxlength="12"
-          value="${escapeHtml(current)}"
-          placeholder="比如：小明 / 单词侠 / 球球"
-          style="width:100%;padding:14px;border:1.5px solid #EBEBEB;
-          border-radius:10px;font-size:16px;text-align:center;
-          font-weight:700;outline:none;box-sizing:border-box">
-
-        <div id="nickMsg" style="font-size:12px;text-align:center;
-          margin:10px 0;min-height:18px;color:#8A8A8A;font-weight:700">
-          最多 12 个字
-        </div>
-
-        <button id="btnSaveNick"
-          style="width:100%;padding:13px;background:#0A0A0A;color:#fff;
-          border:none;border-radius:10px;font-size:15px;font-weight:900;
-          cursor:pointer">
-          保存
-        </button>
-      </div>
-    </div>
+    <div id="nickOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px"><div style="background:#fff;border-radius:16px;padding:26px;width:100%;max-width:360px;position:relative"><button onclick="document.getElementById('nickOverlay').remove()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button><div style="font-size:17px;font-weight:900;text-align:center;color:#0A0A0A;margin-bottom:6px">修改昵称</div><div style="font-size:12px;color:#8A8A8A;text-align:center;line-height:1.6;margin-bottom:20px">别人在排行榜、成就页看到的就是这个名字</div><input id="nickInput" type="text" maxlength="12" value="${escapeHtml(current)}" placeholder="比如：小明" style="width:100%;padding:14px;border:1.5px solid #EBEBEB;border-radius:10px;font-size:16px;text-align:center;font-weight:700;outline:none;box-sizing:border-box"><div id="nickMsg" style="font-size:12px;text-align:center;margin:10px 0;min-height:18px;color:#8A8A8A;font-weight:700">最多 12 个字</div><button id="btnSaveNick" style="width:100%;padding:13px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:900;cursor:pointer">保存</button></div></div>
   `);
-
-  const input = document.getElementById('nickInput');
-  setTimeout(()=>input.focus(), 120);
-
+  const input = document.getElementById('nickInput'); setTimeout(()=>input.focus(), 120);
   document.getElementById('btnSaveNick').onclick = async ()=>{
-    const v = input.value.trim();
-    const msg = document.getElementById('nickMsg');
-    if(!v){
-      msg.textContent = '不能为空';
-      msg.style.color = '#DC2626';
-      return;
-    }
-    const { error } = await sb.from('profiles')
-      .update({ display_name: v }).eq('id', session.user.id);
-    if(error){
-      msg.textContent = '保存失败：' + error.message;
-      msg.style.color = '#DC2626';
-      return;
-    }
-    msg.textContent = '✅ 保存成功';
-    msg.style.color = '#16a34a';
+    const v = input.value.trim(); const msg = document.getElementById('nickMsg');
+    if(!v){ msg.textContent = '不能为空'; msg.style.color = '#DC2626'; return; }
+    const { error } = await sb.from('profiles').update({ display_name: v }).eq('id', session.user.id);
+    if(error){ msg.textContent = '保存失败：' + error.message; msg.style.color = '#DC2626'; return; }
+    msg.textContent = '✅ 保存成功'; msg.style.color = '#16a34a';
     setTimeout(()=>{ document.getElementById('nickOverlay').remove(); location.reload(); }, 800);
   };
 }
-/* ════════ 读本地学习数据 ════════ */
-function loadStudyData(userId){
-  try{
-    const raw = localStorage.getItem('wq_runtime_v5_' + userId);
-    if(!raw) return null;
-    const p = JSON.parse(raw);
-    return p.state || null;
-  }catch(e){ return null; }
-}
-
-/* ════════ 渲染学习报告卡片 ════════ */
-function renderStudyReport(userId){
-  const state = loadStudyData(userId);
-
-  if(!state || !state.history || state.history.length === 0){
-    return `
-      <div style="border:1px solid #EBEBEB;border-radius:14px;
-        padding:24px;background:#fff;margin-top:24px;text-align:center">
-        <div style="font-size:42px;margin-bottom:8px">📊</div>
-        <div style="font-size:15px;font-weight:900;color:#0A0A0A;
-          margin-bottom:6px">学习报告</div>
-        <div style="font-size:13px;color:#8A8A8A;line-height:1.6">
-          还没有学习记录，去游戏里学一轮吧～
-        </div>
-      </div>`;
-  }
-
-  const history = state.history || [];
-  const bank = state.bank || {};
-  const today = new Date().toISOString().slice(0,10);
-  const todayRecs = history.filter(r => r.date === today);
-  const todayDur = todayRecs.reduce((a,r) => a + r.duration, 0);
-  const todayTotal = todayRecs.reduce((a,r) => a + r.total, 0);
-  const todayCorrect = todayRecs.reduce((a,r) => a + r.correct, 0);
-  const todayNew = todayRecs.reduce((a,r) => a + r.newCount, 0);
-
-  // 近 7 天
-  const days = [];
-  for(let i = 6; i >= 0; i--){
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const ds = d.toISOString().slice(0,10);
-    const recs = history.filter(r => r.date === ds);
-    days.push({
-      label: (d.getMonth()+1) + '/' + d.getDate(),
-      dur: recs.reduce((a,r) => a + r.duration, 0)
-    });
-  }
-  const maxDur = Math.max(1, ...days.map(d => d.dur));
-  const weekDur = days.reduce((a,d) => a + d.dur, 0);
-
-  // 掌握度
-  const learned = Object.values(bank).filter(b => b.seen > 0).length;
-  const mastered = Object.values(bank).filter(b => b.m >= 0.7).length;
-  const weak = Object.values(bank).filter(b => b.seen > 0 && b.m < 0.4).length;
-
-  const fmtDur = ms => {
-    if(!ms || ms < 0) return '0 分';
-    const m = Math.round(ms / 60000);
-    if(m < 1) return '<1 分';
-    if(m < 60) return m + ' 分';
-    return Math.floor(m/60) + 'h' + (m%60 ? m%60 + 'm' : '');
-  };
-
-  return `
-    <div style="border:1px solid #EBEBEB;border-radius:14px;
-      padding:24px;background:#fff;margin-top:24px">
-      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">
-        📊 学习报告
-      </h3>
-
-      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
-        margin-bottom:10px">今日</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;
-        gap:10px;margin-bottom:20px">
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
-          text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
-            ${todayDur > 0 ? fmtDur(todayDur) : '—'}
-          </div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
-            margin-top:4px">⏱️ 学习时长</div>
-        </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
-          text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
-            ${todayTotal}
-          </div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
-            margin-top:4px">📝 答题数</div>
-        </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
-          text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
-            ${todayTotal ? Math.round(todayCorrect/todayTotal*100) + '%' : '—'}
-          </div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
-            margin-top:4px">🎯 正确率</div>
-        </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
-          text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
-            ${todayNew}
-          </div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
-            margin-top:4px">✨ 新学词</div>
-        </div>
-      </div>
-
-      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
-        margin-bottom:10px">近 7 天（共 ${fmtDur(weekDur)}）</div>
-      <div style="display:flex;align-items:flex-end;gap:6px;
-        height:80px;padding:6px 0;margin-bottom:20px">
-        ${days.map(d => {
-          const h = Math.max(4, (d.dur / maxDur) * 100);
-          return `
-            <div style="flex:1;display:flex;flex-direction:column;
-              align-items:center;justify-content:flex-end;height:100%">
-              <div style="width:100%;height:${h}%;
-                background:${d.dur > 0 ? 'linear-gradient(180deg,#FFA751,#FF4D8D)' : '#F0F0F0'};
-                border-radius:6px 6px 2px 2px;min-height:4px"></div>
-              <div style="font-size:9px;color:#8A8A8A;font-weight:700;
-                margin-top:4px">${d.label}</div>
-            </div>`;
-        }).join('')}
-      </div>
-
-      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
-        margin-bottom:10px">累计</div>
-      <div style="display:flex;gap:10px;font-size:13px">
-        <div style="flex:1;text-align:center">
-          <div style="font-size:18px;font-weight:900;color:#0A0A0A">
-            ${learned}
-          </div>
-          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
-            margin-top:2px">已学单词</div>
-        </div>
-        <div style="flex:1;text-align:center">
-          <div style="font-size:18px;font-weight:900;color:#22c55e">
-            ${mastered}
-          </div>
-          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
-            margin-top:2px">已掌握</div>
-        </div>
-        <div style="flex:1;text-align:center">
-          <div style="font-size:18px;font-weight:900;color:#ef4444">
-            ${weak}
-          </div>
-          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
-            margin-top:2px">需加强</div>
-        </div>
-      </div>
-    </div>`;
-}
-
-/* ════════ 渲染学习设置卡片 ════════ */
-function renderSettingsCard(profile){
-  const daily = (profile && profile.daily_new) || 10;
-  return `
-    <div style="border:1px solid #EBEBEB;border-radius:14px;
-      padding:24px;background:#fff;margin-top:24px">
-      <h3 style="margin:0 0 6px;font-size:16px;font-weight:700">
-        ⚙️ 学习设置
-      </h3>
-      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
-        margin-bottom:14px">设置会同步到账号，换设备也生效</div>
-
-      <div style="display:flex;justify-content:space-between;
-        align-items:center;margin-bottom:8px">
-        <span style="font-size:14px;font-weight:700;color:#525252">
-          每日新词量
-        </span>
-        <span id="dailyVal" style="font-size:16px;font-weight:900;
-          color:#FF4D8D">${daily}</span>
-      </div>
-      <input type="range" id="dailyRange" min="3" max="20"
-        value="${daily}" style="width:100%">
-      <div style="font-size:11px;color:#8A8A8A;margin-top:6px;
-        font-weight:600">建议从每天 10 个开始，坚持比数量更重要</div>
-    </div>`;
-}
-/* ════════ 读本地学习数据 ════════ */
-function loadStudyData(userId){
-  try{
-    const raw = localStorage.getItem('wq_runtime_v5_' + userId);
-    if(!raw) return null;
-    const p = JSON.parse(raw);
-    return p.state || null;
-  }catch(e){ return null; }
-}
-
-/* ════════ 学习报告卡片 ════════ */
-function renderStudyReport(userId){
-  const state = loadStudyData(userId);
-
-  if(!state || !state.history || state.history.length === 0){
-    return `
-      <div style="border:1px solid #EBEBEB;border-radius:14px;
-        padding:24px;background:#fff;margin-top:24px;text-align:center">
-        <div style="font-size:42px;margin-bottom:8px">📊</div>
-        <div style="font-size:15px;font-weight:900;color:#0A0A0A;
-          margin-bottom:6px">学习报告</div>
-        <div style="font-size:13px;color:#8A8A8A;line-height:1.6">
-          还没有学习记录，去游戏里学一轮吧～
-        </div>
-      </div>`;
-  }
-
-  const history = state.history || [];
-  const bank = state.bank || {};
-  const today = new Date().toISOString().slice(0,10);
-  const todayRecs = history.filter(r => r.date === today);
-  const todayDur = todayRecs.reduce((a,r) => a + r.duration, 0);
-  const todayTotal = todayRecs.reduce((a,r) => a + r.total, 0);
-  const todayCorrect = todayRecs.reduce((a,r) => a + r.correct, 0);
-  const todayNew = todayRecs.reduce((a,r) => a + r.newCount, 0);
-
-  const days = [];
-  for(let i = 6; i >= 0; i--){
-    const d = new Date();
-    d.setDate(d.getDate() - i);
-    const ds = d.toISOString().slice(0,10);
-    const recs = history.filter(r => r.date === ds);
-    days.push({
-      label: (d.getMonth()+1) + '/' + d.getDate(),
-      dur: recs.reduce((a,r) => a + r.duration, 0)
-    });
-  }
-  const maxDur = Math.max(1, ...days.map(d => d.dur));
-  const weekDur = days.reduce((a,d) => a + d.dur, 0);
-
-  const learned = Object.values(bank).filter(b => b.seen > 0).length;
-  const mastered = Object.values(bank).filter(b => b.m >= 0.7).length;
-  const weak = Object.values(bank).filter(b => b.seen > 0 && b.m < 0.4).length;
-
-  const fmtDur = ms => {
-    if(!ms || ms < 0) return '0 分';
-    const m = Math.round(ms / 60000);
-    if(m < 1) return '<1 分';
-    if(m < 60) return m + ' 分';
-    return Math.floor(m/60) + 'h' + (m%60 ? m%60 + 'm' : '');
-  };
-
-  return `
-    <div style="border:1px solid #EBEBEB;border-radius:14px;
-      padding:24px;background:#fff;margin-top:24px">
-      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">
-        📊 学习报告
-      </h3>
-
-      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
-        margin-bottom:10px">今日</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;
-        gap:10px;margin-bottom:20px">
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
-          text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
-            ${todayDur > 0 ? fmtDur(todayDur) : '—'}
-          </div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
-            margin-top:4px">⏱️ 学习时长</div>
-        </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
-          text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
-            ${todayTotal}
-          </div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
-            margin-top:4px">📝 答题数</div>
-        </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
-          text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
-            ${todayTotal ? Math.round(todayCorrect/todayTotal*100) + '%' : '—'}
-          </div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
-            margin-top:4px">🎯 正确率</div>
-        </div>
-        <div style="background:#FAFAFA;border-radius:10px;padding:12px;
-          text-align:center">
-          <div style="font-size:20px;font-weight:900;color:#FF4D8D">
-            ${todayNew}
-          </div>
-          <div style="font-size:11px;color:#8A8A8A;font-weight:700;
-            margin-top:4px">✨ 新学词</div>
-        </div>
-      </div>
-
-      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
-        margin-bottom:10px">近 7 天（共 ${fmtDur(weekDur)}）</div>
-      <div style="display:flex;align-items:flex-end;gap:6px;
-        height:80px;padding:6px 0;margin-bottom:20px">
-        ${days.map(d => {
-          const h = Math.max(4, (d.dur / maxDur) * 100);
-          return `
-            <div style="flex:1;display:flex;flex-direction:column;
-              align-items:center;justify-content:flex-end;height:100%">
-              <div style="width:100%;height:${h}%;
-                background:${d.dur > 0 ? 'linear-gradient(180deg,#FFA751,#FF4D8D)' : '#F0F0F0'};
-                border-radius:6px 6px 2px 2px;min-height:4px"></div>
-              <div style="font-size:9px;color:#8A8A8A;font-weight:700;
-                margin-top:4px">${d.label}</div>
-            </div>`;
-        }).join('')}
-      </div>
-
-      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
-        margin-bottom:10px">累计</div>
-      <div style="display:flex;gap:10px;font-size:13px">
-        <div style="flex:1;text-align:center">
-          <div style="font-size:18px;font-weight:900;color:#0A0A0A">
-            ${learned}
-          </div>
-          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
-            margin-top:2px">已学单词</div>
-        </div>
-        <div style="flex:1;text-align:center">
-          <div style="font-size:18px;font-weight:900;color:#22c55e">
-            ${mastered}
-          </div>
-          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
-            margin-top:2px">已掌握</div>
-        </div>
-        <div style="flex:1;text-align:center">
-          <div style="font-size:18px;font-weight:900;color:#ef4444">
-            ${weak}
-          </div>
-          <div style="color:#8A8A8A;font-weight:700;font-size:11px;
-            margin-top:2px">需加强</div>
-        </div>
-      </div>
-    </div>`;
-}
-
-/* ════════ 学习设置卡片 ════════ */
-function renderSettingsCard(profile){
-  const daily = (profile && profile.daily_new) || 10;
-  return `
-    <div style="border:1px solid #EBEBEB;border-radius:14px;
-      padding:24px;background:#fff;margin-top:24px">
-      <h3 style="margin:0 0 6px;font-size:16px;font-weight:700">
-        ⚙️ 学习设置
-      </h3>
-      <div style="font-size:12px;color:#8A8A8A;font-weight:700;
-        margin-bottom:14px">设置会同步到账号，换设备也生效</div>
-
-      <div style="display:flex;justify-content:space-between;
-        align-items:center;margin-bottom:8px">
-        <span style="font-size:14px;font-weight:700;color:#525252">
-          每日新词量
-        </span>
-        <span id="dailyVal" style="font-size:16px;font-weight:900;
-          color:#FF4D8D">${daily}</span>
-      </div>
-      <input type="range" id="dailyRange" min="3" max="20"
-        value="${daily}" style="width:100%">
-      <div style="font-size:11px;color:#8A8A8A;margin-top:6px;
-        font-weight:600">建议从每天 10 个开始，坚持比数量更重要</div>
-    </div>`;
-}
-/* ════════ 设备管理卡片 ════════ */
-function renderDeviceCard(){
-  return `
-    <div style="border:2px dashed #FF4D8D;border-radius:14px;
-      padding:24px;background:#FFF0F5;margin-top:24px">
-      <h3 style="margin:0 0 8px;font-size:16px;font-weight:700; color:#FF4D8D;">
-        🛡️ 账号设备管理
-      </h3>
-      <div style="font-size:13px;color:#8A8A8A;font-weight:600; line-height:1.6; margin-bottom:16px;">
-        为了保护您的学习数据，当前账号最多绑定 <b>2 台</b> 设备。<br>
-        如果您更换了手机或电脑，请点击下方按钮解除绑定。
-      </div>
-      <button class="btn danger" id="btnUnbind" style="width:100%; border-color:#FF4D8D; color:#FF4D8D;">
-        🔓 解除所有设备绑定
-      </button>
-    </div>
-  `;
-}
-
-// 绑定解绑按钮事件
-document.addEventListener('click', async (e) => {
-  if(e.target && e.target.id === 'btnUnbind'){
-    if(!confirm('⚠️ 确定要解除当前账号的所有设备绑定吗？\n解绑后您可以前往新设备重新登录。')) return;
-    
-    const btn = e.target;
-    btn.textContent = '解绑中...';
-    btn.disabled = true;
-
-    try{
-      const { error } = await sb.rpc('unbind_user_devices', { p_target_id: __currentUser.id });
-      if(error) throw error;
-      
-      alert('✅ 已成功解除所有设备的绑定！');
-      btn.textContent = '🔓 解除所有设备绑定';
-      btn.disabled = false;
-    }catch(err){
-      alert('解绑失败：' + err.message);
-      btn.textContent = '🔓 解除所有设备绑定';
-      btn.disabled = false;
-    }
-  }
-});
 </script>
-
 </body>
 </html>

@@ -1521,9 +1521,14 @@ body.skin-boy .weak-tag{
 <script src="./supabase.js"></script>
 <script src="membership.js"></script>
 <script>
-/* ═══════════════════════════════════════════════════════════
-   ★ 系统预设账号（不可删除）
-   ═══════════════════════════════════════════════════════════ */
+// 获取本地时间的 YYYY-MM-DD
+function getLocalDateStr() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
 /* ═══════════════════════════════════════════════════════════
    ★ Supabase + 解锁系统
    ═══════════════════════════════════════════════════════════ */
@@ -4156,6 +4161,19 @@ $('#btnGames').onclick=()=>{ Sfx.click();showGamesScreen(); };
 $('#btnHomeGames').onclick=()=>{ Sfx.click();showGamesScreen(); };
 $('#btnGamesBack').onclick=()=>{ Sfx.click();goHome(); };
 $('#btnSummaryGame').onclick=()=>{ Sfx.click();showGamesScreen(); };
+// 结算页：返回主页按钮
+$('#btnBackHome').onclick = () => { 
+  Sfx.click(); 
+  goHome(); 
+};
+
+// 结算页：切换主题按钮
+$('#btnSummaryTopic').onclick = () => { 
+  Sfx.click(); 
+  if(!state.goal) return;
+  renderGoal();
+  showScreen('s-goal');
+};
 
 
 
