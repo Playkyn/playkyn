@@ -93,7 +93,7 @@
 .psi-name{font-size:11px;font-weight:800;color:var(--muted);margin:6px 0 8px}
 .psi-btn{padding:6px 4px !important;font-size:11px !important;width:100%}
 
-/* ══════════ 精致狐狸 SVG ══════════ */
+/* ══════════ 精致凤凰 SVG ══════════ */
 .fox-svg{display:block;overflow:visible}
 .fox-svg .fox-tail{
   transform-origin:55% 60%;transform-box:fill-box;
@@ -986,7 +986,7 @@ body.skin-boy .weak-tag{
       </div>
 </div>
 
-<div class="card pet-card" id="petCard"></div>
+
 
 <!-- 随心听 banner -->
 <div class="card" id="listenBanner" style="
@@ -1319,14 +1319,7 @@ body.skin-boy .weak-tag{
     <div id="detailContent"></div>
   </section>
 
-<section class="screen" id="s-pet">
-    <div class="top-bar">
-      <button class="back-btn" id="btnPetBack">← 返回</button>
-      <span class="title">🐾 宠物乐园</span>
-      <span class="spacer"></span>
-    </div>
-    <div id="petContent"></div>
-  </section>
+
 
 
   <section class="screen" id="s-games">
@@ -1900,6 +1893,24 @@ const PET_STAGES = [
     desc:'恭喜！它已成为传说中的神兽！' }
 ];
 
+/* ═══════════════════════════════════════════════════════════
+   ★ 小凤凰的超级对话库 (七大分类)
+   ═══════════════════════════════════════════════════════════ */
+const PET_DIALOGUES = {
+  chat: ["嘿嘿，被你摸到啦，痒痒的～","今天你打算带我去哪里玩呀？","我今天吃单词能量啦！","猜猜我今天最喜欢哪个单词？","其实我是一只懂英语的魔法凤凰🦅"],
+  hungry: ["肚子咕咕叫了... 想吃小饼干🍪","饿晕了，快给我喂点吃的吧~","没有力气变身了... 饿~"],
+  full: ["吃得好饱呀，感觉充满了力量！","谢谢主人的投喂，吧唧吧唧~","嘿嘿，我又胖了一点点..."],
+  guide: ["要不要来挑战一组单词，和我一起升级呀？","刚刚记住的单词，我们抽空回顾一下好不好？","今天的学习额度还在哦，想继续玩一会儿吗？"],
+  praise: ["哇！答对啦，你也太厉害了👏","又拿下一批新词，我为你骄傲！","太棒啦，这个难点你攻克下来了！","漂亮！继续冲鸭！"],
+  fail: ["记错也没事，本来单词就是要反复记的。","没关系，这次错了，下次我们就能记住它！","不用灰心，很多人都会在这里卡住的。"],
+  comfort: ["辛苦啦，不用逼自己太快，歇一小会儿再继续也没关系✨","我就在这里陪着你，慢慢来就好","今天已经很棒啦，不要对自己太严格哦"]
+};
+
+function getRandomDialogue(type) {
+  const list = PET_DIALOGUES[type] || PET_DIALOGUES.chat;
+  return list[Math.floor(Math.random() * list.length)];
+}
+
 const PET_DECORATIONS = [
   // 头顶
   { id:'bow',     icon:'🎀', name:'蝴蝶结', cost:80,   slot:'head' },
@@ -1946,63 +1957,89 @@ function getPetStageIndex(xp){
   return idx;
 }
 
-/* —— 用 SVG 手绘一只精致小狐狸 —— */
+/* —— 用 SVG 手绘一只浴火小凤凰 —— */
 function foxSVG({mood='happy'} = {}, size=130) {
-  // 根据心情切换眼睛和嘴巴
-  let eyes = `<ellipse cx="80" cy="85" rx="7" ry="11" fill="#1a1a1a"/>
-              <ellipse cx="120" cy="85" rx="7" ry="11" fill="#1a1a1a"/>
-              <circle cx="82" cy="81" r="2.5" fill="#fff"/>
-              <circle cx="122" cy="81" r="2.5" fill="#fff"/>`;
-  let mouth = `<path d="M 95 112 Q 100 118 105 112" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+  // 眼睛状态
+  let eyes = `<g class="fox-eye"><ellipse cx="85" cy="80" rx="5" ry="8" fill="#1a1a1a"/>
+              <circle cx="86" cy="77" r="2" fill="#fff"/>
+              <ellipse cx="115" cy="80" rx="5" ry="8" fill="#1a1a1a"/>
+              <circle cx="116" cy="77" r="2" fill="#fff"/></g>`;
+  // 嘴巴状态
+  let mouth = `<path d="M 96 95 L 104 95 L 100 103 Z" fill="#FFA751"/>`; // 小尖喙
   
   if (mood === 'hungry') {
-    eyes = `<ellipse cx="80" cy="85" rx="8" ry="12" fill="#1a1a1a"/>
-            <ellipse cx="120" cy="85" rx="8" ry="12" fill="#1a1a1a"/>
-            <path d="M 95 115 Q 100 108 105 115" stroke="#1a1a1a" stroke-width="2.5" fill="none" stroke-linecap="round"/>`;
+    eyes = `<g class="fox-eye"><path d="M 80 75 L 90 85 M 80 85 L 90 75" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 110 75 L 120 85 M 110 85 L 120 75" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/></g>`;
+    mouth = `<path d="M 95 100 Q 100 90 105 100" stroke="#FFA751" stroke-width="3" fill="none" stroke-linecap="round"/>`;
   } else if (mood === 'sad') {
-    eyes = `<path d="M 72 88 Q 80 80 88 88" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
-            <path d="M 112 88 Q 120 80 128 88" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+    eyes = `<g class="fox-eye"><path d="M 80 82 Q 85 75 90 82" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 110 82 Q 115 75 120 82" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/></g>`;
   }
 
   return `
   <svg class="fox-svg" viewBox="0 0 200 200" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
-    <!-- 尾巴 -->
-    <path d="M 120 160 Q 180 170 185 110 Q 170 100 155 130 Q 140 150 120 160 Z" fill="#FF7B54"/>
-    <path d="M 185 110 Q 170 100 155 130 Q 165 115 180 115 Z" fill="#FFFFFF"/>
-    
-    <!-- 身体 (缩小，让头变大更可爱) -->
-    <ellipse cx="100" cy="145" rx="45" ry="38" fill="#FF7B54"/>
-    <ellipse cx="100" cy="150" rx="28" ry="22" fill="#FFFFFF"/>
+    <defs>
+      <!-- 火焰渐变色 -->
+      <linearGradient id="fireGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#FF4D4D" />
+        <stop offset="50%" stop-color="#FFA751" />
+        <stop offset="100%" stop-color="#FBBF24" />
+      </linearGradient>
+      <linearGradient id="bellyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFF5E1" />
+        <stop offset="100%" stop-color="#FFE4B5" />
+      </linearGradient>
+    </defs>
 
-    <!-- 圆润的三角形耳朵 -->
-    <path d="M 65 70 Q 40 20 60 15 Q 80 30 85 55 Z" fill="#FF7B54"/>
-    <path d="M 135 70 Q 160 20 140 15 Q 120 30 115 55 Z" fill="#FF7B54"/>
-    
-    <!-- 头部 (大头) -->
-    <ellipse cx="100" cy="90" rx="52" ry="48" fill="#FF7B54"/>
-    
-    <!-- 白色的脸颊下半部 -->
-    <ellipse cx="100" cy="105" rx="30" ry="22" fill="#FFFFFF"/>
-    
-    <!-- 腮红 -->
-    <ellipse cx="58" cy="95" rx="10" ry="6" fill="#FFB8A0" opacity="0.6"/>
-    <ellipse cx="142" cy="95" rx="10" ry="6" fill="#FFB8A0" opacity="0.6"/>
-    
-    <!-- 眼睛 -->
-    ${eyes}
-    
-    <!-- 鼻子与嘴巴 -->
-    <ellipse cx="100" cy="102" rx="5" ry="4" fill="#1a1a1a"/>
-    ${mouth}
+    <!-- 整体呼吸浮动 -->
+    <g class="fox-idle">
+      
+      <!-- 华丽的凤凰尾羽 (加上 fox-tail 类名保留摇摆动画) -->
+      <g class="fox-tail" style="transform-origin: 60% 75%;">
+        <path d="M 100 150 Q 50 180 30 120 Q 70 130 100 150 Z" fill="url(#fireGrad)" opacity="0.8"/>
+        <path d="M 100 150 Q 150 180 170 120 Q 130 130 100 150 Z" fill="url(#fireGrad)" opacity="0.8"/>
+        <path d="M 100 140 Q 20 150 40 60 Q 80 110 100 140 Z" fill="#FFA751" opacity="0.6"/>
+        <path d="M 100 140 Q 180 150 160 60 Q 120 110 100 140 Z" fill="#FFA751" opacity="0.6"/>
+        <path d="M 100 150 Q 100 190 80 195 Q 90 170 100 150 Z" fill="#FF4D4D"/>
+        <path d="M 100 150 Q 100 190 120 195 Q 110 170 100 150 Z" fill="#FF4D4D"/>
+      </g>
+
+      <!-- 身体 -->
+      <ellipse cx="100" cy="135" rx="40" ry="45" fill="url(#fireGrad)"/>
+      <!-- 肚皮 -->
+      <ellipse cx="100" cy="145" rx="25" ry="30" fill="url(#bellyGrad)"/>
+
+      <!-- 翅膀 -->
+      <path d="M 65 125 Q 20 100 30 150 Q 50 145 65 135 Z" fill="#FFA751"/>
+      <path d="M 135 125 Q 180 100 170 150 Q 150 145 135 135 Z" fill="#FFA751"/>
+
+      <!-- 头部 -->
+      <ellipse cx="100" cy="85" rx="40" ry="38" fill="url(#fireGrad)"/>
+      
+      <!-- 头部呆毛 (冠羽) -->
+      <path d="M 90 50 Q 80 20 100 30 Q 110 10 115 45 Q 105 35 100 50 Z" fill="#FF4D4D"/>
+      <path d="M 100 48 Q 110 25 120 40 Q 125 20 130 50 Q 120 45 115 55 Z" fill="#FBBF24"/>
+
+      <!-- 腮红 -->
+      <ellipse cx="70" cy="90" rx="8" ry="4" fill="#FFB8A0" opacity="0.8"/>
+      <ellipse cx="130" cy="90" rx="8" ry="4" fill="#FFB8A0" opacity="0.8"/>
+      
+      <!-- 眼睛 -->
+      ${eyes}
+      
+      <!-- 嘴巴 (尖喙) -->
+      ${mouth}
+      
+    </g>
   </svg>`;
 }
 
 
 
 /* —— 根据饱食度决定表情 —— */
-function foxMood(){
-  if(!state.pet || !state.pet.species) return 'happy';
-  const h = getCurrentHunger(state.pet);
+function foxMood(p){
+  if(!p) return 'happy';
+  const h = getCurrentHunger(p);
   if(h >= 70) return 'happy';
   if(h >= 40) return 'normal';
   if(h >= 15) return 'hungry';
@@ -2010,31 +2047,61 @@ function foxMood(){
 }
 
 function initPet(){
-  if(!state.pet){
-    state.pet = {
-      xp:0, species:'fox',
-      equipped:{ head:null, face:null, neck:null, body:null },
-      owned:{}, house:'cave', housesOwned:{ cave:true },
-      hunger:100, lastFedAt:Date.now(),
-      lastStage:0
-    };
-  }
-  if(!state.pet.species) state.pet.species = 'fox';
-  if(!state.pet.owned) state.pet.owned = {};
-  if(!state.pet.housesOwned) state.pet.housesOwned = { cave:true };
-  if(!state.pet.house) state.pet.house = 'cave';
-  if(typeof state.pet.hunger !== 'number') state.pet.hunger = 100;
-  if(!state.pet.lastFedAt) state.pet.lastFedAt = Date.now();
-  if(typeof state.pet.equipped === 'string' || state.pet.equipped === null){
-    const old = state.pet.equipped;
-    state.pet.equipped = { head:null, face:null, neck:null, body:null };
-    if(old){
-      const item = PET_DECORATIONS.find(d=>d.id===old);
-      if(item) state.pet.equipped[item.slot] = old;
+  // 1. 如果连 pets 数组都没有，初始化
+  if(!state.pets) {
+    state.pets = [];
+    // 兼容老数据：如果之前有 state.pet，就把它塞进数组
+    if(state.pet) {
+      if(!state.pet.id) state.pet.id = 'pet_' + Date.now();
+      if(!state.pet.name) state.pet.name = '小凤凰';
+      state.pets.push(state.pet);
+      delete state.pet;
     }
   }
-  if(!state.pet.equipped) state.pet.equipped = { head:null, face:null, neck:null, body:null };
-  return state.pet;
+
+  // 2. 如果一只宠物都没有，新建一只
+  if(state.pets.length === 0) {
+    const newPet = createNewPet('小凤凰');
+    state.pets.push(newPet);
+    state.activePetId = newPet.id;
+  }
+
+  // 3. 确保有一个出战宠物
+  if(!state.activePetId || !state.pets.find(p => p.id === state.activePetId)) {
+    state.activePetId = state.pets[0].id;
+  }
+}
+
+// 🌟 新增：生成新宠物的工厂函数
+function createNewPet(name) {
+  return {
+    id: 'pet_' + Date.now(),
+    name: name,
+    species: 'phoenix',
+    generation: 1,
+    xp: 0,
+    hunger: 100,
+    lastFedAt: Date.now(),
+    lastStage: 0,
+    equipped: { head:null, face:null, neck:null, body:null },
+    owned: {},
+    house: 'cave',
+    housesOwned: { cave: true },
+    // 孕育相关
+    memoryFragments: 0,
+    eggsCreated: 0,
+    isIncubating: false,
+    eggStartTime: 0,
+    eggTargetTime: 0,
+    eggProgress: 0,
+    lastEggCheckIn: 0
+  };
+}
+
+// 🌟 新增：获取当前出战宠物的快捷函数
+function getActivePet() {
+  if (!state || !state.pets) return null;
+  return state.pets.find(p => p.id === state.activePetId) || state.pets[0];
 }
 
 /* —— 计算当前饱食度（随时间下降，每小时 -5） —— */
@@ -2045,9 +2112,9 @@ function getCurrentHunger(p){
 }
 
 /* —— 学习经验加成（饱食度越高，加成越多） —— */
-function getPetXpBonus(){
-  if(!state.pet || !state.pet.species) return 1;
-  const h = getCurrentHunger(state.pet);
+function getPetXpBonus(p){
+  if(!p) return 1;
+  const h = getCurrentHunger(p);
   if(h >= 80) return 1.15;
   if(h >= 50) return 1.08;
   if(h >= 20) return 1.0;
@@ -2927,7 +2994,7 @@ function doLogin(account){
   if(!state.clock) state.clock = { realStart: Date.now(), virtualStart: Date.now(), scale: 1 };
   if(!state.bank) state.bank = {};
   if(!state.history) state.history = [];
-  if(!state.pet) state.pet = { xp:0, equipped:null, owned:{}, lastStage:0 };
+  
 
   // 清洗历史遗留的 groupStats 数据
   if(state.groupStats){
@@ -3294,15 +3361,17 @@ $('#btnDiagBack').onclick=()=>{
 function addXp(n){
   const g=state.game;g.xp+=n;
 
-  // ★ 宠物成长同步
-  if(state.pet){
-    const oldStage = getPetStageIndex(state.pet.xp);
-    state.pet.xp += n;
-    const newStage = getPetStageIndex(state.pet.xp);
-    if(newStage > oldStage){
-      setTimeout(()=>petStageUp(newStage), 900);
-    }
-  }
+
+// ★ 宠物成长同步
+const activePet = getActivePet();
+if(activePet){
+const oldStage = getPetStageIndex(activePet.xp);
+activePet.xp += n; // 直接给当前宠物加经验
+const newStage = getPetStageIndex(activePet.xp);
+if(newStage > oldStage){
+setTimeout(()=>petStageUp(newStage), 900);
+}
+}
 
   let leveled=false;
   while(g.xp>=xpNeeded(g.level)){g.xp-=xpNeeded(g.level);g.level++;leveled=true;
@@ -3387,279 +3456,152 @@ function goHome(){
   renderHome();showScreen('s-home');
 }
 
+const p = getActivePet(); // 🌟 改为获取出战宠物
 /* —— 主页宠物卡片 —— */
 function renderPetCard(){
-    if (!state) return; // 👈 加上这一行！
+  if (!state) return; 
   initPet();
-  const p = state.pet;
-  const el = $('#petCard');
+  const p = getActivePet(); // 🌟 改为获取出战宠物
+  const el = $('#floatingPet');
   if(!el) return;
 
   const stageIdx = getPetStageIndex(p.xp);
   const stage = PET_STAGES[stageIdx];
-  const next  = PET_STAGES[stageIdx+1];
-  const curMin = stage.minXp;
-  const nextMin = next ? next.minXp : stage.minXp + 1;
-  const progress = next
-    ? Math.min(100, (p.xp - curMin)/(nextMin-curMin)*100)
-    : 100;
-
-  const house = PET_HOUSES.find(h=>h.id===p.house) || PET_HOUSES[0];
   const hunger = getCurrentHunger(p);
   const hungerPct = Math.round(hunger);
   const hungerEmoji = hunger>=80?'😋':hunger>=50?'🙂':hunger>=20?'😐':'😢';
 
-  // 装饰
-  const eq = p.equipped || {};
-  const accHtml = ['body','neck','face','head'].map(slot=>{
-    const id = eq[slot];
-    if(!id) return '';
-    const item = PET_DECORATIONS.find(d=>d.id===id);
-    if(!item) return '';
-    return `<span class="pet-accessory slot-${slot}">${item.icon}</span>`;
-  }).join('');
+  if(el.dataset.rendered !== 'true'){
+    el.innerHTML = `
+      <div class="pet-bubble" id="petBubble"></div>
+      <div class="fp-avatar-box">
+        ${foxSVG({mood: foxMood(p), size: 80})}
+      </div>
+      <div class="fp-name">${p.name || '小凤凰'}</div>
+      <div class="fp-badge">${stage.tag}</div>
+      <div class="fp-hunger-bar">
+        <div class="fp-hunger-fill" style="width:${hungerPct}%"></div>
+      </div>
+      <div class="fp-btn" id="btnGoPet">🎮 进入乐园</div>
+    `;
+    el.style.display = 'flex'; 
+    el.dataset.rendered = 'true';
 
-  el.innerHTML = `
-    <div class="pet-scene" style="background:${house.bg};position:relative">
-      <div class="pet-scene-emoji">${stage.scene}</div>
-      <div class="pet-avatar" style="position:relative;z-index:2">
-        ${foxSVG({mood: foxMood(), size:130})}
-        ${accHtml}
-      </div>
-    </div>
-    <div class="pet-info">
-      <div class="pet-name">
-        <b>小狐狸</b>
-        <span class="pet-lv">${stage.tag}</span>
-      </div>
-      <div class="pet-desc">${house.icon} 住在「${house.name}」</div>
-      <div class="pet-hunger">
-        <span class="pet-hunger-label">${hungerEmoji} 饱食度</span>
-        <div class="pet-hunger-bar">
-          <div class="pet-hunger-fill" style="width:${hungerPct}%"></div>
-        </div>
-        <span class="pet-hunger-label">${hungerPct}%</span>
-      </div>
-      <div class="pet-xp-bar" style="margin-top:8px">
-        <div class="pet-xp-fill" style="width:${progress}%"></div>
-      </div>
-      <div class="pet-xp-text">
-        ${next
-          ? `再学习 ${nextMin - p.xp} 点经验进化为「${next.tag}」`
-          : '已达最高境界 ✨'}
-      </div>
-    </div>
-    <button class="btn ghost small" id="btnOpenPet" style="margin-top:12px">🐾 进入宠物乐园</button>
-  `;
-  $('#btnOpenPet').onclick = ()=>{ Sfx.click(); openPetScreen(); };
+    const bubble = $('#petBubble');
+    let hideTimer = null;
+
+    window.petSpeak = function(text, duration = 3000) {
+      if(!text) return;
+      bubble.textContent = text;
+      bubble.classList.add('show');
+      clearTimeout(hideTimer);
+      hideTimer = setTimeout(() => bubble.classList.remove('show'), duration);
+    };
+
+    setInterval(() => {
+      if (bubble.classList.contains('show')) return;
+      petSpeak(hunger < 30 ? getRandomDialogue('hungry') : getRandomDialogue('comfort'), 4000);
+    }, 25000);
+
+    $('#btnGoPet').onclick = (e) => {
+      e.stopPropagation(); 
+      Sfx.click(); 
+      window.location.href = 'pet.html'; // 🌟 直接跳转！
+    };
+
+    if(!el.dataset.dragBound){
+      el.dataset.dragBound = 'true';
+      initDrag(el);
+    }
+  }
+}
+
+// 🚀 终极 Pointer 拖拽逻辑（兼容鼠标和触摸）
+function initDrag(el){
+  let isDragging = false;
+  let startX, startY, initialLeft, initialTop;
+
+  el.addEventListener('pointerdown', (e) => {
+    if(e.target.id === 'btnGoPet') return; 
+    
+    isDragging = true;
+    el.dataset.wasDragged = 'false';
+    el.classList.add('dragging');
+    
+    startX = e.clientX;
+    startY = e.clientY;
+    const rect = el.getBoundingClientRect();
+    
+    el.style.left = rect.left + 'px';
+    el.style.top = rect.top + 'px';
+    initialLeft = rect.left;
+    initialTop = rect.top;
+    
+    el.setPointerCapture(e.pointerId);
+  });
+
+  el.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    
+    const dx = e.clientX - startX;
+    const dy = e.clientY - startY;
+    
+    if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+      el.dataset.wasDragged = 'true';
+    }
+    
+    let newLeft = initialLeft + dx;
+    let newTop = initialTop + dy;
+    
+    const maxLeft = window.innerWidth - el.offsetWidth;
+    const maxTop = window.innerHeight - el.offsetHeight;
+    newLeft = Math.max(0, Math.min(newLeft, maxLeft));
+    newTop = Math.max(0, Math.min(newTop, maxTop));
+    
+    el.style.left = newLeft + 'px';
+    el.style.top = newTop + 'px';
+  });
+
+  el.addEventListener('pointerup', (e) => {
+    if (isDragging) {
+      isDragging = false;
+      el.classList.remove('dragging');
+      el.releasePointerCapture(e.pointerId);
+      setTimeout(() => { el.dataset.wasDragged = 'false'; }, 100);
+    }
+  });
+  
+  el.addEventListener('pointercancel', (e) => {
+    isDragging = false;
+    el.classList.remove('dragging');
+    el.releasePointerCapture(e.pointerId);
+  });
+
+  // 🌟 点击凤凰互动
+  el.onclick = (e) => {
+    if (e.target.closest('#btnGoPet') || el.dataset.wasDragged === 'true') return;
+    
+    el.classList.add('poke');
+    setTimeout(() => el.classList.remove('poke'), 400);
+
+    try { Sfx.pop(); } catch(err) {}
+    
+    // 根据饥饿度决定说话内容
+    const p = state.pet;
+    const h = getCurrentHunger(p);
+    if(h < 30) {
+      window.petSpeak(getRandomDialogue('hungry'));
+    } else {
+      window.petSpeak(getRandomDialogue('chat'));
+    }
+  };
 }
 
 
 
 
 /* —— 宠物详情屏 —— */
-function openPetScreen(){
-  renderPetScreen();
-  showScreen('s-pet');
-}
 
-function renderPetScreen(){
-  initPet();
-  const p = state.pet;
-  const stageIdx = getPetStageIndex(p.xp);
-  const stage = PET_STAGES[stageIdx];
-  const house = PET_HOUSES.find(h=>h.id===p.house) || PET_HOUSES[0];
-  const eq = p.equipped || {};
-  const totalWords   = Object.values(state.bank).filter(b=>b.seen>0).length;
-  const masteredWords= Object.values(state.bank).filter(b=>b.m>=0.6).length;
-  const hunger = getCurrentHunger(p);
-  const hungerPct = Math.round(hunger);
-  const hungerEmoji = hunger>=80?'😋':hunger>=50?'🙂':hunger>=20?'😐':'😢';
-  const xpBonus = getPetXpBonus();
-  const bonusTxt = xpBonus>1
-    ? `<span style="color:#22c55e;font-weight:900">+${Math.round((xpBonus-1)*100)}%</span>`
-    : xpBonus<1
-      ? `<span style="color:#ef4444;font-weight:900">${Math.round((xpBonus-1)*100)}%</span>`
-      : '<span style="color:var(--muted)">正常</span>';
-
-  const accHtml = ['body','neck','face','head'].map(slot=>{
-    const id = eq[slot];
-    if(!id) return '';
-    const item = PET_DECORATIONS.find(d=>d.id===id);
-    if(!item) return '';
-    return `<span class="pet-accessory slot-${slot}">${item.icon}</span>`;
-  }).join('');
-
-  $('#petContent').innerHTML = `
-    <div class="card pet-hero" style="background:${house.bg};position:relative">
-      <div class="pet-scene-emoji big">${stage.scene}</div>
-      <div class="pet-avatar big" style="position:relative;z-index:2">
-        ${foxSVG({mood: foxMood(), size:180})}
-        ${accHtml}
-      </div>
-      <div class="pet-stage-name">小狐狸 · ${stage.tag}</div>
-      <div class="pet-stage-desc">${stage.desc}</div>
-    </div>
-
-    <div class="card">
-      <h2>${hungerEmoji} 喂养状态</h2>
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
-        <div class="pet-hunger-bar" style="flex:1;height:12px">
-          <div class="pet-hunger-fill" style="width:${hungerPct}%"></div>
-        </div>
-        <span style="font-size:14px;font-weight:900;color:var(--text)">${hungerPct}%</span>
-      </div>
-      <div class="small muted" style="font-weight:700;margin-bottom:12px">
-        学习经验加成：${bonusTxt} · 饱食度越高，学习获得的经验越多
-      </div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-        ${PET_FOODS.map(f=>`
-          <button class="btn ghost small" data-feed="${f.id}"
-            style="padding:10px 4px;font-size:11px;flex-direction:column">
-            <div style="font-size:26px;line-height:1">${f.icon}</div>
-            <div style="font-weight:900;margin-top:4px">${f.name}</div>
-            <div style="font-size:10px;color:var(--orange);font-weight:900">💰 ${f.cost}</div>
-            <div style="font-size:9px;color:var(--muted);font-weight:700">+${f.hunger}饱食</div>
-          </button>
-        `).join('')}
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>🏠 住所</h2>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-        ${PET_HOUSES.map(h=>{
-          const owned = p.housesOwned[h.id];
-          const isOn = p.house === h.id;
-          return `<div class="pet-shop-item ${owned?'owned':''}"
-            style="${isOn?'border-color:var(--pink);box-shadow:0 4px 16px rgba(255,107,157,.3)':''}">
-            <div class="psi-icon">${h.icon}</div>
-            <div class="psi-name">${h.name}</div>
-            ${owned
-              ? (isOn
-                ? `<div style="font-size:11px;color:var(--pink);font-weight:900">✔ 当前住所</div>`
-                : `<button class="btn ghost small psi-btn" data-house="${h.id}">搬过去</button>`)
-              : `<button class="btn primary small psi-btn" data-buyhouse="${h.id}"
-                  ${state.game.coins < h.cost ? 'disabled':''}>💰 ${h.cost}</button>`}
-          </div>`;
-        }).join('')}
-      </div>
-    </div>
-
-    <div class="card">
-      <h2>🎁 装扮（可叠加佩戴）</h2>
-      <div class="small muted" style="font-weight:700;margin-bottom:10px">
-        头顶 · 脸部 · 脖子 · 全身 4 个部位，可同时佩戴
-      </div>
-      ${['head','face','neck','body'].map(slot=>{
-        const slotName = {head:'👑 头顶',face:'👓 脸部',neck:'🎀 脖子',body:'🦋 全身'}[slot];
-        const items = PET_DECORATIONS.filter(d=>d.slot===slot);
-        return `<div style="margin-bottom:14px">
-          <div style="font-size:12px;font-weight:900;color:var(--muted);margin-bottom:6px">${slotName}</div>
-          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
-            ${items.map(d=>{
-              const owned = p.owned[d.id];
-              const isOn = eq[slot] === d.id;
-              return `<div class="pet-shop-item ${owned?'owned':''}"
-                style="${isOn?'border-color:var(--pink);box-shadow:0 4px 16px rgba(255,107,157,.3)':''}">
-                <div class="psi-icon">${d.icon}</div>
-                <div class="psi-name">${d.name}</div>
-                ${owned
-                  ? (isOn
-                    ? `<button class="btn ghost small psi-btn" data-unequip="${slot}">脱下</button>`
-                    : `<button class="btn ghost small psi-btn" data-equip2="${d.id}">戴上</button>`)
-                  : `<button class="btn primary small psi-btn" data-buy="${d.id}"
-                      ${state.game.coins < d.cost ? 'disabled':''}>💰 ${d.cost}</button>`}
-              </div>`;
-            }).join('')}
-          </div>
-        </div>`;
-      }).join('')}
-    </div>
-  `;
-
-  // 喂食
-  $('#petContent').querySelectorAll('[data-feed]').forEach(btn=>{
-    btn.onclick = ()=>{
-      const f = PET_FOODS.find(x=>x.id===btn.dataset.feed);
-      if(!f) return;
-      if(state.game.coins < f.cost){ Sfx.error(); return; }
-      const cur = getCurrentHunger(p);
-      if(cur >= 100){ alert('小狐狸已经吃饱啦～'); return; }
-      state.game.coins -= f.cost;
-      p.hunger = Math.min(100, cur + f.hunger);
-      p.lastFedAt = Date.now();
-      save();
-      Sfx.coin();
-      spawnStars(3, innerWidth/2, innerHeight*0.4, ['🍽️','✨','😋']);
-      renderPetScreen();
-    };
-  });
-
-  // 购买装饰
-  $('#petContent').querySelectorAll('[data-buy]').forEach(btn=>{
-    btn.onclick = ()=>{
-      const d = PET_DECORATIONS.find(x=>x.id===btn.dataset.buy);
-      if(!d) return;
-      if(state.game.coins < d.cost){ Sfx.error(); return; }
-      if(!confirm(`花 ${d.cost} 金币购买「${d.name}」吗？`)) return;
-      state.game.coins -= d.cost;
-      p.owned[d.id] = true;
-      p.equipped[d.slot] = d.id;
-      save();
-      Sfx.finish();
-      spawnStars(6, innerWidth/2, innerHeight*0.4, ['✨','⭐','🎉']);
-      renderPetScreen();
-    };
-  });
-
-  // 佩戴
-  $('#petContent').querySelectorAll('[data-equip2]').forEach(btn=>{
-    btn.onclick = ()=>{
-      const d = PET_DECORATIONS.find(x=>x.id===btn.dataset.equip2);
-      if(!d) return;
-      p.equipped[d.slot] = d.id;
-      save();
-      Sfx.click();
-      renderPetScreen();
-    };
-  });
-
-  // 脱下
-  $('#petContent').querySelectorAll('[data-unequip]').forEach(btn=>{
-    btn.onclick = ()=>{
-      p.equipped[btn.dataset.unequip] = null;
-      save();
-      Sfx.click();
-      renderPetScreen();
-    };
-  });
-
-  // 住所
-  $('#petContent').querySelectorAll('[data-buyhouse]').forEach(btn=>{
-    btn.onclick = ()=>{
-      const h = PET_HOUSES.find(x=>x.id===btn.dataset.buyhouse);
-      if(!h) return;
-      if(state.game.coins < h.cost){ Sfx.error(); return; }
-      if(!confirm(`花 ${h.cost} 金币购买「${h.name}」吗？`)) return;
-      state.game.coins -= h.cost;
-      p.housesOwned[h.id] = true;
-      p.house = h.id;
-      save();
-      Sfx.finish();
-      spawnStars(6, innerWidth/2, innerHeight*0.4, ['🏠','✨','🎉']);
-      renderPetScreen();
-    };
-  });
-  $('#petContent').querySelectorAll('[data-house]').forEach(btn=>{
-    btn.onclick = ()=>{
-      p.house = btn.dataset.house;
-      save();
-      Sfx.click();
-      renderPetScreen();
-    };
-  });
-}
 
 
 /* —— 宠物进化弹窗 —— */
@@ -3672,7 +3614,7 @@ function petStageUp(idx){
       <div style="margin:0 auto 8px">${foxSVG({mood:'happy', size:140})}</div>
       <div style="font-size:12px;font-weight:900;color:var(--orange);letter-spacing:2px">✦ 宠 物 进 化 ✦</div>
       <div style="font-size:22px;font-weight:900;color:var(--text);margin:10px 0">
-        小狐狸 · ${stage.tag}
+        小凤凰 · ${stage.tag}
       </div>
       <div class="muted small" style="font-weight:700;line-height:1.6">${stage.desc}</div>
       <button class="btn primary" id="btnPetUpClose" style="margin-top:22px">太棒了！</button>
@@ -4228,7 +4170,6 @@ function showGamesScreen(){
 $('#btnGames').onclick=()=>{ Sfx.click();showGamesScreen(); };
 $('#btnHomeGames').onclick=()=>{ Sfx.click();showGamesScreen(); };
 $('#btnGamesBack').onclick=()=>{ Sfx.click();goHome(); };
-$('#btnPetBack').onclick = ()=>{ Sfx.click(); goHome(); };
 $('#btnSummaryGame').onclick=()=>{ Sfx.click();showGamesScreen(); };
 
 
@@ -5914,7 +5855,7 @@ function initPage(){
     if(!state.clock) state.clock = { realStart: Date.now(), virtualStart: Date.now(), scale: 1 };
     if(!state.bank) state.bank = {};
     if(!state.history) state.history = [];
-    if(!state.pet) state.pet = { xp:0, equipped:null, owned:{}, lastStage:0 };
+    if(!getActivePet()) state.pet = { xp:0, equipped:null, owned:{}, lastStage:0 };
 
     // ★ 惰性结算 + 刷新会员缓存（放在 goHome 之前）
     (async ()=>{
@@ -6011,8 +5952,198 @@ window.addEventListener('pagehide', () => {
   color: var(--pink) !important;
   background: rgba(255, 107, 157, 0.1);
 }
-</style>
+/* 悬浮宠物挂件 *//* 悬浮宠物挂件 */
+/* 悬浮宠物挂件 - 无框极简版 */
+.floating-pet {
+  position: fixed;
+  left: calc(50% - 320px); 
+  top: 300px;
+  z-index: 9999;
+  width: 100px; /* 缩小整体宽度 */
+  cursor: grab;
+  touch-action: none; 
+  user-select: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px; /* 🌟 新增：元素之间留出间隙，防止重叠 */
+  /* ❌ 删除了背景色、边框、阴影、模糊滤镜 */
+}
 
+.floating-pet:active { cursor: grabbing; }
+
+.floating-pet.dragging {
+  opacity: 0.8;
+  transform: scale(1.05);
+}
+
+/* 宠物头像容器 */
+.fp-avatar-box {
+  width: 80px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; 
+  filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15)); /* 给凤凰加一点阴影，脱离背景 */
+}
+.fp-avatar-box svg {
+  width: 100%;
+  height: 100%;
+  max-width: 80px;
+  max-height: 80px;
+}
+
+/* 文字标签：加上小底托 */
+.floating-pet .fp-name {
+  font-size: 12px;
+  font-weight: 900;
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2px 8px;
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+  pointer-events: none;
+}
+
+.floating-pet .fp-badge {
+  font-size: 10px;
+  background: var(--pink);
+  color: #fff;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-weight: 900;
+  box-shadow: 0 2px 6px rgba(255, 107, 157, 0.3);
+  pointer-events: none;
+}
+
+.floating-pet .fp-hunger-bar {
+  width: 80%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+  pointer-events: none;
+  margin-top: 2px;
+}
+.floating-pet .fp-hunger-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #fbbf24, #ffa751);
+}
+
+/* 按钮做成白色气泡样式 */
+.floating-pet .fp-btn {
+  font-size: 11px;
+  padding: 6px 12px;
+  background: #fff;
+  color: var(--pink);
+  border-radius: 20px;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(255, 107, 157, 0.2);
+  margin-top: 4px;
+  transition: transform 0.15s;
+}
+.floating-pet .fp-btn:active {
+  transform: scale(0.92);
+}
+/* ══════════ 小凤凰专属小动作 ══════════ */
+
+/* 1. 呼吸浮动 (整体上下微微浮动) */
+.fox-idle {
+  transform-origin: 50% 100%;
+  animation: foxFloat 3s ease-in-out infinite;
+}
+@keyframes foxFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-3px); }
+}
+
+/* 2. 摇尾巴 (以后半边为轴心左右摇摆) */
+.fox-tail {
+  transform-origin: 50% 75%;
+  animation: foxWagTail 2s ease-in-out infinite;
+}
+@keyframes foxWagTail {
+  0%, 100% { transform: rotate(0deg); }
+  50% { transform: rotate(12deg); }
+}
+
+/* 3. 眨眼睛 (间隔性闭上) */
+.fox-eye {
+  transform-origin: center;
+  animation: foxBlink 4s ease-in-out infinite;
+}
+@keyframes foxBlink {
+  0%, 90%, 100% { transform: scaleY(1); } /* 正常睁开 */
+  95% { transform: scaleY(0.1); }         /* 瞬间闭上 */
+}
+
+/* 4. 戳一戳的反应 (点击宠物时触发) */
+.floating-pet.poke .fox-idle {
+  animation: foxPoke 0.4s cubic-bezier(0.2, 1.4, 0.5, 1);
+}
+@keyframes foxPoke {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(0.9) translateY(-5px); }
+}
+/* ══════════ 宠物对话气泡 ══════════ */
+.pet-bubble {
+  position: absolute;
+  bottom: 100%;
+  right: -20px;
+  width: max-content;
+  max-width: 150px;
+  background: #fff;
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 2px solid var(--pink);
+  box-shadow: 0 4px 12px rgba(255,107,157,0.2);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px) scale(0.9);
+  transition: all 0.3s cubic-bezier(0.2, 1.4, 0.5, 1);
+  z-index: 10000;
+  pointer-events: none;
+  line-height: 1.4;
+  text-align: center;
+}
+.pet-bubble::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  margin-left: -6px;
+  border-width: 6px 6px 0;
+  border-style: solid;
+  border-color: var(--pink) transparent transparent transparent;
+}
+.pet-bubble::before {
+  content: '';
+  position: absolute;
+  bottom: -3px;
+  left: 50%;
+  margin-left: -4px;
+  border-width: 4px 4px 0;
+  border-style: solid;
+  border-color: #fff transparent transparent transparent;
+  z-index: 1;
+}
+.pet-bubble.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0) scale(1);
+}
+
+</style>
+<div id="floatingPet" class="floating-pet" style="display:none;">
+  <!-- 里面的内容通过 JS 动态渲染 -->
+   
+</div>
 
 </body>
 </html>
