@@ -1267,9 +1267,9 @@ body.skin-boy .weak-tag{
       </div>
       <div id="sumLevelUp" style="margin-top:16px"></div>
       <div class="muted small" style="text-align:center;margin-top:16px;font-weight:700" id="sumNext"></div>
-      <button class="btn primary" id="btnBackHome" style="margin-top:22px">🏠 返回主页</button>
+      <button class="btn primary" id="btnBackHome" onclick="goHome()" style="margin-top:22px">🏠 返回主页</button>
       <button class="btn ghost small" id="btnSummaryGame" style="margin-top:10px">🎮 玩小游戏</button>
-      <button class="btn ghost small" id="btnSummaryTopic" style="margin-top:10px">🔄 切换主题</button>
+      <button class="btn ghost small" id="btnSummaryTopic" onclick="if(state.goal){renderGoal();showScreen('s-goal');}" style="margin-top:10px">🔄 切换主题</button>
     </div>
   </section>
 
@@ -5955,22 +5955,34 @@ window.addEventListener('pagehide', () => {
   color: var(--pink) !important;
   background: rgba(255, 107, 157, 0.1);
 }
-/* 悬浮宠物挂件 *//* 悬浮宠物挂件 */
+
+/* 悬浮宠物挂件 - 无框极简版 */
 /* 悬浮宠物挂件 - 无框极简版 */
 .floating-pet {
   position: fixed;
   left: calc(50% - 320px); 
   top: 300px;
   z-index: 9999;
-  width: 100px; /* 缩小整体宽度 */
+  width: 100px; 
   cursor: grab;
   touch-action: none; 
   user-select: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px; /* 🌟 新增：元素之间留出间隙，防止重叠 */
-  /* ❌ 删除了背景色、边框、阴影、模糊滤镜 */
+  gap: 6px; 
+  
+  /* 🌟 加在这里：让透明区域不阻挡点击 */
+  pointer-events: none; 
+}
+
+/* 🌟 加在外面：只有图片和按钮允许点击 */
+.floating-pet .fp-avatar-box,
+.floating-pet .fp-btn,
+.floating-pet .fp-name,
+.floating-pet .fp-badge,
+.floating-pet .fp-hunger-bar {
+  pointer-events: auto;
 }
 
 .floating-pet:active { cursor: grabbing; }
