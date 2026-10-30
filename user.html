@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="theme-color" content="#ffffff">
+<title>我的账号 · Playkyn</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --accent:#FF4D8D;
+  --accent-soft:#FFF0F5;
+  --text:#0A0A0A;
+  --text-2:#525252;
+  --text-3:#8A8A8A;
+  --border:#EBEBEB;
+  --bg:#FFFFFF;
+  --bg-soft:#FAFAFA;
+}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  background:var(--bg);color:var(--text);
+  min-height:100vh;-webkit-font-smoothing:antialiased;
+  line-height:1.55;font-size:15px;
+}
+.nav {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 1000;
+  background: rgba(255,255,255,.85);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  max-width: 880px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  height: 60px;
+  padding: 0 24px;
+  gap: 16px;
+}
+
+.nav-logo {
+  font-size: 18px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  color: var(--text) !important;
+  text-decoration: none !important;
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.nav-logo-mark {
+  width: 58px;
+  height: 58px;
+  background: transparent !important;
+  border-radius: 0 !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: -6px;  
+}
+
+.nav-logo-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.nav-spacer{flex:1}
+.nav-btn{font-size:14px;font-weight:600;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;transition:.15s;white-space:nowrap;text-decoration:none;color:var(--text-2);background:transparent;}
+.nav-btn:hover{background:var(--bg-soft);color:var(--text)}
+
+.wrap{max-width:880px;margin:0 auto;padding:100px 24px 60px;}
+.user-card{border:1px solid var(--border);border-radius:14px;padding:32px;background:#fff;margin-bottom:24px;}
+.user-head{display:flex;align-items:center;gap:20px;padding-bottom:24px;border-bottom:1px solid var(--border);margin-bottom:24px;}
+.user-avatar{width:64px;height:64px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;font-family:Georgia,serif;flex-shrink:0;}
+.user-info{flex:1;min-width:0}
+.user-name{font-size:22px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+.user-email{font-size:14px;color:var(--text-3);font-weight:500}
+
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:4px 10px;border-radius:999px;letter-spacing:.02em;}
+.badge.free{background:#F5F5F5;color:var(--text-2)}
+.badge.pro{background:var(--accent-soft);color:var(--accent)}
+.badge.pro::before{content:"●";font-size:8px}
+.badge.trial{background:#FFF3E0;color:#F57C00}
+.badge.trial::before{content:"●";font-size:8px}
+
+.info-list{display:flex;flex-direction:column;}
+.info-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--border);gap:16px;}
+.info-row:last-child{border-bottom:none}
+.info-label{font-size:14px;color:var(--text-3);font-weight:500;}
+.info-value{font-size:14px;color:var(--text);font-weight:600;text-align:right;word-break:break-all;}
+
+.action-group{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:24px;}
+.btn{border:none;border-radius:10px;padding:12px 22px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s;text-decoration:none;display:inline-flex;align-items:center;justify-content:center;gap:8px;letter-spacing:-.01em;}
+.btn.primary{background:var(--text);color:#fff}
+.btn.primary:hover{background:#000;transform:translateY(-1px)}
+.btn.ghost{background:#fff;color:var(--text);border:1px solid var(--border);}
+.btn.ghost:hover{background:var(--bg-soft)}
+.btn.danger{background:#fff;color:#DC2626;border:1px solid #FECACA;}
+.btn.danger:hover{background:#FEF2F2}
+
+.center-box{text-align:center;padding:80px 20px;}
+.spinner{width:28px;height:28px;border-radius:50%;border:3px solid var(--border);border-top-color:var(--text);animation:spin .8s linear infinite;margin:0 auto 16px;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.center-text{font-size:14px;color:var(--text-3);font-weight:500}
+
+.footer{text-align:center;padding:40px 24px 32px;font-size:12px;color:var(--text-3);border-top:1px solid var(--border);margin-top:40px;}
+.footer a{color:var(--text-3);text-decoration:none}
+.footer a:hover{color:var(--text)}
+
+@media(max-width:560px){
+  .nav-inner{padding:0 16px;gap:8px}
+  .nav-btn{padding:7px 10px;font-size:13px}
+  .wrap{padding:88px 16px 40px}
+  .user-card{padding:20px}
+  .user-head{gap:14px;padding-bottom:20px;margin-bottom:20px}
+  .user-avatar{width:52px;height:52px;font-size:22px}
+  .user-name{font-size:19px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+   <a class="nav-logo" href="index.html">
+  <span class="nav-logo-mark">
+    <img src="logo_bird.png" alt="Playkyn">
+  </span>
+  Playkyn
+</a>
+    <div class="nav-spacer"></div>
+    <a href="index.html" class="nav-btn">主页</a>
+    <a href="wordgame.html" class="nav-btn">游戏</a>
+    <button class="nav-btn" id="navLogout">退出</button>
+  </div>
+</nav>
+
+<div class="wrap" id="content">
+  <div class="center-box">
+    <div class="spinner"></div>
+    <div class="center-text">加载中...</div>
+  </div>
+</div>
+
+<div class="footer">
+  © 2026 Playkyn · <a href="index.html">主页</a>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="membership.js"></script>
+<script>
+const supabaseUrl = 'https://zuhymqoxyqgpkxoaygtl.supabase.co';
+const supabaseKey = 'sb_publishable_y69bIL3lNMFR6kz5apgAEw_GMOkaBJu'; // ⚠️ 记得检查你的 Key
+const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+function fmtDate(iso){
+  if(!iso) return '—';
+  const d = new Date(iso);
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function escapeHtml(s){
+  return String(s||'').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+document.getElementById('navLogout').onclick = async ()=>{
+  if(!confirm('确定要退出登录吗？')) return;
+  await sb.auth.signOut();
+  window.location.href = 'index.html';
+};
+
+let __currentUser = null;
+
+(async function init(){
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session){ window.location.href = 'index.html'; return; }
+
+  __currentUser = session.user;
+  const user = session.user;
+
+  // 1. 直接获取最新解析后的会员对象
+  const m = await settleAndLoad(sb, user.id);
+  window.__membership = m;
+  window.__isUnlocked = m.canUpload;
+
+  const email = user.email || '';
+  const shortName = email.split('@')[0] || '用户';
+  const displayName = m.display_name || shortName;
+  const initial = (displayName[0] || 'U').toUpperCase();
+  const registeredAt = user.created_at;
+  const badgeHtml = renderMembershipBadge(m);
+
+  // 2. 根据 3 种状态生成不同的按钮
+  let upgradeHtml = '';
+  if (m.isPaid) {
+    upgradeHtml = `
+      <div style="text-align:center; margin:20px 0;">
+        <button onclick="showRedeemModal()" style="padding:10px 22px; background:#fff; color:#FF4D8D; border:1.5px solid #FF4D8D; border-radius:24px; font-weight:bold; font-size:13px; cursor:pointer;">
+          🎟️ 续费 / 兑换解锁码
+        </button>
+      </div>`;
+  } else {
+    upgradeHtml = `
+      <div style="text-align:center; margin:20px 0;">
+        <button onclick="showUpgradeModal()" style="padding:12px 24px; background:#fff; color:#FF4D8D; border:1.5px solid #FF4D8D; border-radius:24px; font-weight:bold; font-size:14px; cursor:pointer; box-shadow: 0 4px 12px rgba(255,77,79,0.15);">
+          🔓 升级会员 / 兑换解锁码
+        </button>
+      </div>`;
+  }
+
+  // 3. 状态文字与额度文字的精细化展示
+  let statusText = '免费版 (长期)';
+  if (m.isPaid) statusText = `${m.tierName}（${m.expiresAtStr} 到期）`;
+  else if (m.isTrial) statusText = `试用期（剩 ${m.daysLeft} 天）`;
+
+  let quotaText = '0 词';
+  if (m.isPaid) {
+    quotaText = `${m.quotaRemaining} / ${m.quotaTotal} 词（本周期）`;
+    if (m.credits > 0) quotaText += ` + ${m.credits} 永久词`;
+  } else if (m.isTrial) {
+    quotaText = '试用期间暂不支持上传';
+  } else if (m.isFree) {
+    quotaText = '专属免费词库 (30词)';
+  }
+
+  document.getElementById('content').innerHTML = `
+    <div class="user-card">
+      <div class="user-head">
+        <div class="user-avatar">${escapeHtml(initial)}</div>
+        <div class="user-info">
+          <div class="user-name">
+            ${escapeHtml(displayName)}
+            <button onclick="editNickname()" title="修改昵称" style="background:none;border:none;cursor:pointer;padding:0;font-size:14px;color:#8A8A8A;line-height:1">✏️</button>
+            ${badgeHtml}
+          </div>
+          <div class="user-email">${escapeHtml(email)}</div>
+        </div>
+      </div>
+
+      ${renderQuotaBar(m)}
+
+      <div class="info-list" style="margin-top:16px">
+        <div class="info-row"><span class="info-label">账号状态</span><span class="info-value">${statusText}</span></div>
+        <div class="info-row"><span class="info-label">可用词额度</span><span class="info-value">${quotaText}</span></div>
+        <div class="info-row"><span class="info-label">注册时间</span><span class="info-value">${fmtDate(registeredAt)}</span></div>
+      </div>
+    </div>
+
+    ${renderExpiryWarning(m)}
+    ${upgradeHtml}
+
+    <div class="action-group">
+      <a href="wordgame.html" class="btn primary">开始学习 →</a>
+      <button class="btn ghost" id="btnUpload">📤 上传我的词表</button>
+      <a href="index.html" class="btn ghost">返回主页</a>
+      <button class="btn danger" id="btnLogout2">退出登录</button>
+    </div>
+    
+    <div style="border:1px solid #EBEBEB;border-radius:14px;padding:24px;background:#fff;margin-top:24px">
+      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700">我的词库</h3>
+      <div id="myWordlistsBody" style="color:#8A8A8A;font-size:14px">加载中...</div>
+    </div>
+  `;
+
+  document.getElementById('btnLogout2').onclick = ()=>{ document.getElementById('navLogout').click(); };
+  document.getElementById('btnUpload').onclick = ()=>{ 
+    if(!m.canUpload){ showUpgradeModal(); return; } 
+    openUploadModal(); 
+  };
+
+  document.getElementById('content').insertAdjacentHTML('beforeend',
+    renderDeviceCard() + renderStudyReport(user.id) + renderSettingsCard(m)
+  );
+
+  // 绑定设置卡片事件
+  const rng = document.getElementById('dailyRange');
+  const valEl = document.getElementById('dailyVal');
+  if(rng){
+    rng.oninput = () => { valEl.textContent = rng.value; };
+    rng.onchange = async () => {
+      const v = +rng.value;
+      const { error } = await sb.from('profiles').update({ daily_new: v }).eq('id', user.id);
+      if(error){ alert('保存失败：' + error.message); return; }
+      try{
+        const KEY = 'wq_runtime_v5_' + user.id;
+        const raw = localStorage.getItem(KEY);
+        if(raw){
+          const p = JSON.parse(raw);
+          if(!p.settings) p.settings = {};
+          p.settings.dailyNew = v;
+          localStorage.setItem(KEY, JSON.stringify(p));
+        }
+      }catch(e){}
+      const t = document.createElement('div');
+      t.textContent = '✅ 已保存';
+      t.style.cssText = 'position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);background:#0A0A0A;color:#fff;padding:10px 20px;border-radius:10px;z-index:99999;font-weight:700;font-size:13px';
+      document.body.appendChild(t);
+      setTimeout(() => t.remove(), 1200);
+    };
+  }
+
+  await renderWordlists();
+})();
+
+/* ======== 学习报告渲染 ======== */
+function loadStudyData(userId){
+  try{
+    const raw = localStorage.getItem('wq_runtime_v5_' + userId);
+    if(!raw) return null;
+    const p = JSON.parse(raw);
+    return p.state || null;
+  }catch(e){ return null; }
+}
+
+function renderStudyReport(userId){
+  const state = loadStudyData(userId);
+  
+  const now = new Date();
+  const todayStr = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  
+  const dayOfWeek = now.getDay() === 0 ? 7 : now.getDay(); 
+  const monday = new Date(now);
+  monday.setDate(now.getDate() - dayOfWeek + 1);
+  monday.setHours(0,0,0,0);
+  
+  const weekDateStrs = [];
+  for(let i = 0; i < 7; i++) {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    weekDateStrs.push(`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`);
+  }
+
+  if(!state || !state.history || state.history.length === 0){
+    return `
+      <div style="text-align:center; padding:40px 20px; margin-top:24px; border:1px solid #EBEBEB; border-radius:14px; background:#fff;">
+        <div style="font-size:42px;margin-bottom:8px">📊</div>
+        <div style="font-size:15px;font-weight:900;color:#0A0A0A;margin-bottom:6px">学习报告</div>
+        <div style="font-size:13px;color:#8A8A8A;line-height:1.6">还没有学习记录，去游戏里学一轮吧～</div>
+      </div>`;
+  }
+
+  const history = state.history || [];
+  const bank = state.bank || {};
+  
+  const todayRecs = history.filter(r => r.date === todayStr);
+  const todayDur = todayRecs.reduce((a,r) => a + r.duration, 0);
+  const todayTotal = todayRecs.reduce((a,r) => a + r.total, 0);
+  const todayCorrect = todayRecs.reduce((a,r) => a + r.correct, 0);
+  const todayNew = todayRecs.reduce((a,r) => a + r.newCount, 0);
+
+  const weekRecs = history.filter(r => weekDateStrs.includes(r.date));
+  const weekDur = weekRecs.reduce((a,r) => a + r.duration, 0);
+  const weekTotal = weekRecs.reduce((a,r) => a + r.total, 0);
+  const weekCorrect = weekRecs.reduce((a,r) => a + r.correct, 0);
+  const weekNew = weekRecs.reduce((a,r) => a + r.newCount, 0);
+  const activeDays = [...new Set(weekRecs.map(r => r.date))].length;
+
+  let milestoneMsg = "本周还没有开始学习哦，快去破冰吧！", milestoneIcon = "🐣";
+  if(activeDays === 7) { milestoneMsg = "满勤达人！这周一天都没落下！"; milestoneIcon = "👑"; }
+  else if(weekNew >= 100) { milestoneMsg = "词汇大爆发！本周新词破百！"; milestoneIcon = "🚀"; }
+  else if(weekTotal >= 200) { milestoneMsg = "刷题狂魔！本周答题量破 200！"; milestoneIcon = "🔥"; }
+  else if(activeDays >= 4) { milestoneMsg = "稳步前进！保持节奏！"; milestoneIcon = "🏃"; }
+
+  const learned = Object.values(bank).filter(b => b.seen > 0).length;
+  const mastered = Object.values(bank).filter(b => b.m >= 0.7).length;
+  const weak = Object.values(bank).filter(b => b.seen > 0 && b.m < 0.4).length;
+
+  const fmtDur = ms => {
+    if(!ms || ms < 0) return '0 分';
+    const m = Math.round(ms / 60000);
+    if(m < 1) return '<1 分';
+    if(m < 60) return m + ' 分';
+    return Math.floor(m/60) + 'h' + (m%60 ? m%60 + 'm' : '');
+  };
+
+  return `
+    <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;" id="report-container">
+      
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+        <div style="display:flex; background:#F5F5F5; border-radius:8px; padding:4px;">
+          <button onclick="switchReportTab('day')" id="tab-day" style="padding:6px 16px; border:none; border-radius:6px; font-weight:700; font-size:13px; cursor:pointer; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,0.1); color:#0A0A0A;">按天</button>
+          <button onclick="switchReportTab('week')" id="tab-week" style="padding:6px 16px; border:none; border-radius:6px; font-weight:700; font-size:13px; cursor:pointer; background:transparent; color:#8A8A8A;">按周</button>
+        </div>
+        <button onclick="downloadWeeklyReport()" id="btn-download-report" style="display:none; padding:6px 12px; border:1px solid #EBEBEB; background:#fff; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer; color:#525252;">📥 下载周报</button>
+      </div>
+
+      <div id="view-day">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px; margin-bottom:16px;">
+          <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayDur > 0 ? fmtDur(todayDur) : '0 分'}</div>
+            <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">⏱️ 今日时长</div>
+          </div>
+          <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayTotal}</div>
+            <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">📝 今日答题</div>
+          </div>
+          <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayTotal ? Math.round(todayCorrect/todayTotal*100) + '%' : '0%'}</div>
+            <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">🎯 今日正确率</div>
+          </div>
+          <div style="background:#FAFAFA;border-radius:10px;padding:12px;text-align:center;">
+            <div style="font-size:20px;font-weight:900;color:#FF4D8D">${todayNew}</div>
+            <div style="font-size:11px;color:#8A8A8A;font-weight:700;margin-top:4px">✨ 今日新学</div>
+          </div>
+        </div>
+        <div onclick="showWordListModal('all')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:#FAFAFA; border-radius:10px; margin-bottom:8px;">
+          <span style="font-size:14px; font-weight:700; color:#0A0A0A;">已学单词</span><span style="font-size:16px; font-weight:900;">${learned} ›</span>
+        </div>
+        <div onclick="showWordListModal('mastered')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:#F0FDF4; border-radius:10px; margin-bottom:8px;">
+          <span style="font-size:14px; font-weight:700; color:#166534;">已掌握</span><span style="font-size:16px; font-weight:900; color:#22c55e;">${mastered} ›</span>
+        </div>
+        <div onclick="showWordListModal('weak')" style="cursor:pointer; display:flex; justify-content:space-between; padding:12px; background:#FEF2F2; border-radius:10px;">
+          <span style="font-size:14px; font-weight:700; color:#991B1B;">需加强</span><span style="font-size:16px; font-weight:900; color:#ef4444;">${weak} ›</span>
+        </div>
+      </div>
+
+      <div id="view-week" style="display:none;">
+        <div style="background:linear-gradient(180deg, #FFF8FB, #fff); border:1px solid #FFD1E3; border-radius:14px; padding:20px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+            <h3 style="margin:0;font-size:16px;font-weight:900;color:#0A0A0A;">📅 本周学习战报</h3>
+            <span style="font-size:12px; background:#FF4D8D; color:#fff; padding:2px 8px; border-radius:10px; font-weight:700;">${weekDateStrs[0].slice(5)} ~ ${weekDateStrs[6].slice(5)}</span>
+          </div>
+          <div style="background:#FFF0F5; border:1px dashed #FF4D8D; border-radius:12px; padding:14px; margin-bottom:16px; display:flex; gap:12px; align-items:center;">
+            <div style="font-size:28px;">${milestoneIcon}</div>
+            <div style="font-size:13px; font-weight:800; color:#FF4D8D; line-height:1.5;">${milestoneMsg}</div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px;">
+            <div style="background:#FAFAFA; border-radius:10px; padding:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#0A0A0A;">${fmtDur(weekDur)}</div>
+              <div style="font-size:11px; color:#8A8A8A; font-weight:700; margin-top:4px;">⏱️ 本周时长</div>
+            </div>
+            <div style="background:#FAFAFA; border-radius:10px; padding:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#0A0A0A;">${activeDays} <span style="font-size:12px;color:#8A8A8A;">/ 7 天</span></div>
+              <div style="font-size:11px; color:#8A8A8A; font-weight:700; margin-top:4px;">📅 打卡天数</div>
+            </div>
+            <div style="background:#FAFAFA; border-radius:10px; padding:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#FF4D8D;">${weekNew}</div>
+              <div style="font-size:11px; color:#8A8A8A; font-weight:700; margin-top:4px;">✨ 本周新词</div>
+            </div>
+            <div style="background:#FAFAFA; border-radius:10px; padding:12px; text-align:center;">
+              <div style="font-size:20px; font-weight:900; color:#FF4D8D;">${weekTotal ? Math.round(weekCorrect/weekTotal*100) + '%' : '—'}</div>
+              <div style="font-size:11px; color:#8A8A8A; font-weight:700; margin-top:4px;">🎯 本周正确率</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="border:1px solid #EBEBEB; border-radius:14px; padding:24px; background:#fff; margin-top:24px;">
+      <h3 style="margin:0 0 16px;font-size:16px;font-weight:700;">📈 近 7 天趋势</h3>
+      <div style="display:flex;align-items:flex-end;gap:6px;height:80px;padding:6px 0;">
+        ${(() => {
+           const last7Days = [];
+           for(let i = 6; i >= 0; i--){
+             const d = new Date(); d.setDate(d.getDate() - i);
+             const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+             const recs = history.filter(r => r.date === ds);
+             last7Days.push({ label: (d.getMonth()+1) + '/' + d.getDate(), dur: recs.reduce((a,r) => a + r.duration, 0) });
+           }
+           const maxDur = Math.max(1, ...last7Days.map(d => d.dur));
+           return last7Days.map(d => {
+             const h = Math.max(4, (d.dur / maxDur) * 100);
+             return `<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%">
+                <div style="width:100%;height:${h}%;background:${d.dur > 0 ? 'linear-gradient(180deg,#FFA751,#FF4D8D)' : '#F0F0F0'};border-radius:6px 6px 2px 2px;min-height:4px"></div>
+                <div style="font-size:9px;color:#8A8A8A;font-weight:700;margin-top:4px">${d.label}</div>
+             </div>`;
+           }).join('');
+        })()}
+      </div>
+    </div>
+  `;
+}
+
+function switchReportTab(tab) {
+  const viewDay = document.getElementById('view-day');
+  const viewWeek = document.getElementById('view-week');
+  const tabDay = document.getElementById('tab-day');
+  const tabWeek = document.getElementById('tab-week');
+  const btnDownload = document.getElementById('btn-download-report');
+
+  if (tab === 'day') {
+    viewDay.style.display = 'block';
+    viewWeek.style.display = 'none';
+    tabDay.style.background = '#fff'; tabDay.style.color = '#0A0A0A'; tabDay.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    tabWeek.style.background = 'transparent'; tabWeek.style.color = '#8A8A8A'; tabWeek.style.boxShadow = 'none';
+    btnDownload.style.display = 'none';
+  } else {
+    viewDay.style.display = 'none';
+    viewWeek.style.display = 'block';
+    tabWeek.style.background = '#fff'; tabWeek.style.color = '#0A0A0A'; tabWeek.style.boxShadow = '0 1px 3px rgba(0,0,0,0.1)';
+    tabDay.style.background = 'transparent'; tabDay.style.color = '#8A8A8A'; tabDay.style.boxShadow = 'none';
+    btnDownload.style.display = 'block';
+  }
+}
+
+function downloadWeeklyReport() {
+  const node = document.getElementById('view-week');
+  const btn = document.getElementById('btn-download-report');
+  const originalText = btn.textContent;
+  btn.textContent = '生成中...';
+  btn.disabled = true;
+
+  html2canvas(node, {
+    scale: 2,
+    backgroundColor: '#ffffff',
+    useCORS: true
+  }).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `Playkyn_周报_${new Date().getTime()}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    btn.textContent = originalText;
+    btn.disabled = false;
+  }).catch(err => {
+    console.error('生成图片失败', err);
+    alert('生成失败，请检查网络或稍后重试');
+    btn.textContent = originalText;
+    btn.disabled = false;
+  });
+}
+
+function renderSettingsCard(m){
+  const daily = m.daily_new || 10;
+  return `
+    <div style="border:1px solid #EBEBEB;border-radius:14px;padding:24px;background:#fff;margin-top:24px">
+      <h3 style="margin:0 0 6px;font-size:16px;font-weight:700">⚙️ 学习设置</h3>
+      <div style="font-size:12px;color:#8A8A8A;font-weight:700;margin-bottom:14px">设置会同步到账号，换设备也生效</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:14px;font-weight:700;color:#525252">每日新词量</span>
+        <span id="dailyVal" style="font-size:16px;font-weight:900;color:#FF4D8D">${daily}</span>
+      </div>
+      <input type="range" id="dailyRange" min="3" max="20" value="${daily}" style="width:100%">
+      <div style="font-size:11px;color:#8A8A8A;margin-top:6px;font-weight:600">建议从每天 10 个开始，坚持比数量更重要</div>
+    </div>`;
+}
+
+function renderDeviceCard(){
+  // 延迟加载，等 DOM 渲染出来再去查数据库
+  setTimeout(async () => {
+    const listContainer = document.getElementById('deviceListContainer');
+    const countEl = document.getElementById('deviceCount');
+    if(!listContainer) return;
+
+    try {
+      const { data: devices, error } = await sb.from('user_devices')
+        .select('*')
+        .eq('user_id', __currentUser.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      if (countEl) countEl.textContent = devices ? devices.length : 0;
+
+      if (!devices || devices.length === 0) {
+        listContainer.innerHTML = `<div style="text-align:center; padding: 10px; color:#8A8A8A; font-size:13px;">暂无绑定设备</div>`;
+        return;
+      }
+
+      let html = '';
+      devices.forEach(dev => {
+        // 优先使用数据库存的名字，没存的话就根据指纹猜一个
+        let dName = dev.device_name;
+        if (!dName && dev.device_fp) {
+          if (dev.device_fp.includes('iPhone')) dName = '📱 iPhone 设备';
+          else if (dev.device_fp.includes('Android')) dName = '📱 Android 设备';
+          else if (dev.device_fp.includes('Mac')) dName = '💻 Mac 电脑';
+          else if (dev.device_fp.includes('Windows')) dName = '💻 Windows 电脑';
+          else dName = '🌐 网页浏览器';
+        }
+        
+        // 简单判断是否当前设备
+        const isCurrent = dev.device_fp && navigator.userAgent.includes(dev.device_fp.split('-')[0]);
+        
+        // 使用 created_at 作为绑定时间展示
+        const bindTime = dev.created_at ? new Date(dev.created_at).toLocaleDateString('zh-CN') : '未知';
+
+        html += `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px; background:#fff; border:1px solid #F0F0F0; border-radius:10px; margin-bottom:8px;">
+            <div>
+              <div style="font-weight:700; font-size:14px; color:var(--text);">
+                ${dName} ${isCurrent ? '<span style="font-size:10px; color:#FF4D8D; background:#FFF0F5; padding:2px 6px; border-radius:4px; margin-left:4px;">当前设备</span>' : ''}
+              </div>
+              <div style="font-size:11px; color:#8A8A8A; margin-top:4px;">绑定时间: ${bindTime}</div>
+            </div>
+            ${!isCurrent ? `<button onclick="unbindSingleDevice('${dev.id}')" style="padding:6px 10px; font-size:12px; color:#DC2626; background:#FEF2F2; border:none; border-radius:6px; cursor:pointer;">解绑</button>` : ''}
+          </div>
+        `;
+      });
+      listContainer.innerHTML = html;
+
+    } catch(e) {
+      console.error("获取设备列表失败", e);
+      listContainer.innerHTML = `<div style="text-align:center; color:#DC2626; font-size:12px;">获取设备信息失败</div>`;
+    }
+  }, 50); // 稍微延迟一点点
+
+  return `
+    <div style="border:2px dashed #FF4D8D;border-radius:14px;padding:24px;background:#FFF0F5;margin-top:24px">
+      <h3 style="margin:0 0 8px;font-size:16px;font-weight:700; color:#FF4D8D;">🛡️ 账号设备管理</h3>
+      <div style="font-size:13px;color:#8A8A8A;font-weight:600; line-height:1.6; margin-bottom:16px;">
+        为了保护您的学习数据，当前账号最多绑定 <b>2 台</b> 设备。<br>
+        当前已绑定 <b id="deviceCount" style="color:#FF4D8D">...</b> 台。
+      </div>
+      
+      <!-- 动态列表容器 -->
+      <div id="deviceListContainer" style="margin-bottom:16px; min-height: 50px;">
+         <div style="text-align:center; padding: 10px; color:#8A8A8A; font-size:13px;">正在获取设备列表...</div>
+      </div>
+
+      <button class="btn danger" id="btnUnbind" style="width:100%; border-color:#FF4D8D; color:#FF4D8D;">🔓 解除所有设备绑定</button>
+    </div>
+  `;
+}
+
+// 解绑指定的单个设备
+window.unbindSingleDevice = async function(deviceId) {
+  if (!confirm('确定要解绑这台设备吗？解绑后它将需要重新登录。')) return;
+  try {
+    const { error } = await sb.from('user_devices').delete().eq('id', deviceId);
+    if (error) throw error;
+    alert('✅ 设备已解绑');
+    location.reload(); // 重新加载页面刷新列表
+  } catch(err) {
+    alert('解绑失败：' + err.message);
+  }
+};
+
+document.addEventListener('click', async (e) => {
+  if(e.target && e.target.id === 'btnUnbind'){
+    if(!confirm('⚠️ 确定要解除当前账号的所有设备绑定吗？\n解绑后您可以前往新设备重新登录。')) return;
+    const btn = e.target;
+    btn.textContent = '解绑中...'; btn.disabled = true;
+    try{
+      const { error } = await sb.rpc('unbind_user_devices', { p_target_id: __currentUser.id });
+      if(error) throw error;
+      alert('✅ 已成功解除所有设备的绑定！');
+      btn.textContent = '🔓 解除所有设备绑定'; btn.disabled = false;
+    }catch(err){
+      alert('解绑失败：' + err.message);
+      btn.textContent = '🔓 解除所有设备绑定'; btn.disabled = false;
+    }
+  }
+});
+
+/* ======== 加载词库列表 ======== */
+async function renderWordlists() {
+  const body = document.getElementById('myWordlistsBody');
+  if (!body) return;
+ // 修改后的代码：
+  const { data, error } = await sb.from('wordlists')
+    .select('id, name, description, word_count, is_public, is_trial_allowed, owner_id, created_at')
+    .or(`owner_id.eq.${__currentUser.id},is_public.eq.true`)
+    .order('created_at', { ascending: false });
+
+  if (error || !data) { body.textContent = '加载失败: ' + (error?.message || '未知'); return; }
+  if (data.length === 0) { body.innerHTML = '<div style="color:#8A8A9A; font-size:14px; text-align:center; padding:20px;">暂无词库，点击上方按钮上传吧～</div>'; return; }
+
+  let html = '';
+  const currentWordlistId = localStorage.getItem('selected_wordlist_id');
+  const m = window.__membership; // 获取当前会员状态
+
+     data.forEach(item => {
+    // 判断当前是否已选中
+    let isSelected = false;
+    if (m.isTrial) {
+      isSelected = (m.trialSettings?.selected_dict_id === item.id);
+    } else {
+      isSelected = (item.id === localStorage.getItem('selected_wordlist_id'));
+    }
+
+    const isCustom = item.owner_id === __currentUser.id;
+    const trialDictId = m.trialSettings?.selected_dict_id;
+
+    // 情况 A：已过期(免费用户) 且 是自己上传的词库 -> 锁定
+    if (m.isFree && isCustom) {
+ // 计算剩余天数
+  let daysLeftToDelete = null;
+  if (m.expiresAt && m.expiresAt > 0) {
+    const deleteDate = m.expiresAt + (90 * 24 * 3600 * 1000); // 到期日 + 90天
+    const diff = deleteDate - Date.now();
+    daysLeftToDelete = Math.max(0, Math.ceil(diff / (24 * 3600 * 1000)));
+  }
+
+  let warnText = '专属数据已为您保留';
+  let warnColor = '#8A8A9A';
+  if (daysLeftToDelete !== null && daysLeftToDelete <= 7) {
+    warnText = `⚠️ 仅剩 ${daysLeftToDelete} 天，即将永久清除！`;
+    warnColor = '#DC2626'; // 红色警告
+  } else if (daysLeftToDelete !== null) {
+    warnText = `数据保留中（剩 ${daysLeftToDelete} 天）`;
+  }
+      html += `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; border-radius:8px; margin-bottom:8px; background:#FAFAFA; opacity:0.8;">
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-weight:bold; font-size:14px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; color:#8A8A8A;">
+              🔒 ${escapeHtml(item.name)} (已锁定)
+            </div>
+            <div style="font-size:12px; color:#8A8A9A; margin-top:4px;">${item.word_count || 0} 个词 · 专属数据已为您保留</div>
+          </div>
+          <button onclick="showUpgradeModal()" style="background:#FF4D8D; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; flex-shrink:0;">续费解锁</button>
+        </div>
+      `;
+      return; 
+    }
+
+    // 情况 B：试用期锁定拦截
+    let isTrialLocked = false;
+    let lockReason = '';
+    
+    if (m.isTrial) {
+      if (!item.is_trial_allowed) {
+        // 没有开启试用资格的词库
+        isTrialLocked = true;
+        lockReason = '该词库暂未开放试用';
+      } else if (trialDictId && trialDictId !== item.id) {
+        // 已经选了别的词库
+        isTrialLocked = true;
+        lockReason = '该词库暂未开放试用';
+      }
+    }
+
+    if (isTrialLocked) {
+      html += `
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid #eee; border-radius:8px; margin-bottom:8px; background:#FAFAFA; opacity:0.8;">
+          <div style="flex:1; overflow:hidden;">
+            <div style="font-weight:bold; font-size:14px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; color:#8A8A8A;">
+              🔒 ${escapeHtml(item.name)}
+            </div>
+            <div style="font-size:12px; color:#8A8A9A; margin-top:4px;">${item.word_count || 0} 个词 · ${lockReason}</div>
+          </div>
+          <button onclick="showUpgradeModal()" style="background:#FF4D8D; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:12px; cursor:pointer; flex-shrink:0;">升级解锁</button>
+        </div>
+      `;
+      return;
+    }
+
+    // 情况 C：正常渲染（可点击）
+    // 注意这里我们在 onclick 中传了第三个参数 item.is_trial_allowed
+    html += `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px; border:1px solid ${isSelected ? '#1677FF' : '#eee'}; border-radius:8px; margin-bottom:8px; background:${isSelected ? '#f0f7ff' : 'transparent'};">
+        <div style="flex:1; overflow:hidden;">
+          <div style="font-weight:bold; font-size:14px; text-overflow:ellipsis; white-space:nowrap; overflow:hidden; color:${isSelected ? '#1677FF' : '#333'};">
+            ${isSelected ? '✅ ' : ''}${escapeHtml(item.name)}
+          </div>
+          <div style="font-size:12px; color:#8A8A9A; margin-top:4px;">${item.word_count || 0} 个词 · ${item.is_public ? '公开' : '私有'}</div>
+        </div>
+        <div style="display:flex; gap:8px; flex-shrink:0;">
+          ${isSelected 
+            ? `<button disabled style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; font-size:12px; opacity:0.8; cursor:not-allowed;">✅ 当前选择</button>`
+            : `<button onclick="selectWordlist('${item.id}', '${escapeHtml(item.name).replace(/'/g, "\\'")}', ${item.is_trial_allowed})" style="background:#1677FF; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">▶️ 使用</button>`
+          }
+          ${isCustom
+            ? `<button onclick="deleteWordlist('${item.id}')" style="background:#ff4d4f; color:white; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-size:12px;">🗑️ 删除</button>`
+            : ''}
+        </div>
+      </div>
+    `;
+  });
+  body.innerHTML = html;
+}
+
+// 接收刚才传进来的第三个参数 isTrialAllowed
+async function selectWordlist(wordlistId, wordlistName, isTrialAllowed) {
+  const m = window.__membership;
+  const user = __currentUser;
+
+  if (!user || !m) { alert('登录状态异常，请刷新页面'); return; }
+
+  // 1. 免费用户
+  if (m.isFree) {
+    alert('您的免费体验已结束。当前仅可游玩系统为您保留的 30 个专属免费词汇。升级正式会员即可解锁完整海量词库！');
+    showUpgradeModal();
+    return;
+  }
+
+  // 2. 试用期用户：严格“二选一”拦截
+  if (m.isTrial) {
+    // 🚨 白名单拦截：没有开启试用资格的，直接拒掉
+    if (!isTrialAllowed) {
+      alert('⚠️ 该词库暂未开放试用体验，请选择指定的试用词库。升级正式会员即可解锁全部！');
+      showUpgradeModal();
+      return;
+    }
+
+    const trialDictId = m.trialSettings?.selected_dict_id; 
+
+    if (!trialDictId) {
+      const confirmSelect = confirm(`试用期仅可选择「${wordlistName}」作为您的专属词库，确认选择后不可更改，确定吗？`);
+      if (!confirmSelect) return;
+
+      const { error } = await sb.from('user_trial_settings').upsert({ 
+        user_id: user.id, 
+        selected_dict_id: wordlistId 
+      });
+      
+      if(error) { 
+        console.error('绑定失败:', error);
+        alert('绑定失败：' + error.message); 
+        return; 
+      }
+      
+      alert('✅ 绑定成功！当前词库已锁定为您的专属试用词库。');
+      window.location.reload(); 
+      return;
+    }
+
+    if (trialDictId !== wordlistId) {
+      alert('⚠️ 试用期内只能游玩注册时选择的那个专属词库。升级正式会员即可解锁全部词库！');
+      showUpgradeModal();
+      return;
+    }
+  }
+
+  // 3. 放行
+  localStorage.setItem('selected_wordlist_id', String(wordlistId).trim());
+  localStorage.setItem('selected_wordlist_name', String(wordlistName).trim());
+  window.location.href = 'wordgame.html';
+}
+async function deleteWordlist(wordlistId) {
+  if (!confirm('确定要删除这个词库吗？里面的所有单词也会被一起删除，且无法恢复！')) { return; }
+  try {
+    const { error: wordsError } = await sb.from('words').delete().eq('wordlist_id', wordlistId);
+    if (wordsError) throw wordsError;
+    const { error: listError } = await sb.from('wordlists').delete().eq('id', wordlistId);
+    if (listError) throw listError;
+    alert('删除成功！');
+    renderWordlists();
+  } catch (error) { alert('删除失败：' + (error.message || '未知错误')); }
+}
+
+/* ⭐️ 重写上传词库逻辑：RPC安全扣费 + 失败兜底清理 */
+function openUploadModal(){
+  const modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:9999;padding:20px';
+  modal.innerHTML = `
+    <div style="background:#fff;border-radius:14px;padding:24px;max-width:420px;width:100%;max-height:80vh;overflow-y:auto">
+      <h3 style="margin:0 0 8px;font-size:17px">上传词表</h3>
+      <p style="margin:0 0 16px;color:#666;font-size:13px;line-height:1.6">CSV 格式，第一行写列名。<br><b>最少两列：</b>word, meaning<br><b>支持更多列：</b>word, meaning, phonetic, unit, group</p>
+      <div style="background:#f5f5f5;border-radius:8px;padding:12px;font-family:monospace;font-size:12px;line-height:1.6;margin-bottom:16px">word,meaning,phonetic,unit,group<br>abandon,放弃,/əˈbændən/,U1,核心词</div>
+      <input type="text" id="uploadName" placeholder="词库名称" style="width:100%;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:14px;margin-bottom:12px">
+      <input type="file" id="uploadFile" accept=".csv,.txt" style="margin-bottom:16px">
+      <div id="uploadStatus" style="font-size:13px;color:#666;min-height:20px;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <button id="uploadStart" style="flex:1;padding:12px;background:#0A0A0A;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">开始上传</button>
+        <button id="uploadCancel" style="flex:1;padding:12px;background:#f5f5f5;color:#333;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">取消</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  
+  const status = modal.querySelector('#uploadStatus');
+  modal.querySelector('#uploadCancel').onclick = ()=> modal.remove();
+  
+  modal.querySelector('#uploadStart').onclick = async ()=>{
+    const name = modal.querySelector('#uploadName').value.trim();
+    const fileInput = modal.querySelector('#uploadFile');
+    
+    if(!name){ status.textContent = '请填写词库名称'; status.style.color = '#dc2626'; return; }
+    if(!fileInput.files.length){ status.textContent = '请选择 CSV 文件'; status.style.color = '#dc2626'; return; }
+    
+    const file = fileInput.files[0];
+    status.textContent = '读取文件...'; status.style.color = '#666';
+    
+    let wl = null; 
+    try{
+      const text = await file.text();
+      const words = parseCSV(text);
+      if(!words.length){ status.textContent = '解析失败，请检查 CSV 格式'; status.style.color = '#dc2626'; return; }
+      
+      // 1. 读取最新额度状态
+      const freshM = await settleAndLoad(sb, __currentUser.id); 
+      
+      // 校验额度
+      if(words.length > freshM.totalAvailable){ 
+        status.innerHTML = `⚠️ 额度不足！<br>您的套餐剩余额度为 ${freshM.totalAvailable} 词，本次上传需 ${words.length} 词。`; 
+        status.style.color = '#dc2626';
+        setTimeout(()=>{ modal.remove(); showUpgradeModal(); }, 2500); 
+        return; 
+      }
+      
+      status.textContent = `正在创建词库...`;
+      
+      // 2. 创建词库记录
+      const { data: newWl, error: e1 } = await sb.from('wordlists').insert({ 
+        name, 
+        description: `由 ${__currentUser.email} 上传`, 
+        is_public: false, 
+        owner_id: __currentUser.id 
+      }).select().single();
+      
+      if(e1) throw new Error(e1.message);
+      wl = newWl; 
+      
+      status.textContent = `正在分批写入单词...`;
+      
+      // 3. 分批写入单词
+      const BATCH = 500;
+      for(let i = 0; i < words.length; i += BATCH){
+        const batch = words.slice(i, i + BATCH).map((w, idx) => ({ 
+          wordlist_id: wl.id, 
+          word: w.word, 
+          meaning: w.meaning, 
+          phonetic: w.phonetic || null, 
+          unit: w.unit || null, 
+          "group": w.group || null, 
+          sort_order: i + idx 
+        }));
+        const { error: insertErr } = await sb.from('words').insert(batch);
+        if(insertErr) throw new Error('写入单词失败：' + insertErr.message);
+      }
+      
+      // 4. 更新词库总数
+      await sb.from('wordlists').update({ word_count: words.length }).eq('id', wl.id);
+      
+      // 5. 调用 RPC 安全扣减额度
+      status.textContent = `正在扣除额度...`;
+      await consumeQuota(sb, words.length); 
+      
+      status.textContent = `✅ 上传成功！即将刷新...`; status.style.color = '#22c55e';
+      setTimeout(()=>{ modal.remove(); window.location.reload(); }, 1200);
+      
+    } catch(e) { 
+      console.error(e);
+      status.textContent = '出错：' + e.message; 
+      status.style.color = '#dc2626';
+      
+      // 兜底清理：如果中途报错，清理脏数据
+      if(wl && wl.id) {
+         try {
+           await sb.from('words').delete().eq('wordlist_id', wl.id);
+           await sb.from('wordlists').delete().eq('id', wl.id);
+         } catch(cleanErr) { console.error('清理脏数据失败', cleanErr); }
+      }
+    }
+  };
+}
+
+function parseCSV(text){
+  const lines = text.split(/\r?\n/).filter(l => l.trim());
+  if(lines.length < 2) return [];
+  const headers = parseLine(lines[0]).map(h => h.trim().toLowerCase());
+  const idxMap = { word: headers.indexOf('word'), meaning: headers.indexOf('meaning'), phonetic: headers.indexOf('phonetic'), unit: headers.indexOf('unit'), group: headers.indexOf('group') };
+  if(idxMap.word < 0 || idxMap.meaning < 0) return [];
+  const words = [];
+  for(let i = 1; i < lines.length; i++){
+    const cols = parseLine(lines[i]);
+    const word = cols[idxMap.word]?.trim(); const meaning = cols[idxMap.meaning]?.trim();
+    if(!word || !meaning) continue;
+    words.push({ word, meaning, phonetic: idxMap.phonetic >= 0 ? (cols[idxMap.phonetic]?.trim() || '') : '', unit: idxMap.unit >= 0 ? (cols[idxMap.unit]?.trim() || '') : '', group: idxMap.group >= 0 ? (cols[idxMap.group]?.trim() || '') : '' });
+  }
+  return words;
+}
+function parseLine(line){
+  const result=[]; let cur=''; let inQuote=false;
+  for(let i=0;i<line.length;i++){ const c=line[i]; if(c==='"'){ if(inQuote&&line[i+1]==='"'){cur+='"';i++;} else inQuote=!inQuote; } else if(c===','&&!inQuote){result.push(cur);cur='';} else cur+=c; }
+  result.push(cur); return result;
+}
+
+function showUpgradeModal(){
+  if(document.getElementById('vipModalOverlay')) return;
+  const rows = Object.entries(MEMBERSHIP_TIERS).map(([key,t])=>{
+    const hot = key === 'quarterly';
+    return `<div style="border:2px solid ${hot?'#FF4D8D':'#EBEBEB'};border-radius:12px;padding:14px;margin-bottom:10px;position:relative;background:${hot?'#FFF8FB':'#fff'}">${hot?`<div style="position:absolute;top:-8px;right:12px;background:#FF4D8D;color:#fff;font-size:10px;font-weight:900;padding:2px 8px;border-radius:99px">推荐</div>`:''}<div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div><div style="font-size:15px;font-weight:900;color:#0A0A0A">${t.name}</div><div style="font-size:11px;color:#8A8A8A;margin-top:2px">${t.quota} 词 · ${t.days} 天</div></div><div style="font-size:22px;font-weight:900;color:#FF4D8D">¥${t.price}</div></div></div>`;
+  }).join('');
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="vipModalOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99999;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px"><div style="background:#fff;border-radius:16px;padding:24px;width:100%;max-width:380px;max-height:85vh;overflow-y:auto;position:relative;animation:popIn .2s ease-out"><button onclick="document.getElementById('vipModalOverlay').remove()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button><div style="font-size:18px;font-weight:900;color:#0A0A0A;margin-bottom:6px">升级 Playkyn 会员</div><div style="font-size:12px;color:#8A8A8A;line-height:1.6;margin-bottom:16px">有效期内可用固定词数额度定制词库；<br>额度用完不结转，到期未用按 50% 转永久。</div>${rows}<div style="font-size:12px;color:#8A8A8A;text-align:center;margin:14px 0 10px;line-height:1.6">也可以按 ¥0.3/词 单独购买，永久有效</div><button onclick="document.getElementById('vipModalOverlay').remove();showRedeemModal()" style="width:100%;padding:12px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:900;cursor:pointer;margin-bottom:8px">🎟️ 我已购买，输入解锁码</button><div style="font-size:11px;color:#8A8A8A;text-align:center;line-height:1.7;border-top:1px dashed #EBEBEB;padding-top:12px;margin-top:8px">客服微信：<b style="color:#0A0A0A">Playkyn</b><br>邮箱：<b style="color:#0A0A0A">495493831@qq.com</b></div></div></div><style>@keyframes popIn{0%{transform:scale(.92);opacity:0}100%{transform:scale(1);opacity:1}}</style>
+  `);
+}
+
+function showRedeemModal(){
+  if(document.getElementById('redeemOverlay')) return;
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="redeemOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px"><div style="background:#fff;border-radius:16px;padding:26px;width:100%;max-width:360px;position:relative;animation:popIn .2s ease-out"><button onclick="document.getElementById('redeemOverlay').remove()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button><div style="text-align:center;font-size:36px;margin-bottom:8px">🎟️</div><div style="font-size:17px;font-weight:900;text-align:center;color:#0A0A0A;margin-bottom:6px">输入解锁码</div><div style="font-size:12px;color:#8A8A8A;text-align:center;line-height:1.6;margin-bottom:20px">从客服获取的解锁码，输入即可开通</div><input id="redeemInput" type="text" placeholder="PLAY-XXXX-XXXX" style="width:100%;padding:14px;border:1.5px solid #EBEBEB;border-radius:10px;font-size:16px;text-align:center;font-family:monospace;letter-spacing:1px;font-weight:700;outline:none;box-sizing:border-box;text-transform:uppercase"><div id="redeemMsg" style="font-size:13px;text-align:center;margin:12px 0;min-height:20px;font-weight:700"></div><button id="btnDoRedeem" style="width:100%;padding:13px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:900;cursor:pointer">立即兑换</button></div></div>
+  `);
+  const input = document.getElementById('redeemInput'); const msg = document.getElementById('redeemMsg'); const btn = document.getElementById('btnDoRedeem');
+  setTimeout(()=>input.focus(), 120);
+  const doRedeem = async ()=>{
+    const code = input.value.trim();
+    if(!code){ msg.textContent='请输入解锁码'; msg.style.color='#DC2626'; return; }
+    btn.disabled = true; btn.textContent = '兑换中...'; msg.textContent = '';
+    const res = await redeemCode(sb, code);
+    if(res && res.ok){ msg.textContent = '🎉 ' + (res.msg || '兑换成功'); msg.style.color = '#16a34a'; setTimeout(()=>{ document.getElementById('redeemOverlay').remove(); location.reload(); }, 1200); }
+    else { msg.textContent = '❌ ' + ((res && res.msg) || '兑换失败'); msg.style.color = '#DC2626'; btn.disabled = false; btn.textContent = '立即兑换'; }
+  };
+  btn.onclick = doRedeem; input.onkeydown = e => { if(e.key === 'Enter') doRedeem(); };
+}
+
+async function editNickname(){
+  if(document.getElementById('nickOverlay')) return;
+  const { data: { session } } = await sb.auth.getSession(); if(!session) return;
+  const { data: profile } = await sb.from('profiles').select('display_name').eq('id', session.user.id).single();
+  const current = (profile && profile.display_name) || '';
+  document.body.insertAdjacentHTML('beforeend', `
+    <div id="nickOverlay" style="position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:100000;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px);padding:20px"><div style="background:#fff;border-radius:16px;padding:26px;width:100%;max-width:360px;position:relative"><button onclick="document.getElementById('nickOverlay').remove()" style="position:absolute;top:10px;right:14px;background:none;border:none;font-size:22px;color:#aaa;cursor:pointer">✕</button><div style="font-size:17px;font-weight:900;text-align:center;color:#0A0A0A;margin-bottom:6px">修改昵称</div><div style="font-size:12px;color:#8A8A8A;text-align:center;line-height:1.6;margin-bottom:20px">别人在排行榜、成就页看到的就是这个名字</div><input id="nickInput" type="text" maxlength="12" value="${escapeHtml(current)}" placeholder="比如：小明" style="width:100%;padding:14px;border:1.5px solid #EBEBEB;border-radius:10px;font-size:16px;text-align:center;font-weight:700;outline:none;box-sizing:border-box"><div id="nickMsg" style="font-size:12px;text-align:center;margin:10px 0;min-height:18px;color:#8A8A8A;font-weight:700">最多 12 个字</div><button id="btnSaveNick" style="width:100%;padding:13px;background:#0A0A0A;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:900;cursor:pointer">保存</button></div></div>
+  `);
+  const input = document.getElementById('nickInput'); setTimeout(()=>input.focus(), 120);
+  document.getElementById('btnSaveNick').onclick = async ()=>{
+    const v = input.value.trim(); const msg = document.getElementById('nickMsg');
+    if(!v){ msg.textContent = '不能为空'; msg.style.color = '#DC2626'; return; }
+    const { error } = await sb.from('profiles').update({ display_name: v }).eq('id', session.user.id);
+    if(error){ msg.textContent = '保存失败：' + error.message; msg.style.color = '#DC2626'; return; }
+    msg.textContent = '✅ 保存成功'; msg.style.color = '#16a34a';
+    setTimeout(()=>{ document.getElementById('nickOverlay').remove(); location.reload(); }, 800);
+  };
+}
+
+function showWordListModal(type) {
+  const state = loadStudyData(__currentUser.id);
+  if(!state || !state.bank) return;
+  const bank = state.bank;
+
+  let list = Object.entries(bank).filter(([en, b]) => b.seen > 0);
+  let title = '';
+  
+  if (type === 'all') {
+    title = '📚 已学单词';
+    list.sort((a, b) => b[1].seen - a[1].seen);
+  } else if (type === 'mastered') {
+    title = '✅ 已掌握单词';
+    list = list.filter(([en, b]) => b.m >= 0.7);
+    list.sort((a, b) => b[1].m - a[1].m);
+  } else if (type === 'weak') {
+    title = '🚨 需加强单词';
+    list = list.filter(([en, b]) => b.m < 0.4);
+    list.sort((a, b) => b[1].bad - a[1].bad); 
+  }
+
+  let listHtml = list.map(([en, b]) => {
+    let badge = '';
+    if (b.m >= 0.7) badge = `<span style="color:#22c55e;background:#DCFCE7;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;">掌握 ${Math.round(b.m*100)}%</span>`;
+    else if (b.m < 0.4) badge = `<span style="color:#ef4444;background:#FEE2E2;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;">错 ${b.bad} 次</span>`;
+    else badge = `<span style="color:#f59e0b;background:#FEF3C7;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;">熟悉中</span>`;
+
+    return `
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:12px 0; border-bottom:1px solid #EBEBEB;">
+        <div>
+          <div style="font-size:15px; font-weight:700; color:#0A0A0A;">${en}</div>
+        </div>
+        <div>${badge}</div>
+      </div>
+    `;
+  }).join('');
+
+  if (list.length === 0) {
+    listHtml = `<div style="text-align:center;padding:40px 0;color:#8A8A8A;font-size:14px;">暂无相关单词</div>`;
+  }
+
+  const overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:99999;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);';
+  overlay.innerHTML = `
+    <div style="background:#fff;border-radius:16px;width:100%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden;animation:popIn .2s ease-out;">
+      <div style="padding:20px 24px; border-bottom:1px solid #EBEBEB; display:flex; justify-content:space-between; align-items:center;">
+        <h3 style="margin:0; font-size:17px; font-weight:900; color:#0A0A0A;">${title} (${list.length})</h3>
+        <button style="background:none;border:none;font-size:24px;color:#aaa;cursor:pointer;" onclick="this.closest('div').parentElement.parentElement.remove()">✕</button>
+      </div>
+      <div style="padding:0 24px; overflow-y:auto; flex:1; -webkit-overflow-scrolling:touch;">
+        ${listHtml}
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+}
+</script>
+</body>
+</html>

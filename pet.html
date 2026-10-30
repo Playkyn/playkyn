@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>宠物乐园 · Playkyn</title>
+<style>
+/* ══════════ 基础全局样式 ══════════ */
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --pink:#ff6b9d; --orange:#ffa751; --yellow:#fbbf24;
+  --blue:#6bcbff; --purple:#a78bfa; --green:#4ade80; --red:#ff6b6b;
+  --text:#3d2463; --muted:#8b7aa8;
+  --shadow:0 6px 20px rgba(255,107,157,.18);
+}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC",sans-serif;
+  background:linear-gradient(160deg,#ffecd2 0%,#fcb69f 45%,#ff9a9e 100%);
+  background-attachment:fixed;color:var(--text);min-height:100vh;
+  padding:14px 14px 40px;
+}
+.app{max-width:520px;margin:0 auto;}
+.card{background:rgba(255,255,255,.92);border:2px solid rgba(255,255,255,.95);
+  border-radius:22px;padding:18px;margin-bottom:14px;box-shadow:var(--shadow);backdrop-filter:blur(10px)}
+h2{font-size:16px;font-weight:900;margin-bottom:14px;}
+.btn{width:100%;border:none;border-radius:16px;padding:15px;font-size:16px;
+  font-weight:800;cursor:pointer;transition:.15s;color:#fff;letter-spacing:.5px}
+.btn.primary{background:linear-gradient(120deg,var(--pink),var(--orange));box-shadow:0 8px 24px -8px var(--pink)}
+.btn.ghost{background:rgba(255,255,255,.7);color:var(--pink);border:2px solid var(--pink)}
+.btn.small{padding:11px;font-size:14px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.top-bar{display:flex;align-items:center;gap:10px;padding:10px 0 20px;}
+.back-btn{background:rgba(255,255,255,.92);border:none;color:var(--pink);border-radius:12px;padding:8px 13px;font-size:13px;font-weight:900;cursor:pointer;}
+
+/* ══════════ 宠物专属样式 ══════════ */
+.pet-hero{text-align:center;padding:24px 18px;position:relative;overflow:hidden;border-radius:22px}
+.pet-stage-name{font-size:22px;font-weight:900;color:var(--text);margin-top:14px;position:relative;z-index:2}
+.pet-stage-desc{font-size:12px;color:var(--muted);font-weight:700;margin-top:6px;position:relative;z-index:2;line-height:1.6}
+.pet-scene-emoji{position:absolute;inset:0;font-size:130px;opacity:.13;display:flex;align-items:center;justify-content:center;pointer-events:none;user-select:none}
+.pet-scene-emoji.big{font-size:180px;opacity:.15}
+.pet-avatar{position:relative;display:inline-flex;align-items:center;justify-content:center;z-index:2;animation:petFloat 3s ease-in-out infinite}
+.pet-avatar.big .pet-icon{font-size:100px}
+@keyframes petFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+
+.pet-shop-item{text-align:center;padding:12px 6px;border-radius:14px;
+  background:rgba(255,255,255,.7);border:2px solid rgba(255,255,255,.95);
+  box-shadow:0 4px 12px rgba(255,107,157,.08);transition:.2s}
+.pet-shop-item.owned{border-color:var(--yellow);box-shadow:0 4px 16px rgba(255,187,36,.25)}
+.psi-icon{font-size:32px;line-height:1}
+.psi-name{font-size:11px;font-weight:800;color:var(--muted);margin:6px 0 8px}
+.psi-btn{padding:6px 4px !important;font-size:11px !important;width:100%}
+
+.pet-hunger-bar{height:10px;border-radius:10px;background:rgba(255,255,255,.7);overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,.06)}
+.pet-hunger-fill{height:100%;border-radius:10px;background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink));transition:width .6s ease;box-shadow:0 0 10px rgba(255,167,81,.5)}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top-bar">
+    <button class="back-btn" onclick="window.location.href='wordgame.html'">← 返回游戏</button>
+    <span style="font-size:16px; font-weight:900; margin-left:auto;">🐾 宠物乐园</span>
+  </div>
+  <div id="petContent"></div>
+</div>
+
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script src="w.js"></script>
+<script src="membership.js"></script>
+<script>
+const supabaseUrl = 'https://zuhymqoxyqgpkxoaygtl.supabase.co';
+const supabaseKey = 'sb_publishable_y69bIL3lNMFR6kz5apgAEw_GMOkaBJu'; 
+const sb = window.supabase.createClient(supabaseUrl, supabaseKey);
+
+// ================= 数据常量 =================
+const PET_STAGES = [
+  { minXp:0, tag:'萌芽', scene:'🌱', desc:'刚刚破壳，对世界充满好奇。' },
+  { minXp:100, tag:'见习', scene:'🌿', desc:'学会了基本的魔法，能听懂更多单词了。' },
+  { minXp:400, tag:'灵动', scene:'🌳', desc:'身体越来越灵活，奔跑带风。' },
+  { minXp:1200, tag:'机敏', scene:'🏞️', desc:'开始能理解复杂的句子和长难词。' },
+  { minXp:3000, tag:'智者', scene:'🏔️', desc:'掌握了许多知识，成了大家眼中的智多星。' },
+  { minXp:6000, tag:'永恒', scene:'🏰', desc:'已达巅峰，准备迎接新的轮回。' }
+];
+
+const PET_HOUSES = [
+  { id:'cave',    name:'温馨洞穴', icon:'🕳️', cost:0, bg:'linear-gradient(160deg,#e0e7ff,#c7d2fe)' },
+  { id:'cottage', name:'森林小木屋', icon:'🏠', cost:500, bg:'linear-gradient(160deg,#fef3c7,#fde68a)' },
+  { id:'garden',  name:'梦幻花园', icon:'🌷', cost:1500, bg:'linear-gradient(160deg,#fce7f3,#fbcfe8)' },
+  { id:'castle',  name:'云端城堡', icon:'🏰', cost:3000, bg:'linear-gradient(160deg,#ede9fe,#ddd6fe)' }
+];
+
+const PET_FOODS = [
+  { id:'apple', icon:'🍎', name:'苹果',  cost:10,  hunger:20 },
+  { id:'bone',  icon:'🦴', name:'骨头',  cost:20,  hunger:35 },
+  { id:'fish',  icon:'🐟', name:'小鱼',  cost:30,  hunger:50 },
+  { id:'cake',  icon:'🍰', name:'蛋糕',  cost:60,  hunger:80 }
+];
+
+// ================= 全局变量 =================
+let state = null;
+let currentUser = null;
+
+// ================= 辅助函数 =================
+function getActivePet() {
+  return state.pets.find(p => p.id === state.activePetId) || state.pets[0];
+}
+function getPetStageIndex(xp){
+  let idx = 0;
+  for(let i=0;i<PET_STAGES.length;i++){ if(xp >= PET_STAGES[i].minXp) idx = i; }
+  return idx;
+}
+function getCurrentHunger(p){
+  const hours = (Date.now() - (p.lastFedAt||Date.now())) / 3600000;
+  return Math.max(0, Math.min(100, (p.hunger||100) - hours*5));
+}
+function saveState() {
+  const KEY = 'wq_runtime_v5_' + currentUser.id;
+  const raw = localStorage.getItem(KEY);
+  if(raw) {
+    const obj = JSON.parse(raw);
+    obj.state = state;
+    localStorage.setItem(KEY, JSON.stringify(obj));
+  }
+}
+
+// ⚠️ 放入 foxSVG 函数（之前画的凤凰）
+function foxSVG({mood='happy'} = {}, size=130) {
+  let eyes = `<g class="fox-eye"><ellipse cx="85" cy="80" rx="5" ry="8" fill="#1a1a1a"/>
+              <circle cx="86" cy="77" r="2" fill="#fff"/>
+              <ellipse cx="115" cy="80" rx="5" ry="8" fill="#1a1a1a"/>
+              <circle cx="116" cy="77" r="2" fill="#fff"/></g>`;
+  let mouth = `<path d="M 96 95 L 104 95 L 100 103 Z" fill="#FFA751"/>`;
+  
+  if (mood === 'hungry') {
+    eyes = `<g class="fox-eye"><path d="M 80 75 L 90 85 M 80 85 L 90 75" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/>
+            <path d="M 110 75 L 120 85 M 110 85 L 120 75" stroke="#1a1a1a" stroke-width="3" stroke-linecap="round"/></g>`;
+    mouth = `<path d="M 95 100 Q 100 90 105 100" stroke="#FFA751" stroke-width="3" fill="none" stroke-linecap="round"/>`;
+  } else if (mood === 'sad') {
+    eyes = `<g class="fox-eye"><path d="M 80 82 Q 85 75 90 82" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+            <path d="M 110 82 Q 115 75 120 82" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/></g>`;
+  }
+
+  return `
+  <svg class="fox-svg" viewBox="0 0 200 200" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="fireGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stop-color="#FF4D4D" /><stop offset="50%" stop-color="#FFA751" /><stop offset="100%" stop-color="#FBBF24" />
+      </linearGradient>
+      <linearGradient id="bellyGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+        <stop offset="0%" stop-color="#FFF5E1" /><stop offset="100%" stop-color="#FFE4B5" />
+      </linearGradient>
+    </defs>
+    <g class="fox-idle">
+      <g class="fox-tail" style="transform-origin: 60% 75%;">
+        <path d="M 100 150 Q 50 180 30 120 Q 70 130 100 150 Z" fill="url(#fireGrad)" opacity="0.8"/>
+        <path d="M 100 150 Q 150 180 170 120 Q 130 130 100 150 Z" fill="url(#fireGrad)" opacity="0.8"/>
+        <path d="M 100 140 Q 20 150 40 60 Q 80 110 100 140 Z" fill="#FFA751" opacity="0.6"/>
+        <path d="M 100 140 Q 180 150 160 60 Q 120 110 100 140 Z" fill="#FFA751" opacity="0.6"/>
+      </g>
+      <ellipse cx="100" cy="135" rx="40" ry="45" fill="url(#fireGrad)"/>
+      <ellipse cx="100" cy="145" rx="25" ry="30" fill="url(#bellyGrad)"/>
+      <path d="M 65 125 Q 20 100 30 150 Q 50 145 65 135 Z" fill="#FFA751"/>
+      <path d="M 135 125 Q 180 100 170 150 Q 150 145 135 135 Z" fill="#FFA751"/>
+      <ellipse cx="100" cy="85" rx="40" ry="38" fill="url(#fireGrad)"/>
+      <path d="M 90 50 Q 80 20 100 30 Q 110 10 115 45 Q 105 35 100 50 Z" fill="#FF4D4D"/>
+      <path d="M 100 48 Q 110 25 120 40 Q 125 20 130 50 Q 120 45 115 55 Z" fill="#FBBF24"/>
+      <ellipse cx="70" cy="90" rx="8" ry="4" fill="#FFB8A0" opacity="0.8"/>
+      <ellipse cx="130" cy="90" rx="8" ry="4" fill="#FFB8A0" opacity="0.8"/>
+      ${eyes}${mouth}
+    </g>
+  </svg>`;
+}
+
+// ================= 启动 =================
+async function initPetPage() {
+  const { data: { session } } = await sb.auth.getSession();
+  if(!session) { window.location.href = 'index.html'; return; }
+  currentUser = session.user;
+  
+  const KEY = 'wq_runtime_v5_' + currentUser.id;
+  try {
+    const raw = localStorage.getItem(KEY);
+    if(raw) { state = JSON.parse(raw).state; }
+  } catch(e) {}
+
+  if(!state) {
+    alert('还没有宠物，请先去游戏里开始学习吧！');
+    window.location.href = 'wordgame.html';
+    return;
+  }
+
+  if(!state.pets) {
+    state.pets = [];
+    if(state.pet) {
+      if(!state.pet.id) state.pet.id = 'pet_' + Date.now();
+      state.pets.push(state.pet);
+      delete state.pet;
+    }
+  }
+  if(state.pets.length === 0) {
+    state.pets.push({
+      id: 'pet_' + Date.now(), name: '小凤凰', xp: 0, hunger: 100, lastFedAt: Date.now(),
+      memoryFragments: 0, eggsCreated: 0, isIncubating: false, eggStartTime: 0, eggTargetTime: 0, lastEggCheckIn: 0
+    });
+    state.activePetId = state.pets[0].id;
+  }
+
+  renderPetScreen();
+}
+
+// ================= 渲染界面 =================
+function renderPetScreen(){
+  const p = getActivePet();
+  const stageIdx = getPetStageIndex(p.xp);
+  const stage = PET_STAGES[stageIdx];
+  const house = PET_HOUSES.find(h=>h.id===p.house) || PET_HOUSES[0];
+  const isMaxLevel = p.xp >= PET_STAGES[PET_STAGES.length-1].minXp;
+  const hunger = getCurrentHunger(p);
+  const hungerPct = Math.round(hunger);
+  const hungerEmoji = hunger>=80?'😋':hunger>=50?'🙂':hunger>=20?'😐':'😢';
+
+  document.getElementById('petContent').innerHTML = `
+    <!-- 宠物形象展示 -->
+    <div class="card pet-hero" style="background:${house.bg};">
+      <div class="pet-scene-emoji big">${stage.scene}</div>
+      <div class="pet-avatar big" style="position:relative;z-index:2">
+        ${foxSVG({mood: hunger < 30 ? 'hungry' : 'happy', size: 180})}
+      </div>
+      <div class="pet-stage-name">小凤凰 · ${stage.tag}</div>
+      <div class="pet-stage-desc">${stage.desc}</div>
+    </div>
+
+    <!-- 喂养区 -->
+    <div class="card">
+      <h2>${hungerEmoji} 喂养状态</h2>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div class="pet-hunger-bar" style="flex:1;height:12px">
+          <div class="pet-hunger-fill" style="width:${hungerPct}%"></div>
+        </div>
+        <span style="font-size:14px;font-weight:900;color:var(--text)">${hungerPct}%</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">
+        ${PET_FOODS.map(f=>`
+          <button class="btn ghost small" data-feed="${f.id}" style="padding:10px 4px;font-size:11px;flex-direction:column">
+            <div style="font-size:26px;line-height:1">${f.icon}</div>
+            <div style="font-weight:900;margin-top:4px">${f.name}</div>
+            <div style="font-size:10px;color:var(--orange);font-weight:900">💰 ${f.cost}</div>
+          </button>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- 住所 -->
+    <div class="card">
+      <h2>🏠 住所</h2>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        ${PET_HOUSES.map(h=>{
+          const owned = p.housesOwned?.[h.id] || (h.id==='cave');
+          const isOn = p.house === h.id || (!p.house && h.id==='cave');
+          return `<div class="pet-shop-item ${owned?'owned':''}" style="${isOn?'border-color:var(--pink);box-shadow:0 4px 16px rgba(255,107,157,.3)':''}">
+            <div class="psi-icon">${h.icon}</div>
+            <div class="psi-name">${h.name}</div>
+            ${owned
+              ? (isOn ? `<div style="font-size:11px;color:var(--pink);font-weight:900">✔ 当前住所</div>` : `<button class="btn ghost small psi-btn" data-house="${h.id}">搬过去</button>`)
+              : `<button class="btn primary small psi-btn" data-buyhouse="${h.id}" ${state.game.coins < h.cost ? 'disabled':''}>💰 ${h.cost}</button>`}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- 🌟 知识孕育所 -->
+    <div class="card" style="border: 2px dashed ${isMaxLevel ? 'var(--pink)' : '#ccc'};">
+      <h2 style="color:${isMaxLevel ? 'var(--pink)' : 'var(--muted)'}">🥚 知识孕育所</h2>
+      
+      <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+        <span style="font-size:12px; font-weight:700;">记忆碎片：<b style="color:var(--orange)">${p.memoryFragments || 0}</b> 枚</span>
+        <span style="font-size:12px; font-weight:700;">孕育次数：${p.eggsCreated || 0} / 3</span>
+      </div>
+
+      ${(() => {
+        if(!isMaxLevel) {
+          return `<div style="font-size:13px; color:var(--muted); line-height:1.6;">小凤凰达到 <b>永恒境</b>（满级）后，即可消耗 100 枚记忆碎片孕育下一代。</div>`;
+        }
+        if(p.eggsCreated >= 3) {
+          return `<div style="font-size:13px; color:var(--pink); font-weight:700;">已达到孕育上限（3枚）。这是属于你们的珍贵传承！</div>`;
+        }
+        if(p.isIncubating) {
+          return `
+            <div style="font-size:13px; font-weight:700; margin-bottom:6px;">✨ 知识蛋凝聚中...</div>
+            <div style="width:100%; height:10px; background:#eee; border-radius:5px; overflow:hidden; margin-bottom:12px;">
+              <div style="width:45%; height:100%; background:linear-gradient(90deg, var(--purple), var(--pink));"></div>
+            </div>
+            <button class="btn primary small" disabled>孕育中...</button>
+          `;
+        }
+        return `
+          <div style="font-size:13px; margin-bottom:12px; line-height:1.6;">消耗 <b>100 枚记忆碎片</b>，凝聚一枚专属知识蛋。</div>
+          <button class="btn primary" id="btnStartIncubate" ${(p.memoryFragments || 0) < 100 ? 'disabled' : ''}>
+            ${(p.memoryFragments || 0) < 100 ? '记忆碎片不足 (需100枚)' : '✨ 开始凝聚知识蛋'}
+          </button>
+        `;
+      })()}
+    </div>
+  `;
+
+  // 绑定事件
+  bindPetEvents(p, hunger, hungerPct);
+}
+
+function bindPetEvents(p, hunger, hungerPct) {
+  // 喂食
+  document.querySelectorAll('[data-feed]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const f = PET_FOODS.find(x=>x.id===btn.dataset.feed);
+      if(!f) return;
+      if(state.game.coins < f.cost) return alert('金币不足');
+      if(hunger >= 100) return alert('已经吃饱啦～');
+      state.game.coins -= f.cost;
+      p.hunger = Math.min(100, hunger + f.hunger);
+      p.lastFedAt = Date.now();
+      saveState(); 
+      renderPetScreen();
+    };
+  });
+
+  // 购买/切换住所
+  document.querySelectorAll('[data-buyhouse]').forEach(btn=>{
+    btn.onclick = ()=>{
+      const h = PET_HOUSES.find(x=>x.id===btn.dataset.buyhouse);
+      if(!h) return;
+      if(state.game.coins < h.cost) return alert('金币不足');
+      if(!confirm(`花 ${h.cost} 金币购买「${h.name}」吗？`)) return;
+      state.game.coins -= h.cost;
+      if(!p.housesOwned) p.housesOwned = {};
+      p.housesOwned[h.id] = true;
+      p.house = h.id;
+      saveState();
+      renderPetScreen();
+    };
+  });
+  document.querySelectorAll('[data-house]').forEach(btn=>{
+    btn.onclick = ()=>{
+      p.house = btn.dataset.house;
+      saveState();
+      renderPetScreen();
+    };
+  });
+
+  // 孕育
+  const btnStartIncubate = document.getElementById('btnStartIncubate');
+  if(btnStartIncubate) {
+    btnStartIncubate.onclick = () => {
+      if(p.memoryFragments < 100) return;
+      if(!confirm('确定消耗 100 枚记忆碎片，开始凝聚知识蛋吗？')) return;
+      p.memoryFragments -= 100;
+      p.isIncubating = true;
+      p.eggStartTime = Date.now();
+      p.eggTargetTime = Date.now() + 10 * 24 * 60 * 60 * 1000; // 10天
+      p.lastEggCheckIn = Date.now();
+      saveState();
+      alert('开始孕育！');
+      renderPetScreen();
+    };
+  }
+}
+
+// 启动
+initPetPage();
+</script>
+</body>
+</html>

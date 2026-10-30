@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Playkyn 图标生成器</title>
+<style>
+  body{font-family:sans-serif;padding:40px;text-align:center;background:#f5f5f5;max-width:700px;margin:0 auto}
+  h1{font-size:20px;margin-bottom:8px}
+  p{color:#666;font-size:13px;margin-bottom:16px;line-height:1.7}
+  textarea{width:100%;height:140px;padding:12px;border:1px solid #ddd;border-radius:8px;font-family:monospace;font-size:12px;resize:vertical}
+  button{background:#E11D48;color:#fff;border:none;padding:14px 28px;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin:8px}
+  button:hover{background:#be123c}
+  button:disabled{background:#ccc;cursor:not-allowed}
+  canvas{display:block;margin:24px auto;border:1px solid #ddd;border-radius:12px;max-width:300px;height:auto}
+  .status{font-size:13px;color:#666;margin-top:12px;min-height:20px}
+</style>
+</head>
+<body>
+
+<h1>Playkyn 图标生成器</h1>
+<p>1. 打开 logo.svg，全选复制<br>2. 粘贴到下面的框里<br>3. 点击按钮下载图标</p>
+
+<textarea id="svgInput" placeholder="在这里粘贴 logo.svg 的完整内容..."></textarea>
+
+<div>
+  <button onclick="download(192)" id="btn192" disabled>下载 icon-192.png</button>
+  <button onclick="download(512)" id="btn512" disabled>下载 icon-512.png</button>
+</div>
+
+<div class="status" id="status">等待粘贴 SVG 内容...</div>
+
+<canvas id="c" width="512" height="512" style="display:none"></canvas>
+
+<script>
+let svgText = '';
+
+document.getElementById('svgInput').addEventListener('input', (e)=>{
+  const val = e.target.value.trim();
+  if(val.startsWith('<svg') && val.endsWith('</svg>')){
+    svgText = val;
+    document.getElementById('btn192').disabled = false;
+    document.getElementById('btn512').disabled = false;
+    document.getElementById('status').textContent = '✓ SVG 已识别，可以点击下载了';
+    document.getElementById('status').style.color = '#22c55e';
+    drawIcon(512);
+  } else {
+    svgText = '';
+    document.getElementById('btn192').disabled = true;
+    document.getElementById('btn512').disabled = true;
+    document.getElementById('status').textContent = '请粘贴完整的 SVG（从 <svg 到 </svg>）';
+    document.getElementById('status').style.color = '#ef4444';
+  }
+});
+
+function parseViewBox(svg){
+  const m = svg.match(/viewBox="([^"]+)"/);
+  if(!m) return { w: 540, h: 400 };
+  const parts = m[1].trim().split(/\s+/).map(Number);
+  return { w: parts[2] || 540, h: parts[3] || 400 };
+}
+
+async function drawIcon(size){
+  if(!svgText) return;
+  const canvas = document.getElementById('c');
+  canvas.width = size;
+  canvas.height = size;
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+
+  // 1. 深玫红圆角方块
+  const radius = size * 0.22;
+  ctx.fillStyle = '#E11D48';
+  ctx.beginPath();
+  ctx.moveTo(radius, 0);
+  ctx.lineTo(size-radius, 0);
+  ctx.quadraticCurveTo(size, 0, size, radius);
+  ctx.lineTo(size, size-radius);
+  ctx.quadraticCurveTo(size, size, size-radius, size);
+  ctx.lineTo(radius, size);
+  ctx.quadraticCurveTo(0, size, 0, size-radius);
+  ctx.lineTo(0, radius);
+  ctx.quadraticCurveTo(0, 0, radius, 0);
+  ctx.closePath();
+  ctx.fill();
+
+  // 2. 按 hero 方块的视觉渲染：SVG 放大 1.6 倍，居中，超出裁掉
+  const vb = parseViewBox(svgText);
+  const ratio = vb.w / vb.h;
+  const zoom = 1.6;
+
+  let drawW, drawH;
+  if (ratio >= 1) {
+    // 宽图：宽度撑满 zoom 倍
+    drawW = size * zoom;
+    drawH = drawW / ratio;
+  } else {
+    // 高图：高度撑满 zoom 倍
+    drawH = size * zoom;
+    drawW = drawH * ratio;
+  }
+  const offsetX = (size - drawW) / 2;
+  const offsetY = (size - drawH) / 2;
+
+  const blob = new Blob([svgText], {type: 'image/svg+xml'});
+  const url = URL.createObjectURL(blob);
+  const img = new Image();
+  img.onload = ()=>{
+    ctx.drawImage(img, offsetX, offsetY, drawW, drawH);
+    URL.revokeObjectURL(url);
+  };
+  img.onerror = ()=>{
+    document.getElementById('status').textContent = '⚠ SVG 渲染失败，检查是否完整粘贴';
+    document.getElementById('status').style.color = '#ef4444';
+  };
+  img.src = url;
+}
+
+function download(size){
+  if(!svgText) return;
+  drawIcon(size);
+  setTimeout(()=>{
+    const canvas = document.getElementById('c');
+    canvas.toBlob(blob=>{
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `icon-${size}.png`;
+      a.click();
+      document.getElementById('status').textContent = `✓ icon-${size}.png 已下载`;
+      document.getElementById('status').style.color = '#22c55e';
+    });
+  }, 600);
+}
+</script>
+
+</body>
+</html>
