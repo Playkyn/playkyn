@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#ffffff">
+<meta name="color-scheme" content="light only">
 <title>Playkyn · Just play, Get it.</title>
 <link rel="manifest" href="manifest.json">
 <style>
@@ -682,7 +683,7 @@ body{
       <!-- 幻化容器 -->
       <div class="egg-wrapper" id="eggWrapper" style="cursor: pointer; transition: transform 0.3s; margin-bottom: 24px; position: relative;">
           <!-- 初始显示：你的完整版 Logo -->
-          <img id="eggImg" src="logo_bird_big2.png" alt="Playkyn Logo" style="width: 220px; height: auto; transition: all 0.4s ease; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.1));">
+             <img id="eggImg" src="logo_bird_big2.png" alt="Playkyn Logo" style="height: auto; transition: all 0.4s ease; filter: drop-shadow(0 15px 25px rgba(0,0,0,0.1));">
       </div>
 
       <!-- 进度条容器 (初始透明度设为 0 隐藏) -->
@@ -702,7 +703,7 @@ body{
     <button class="btn ghost" id="btnInstall">添加到主屏幕</button>
   </div>
 
-  <!-- ======= 👇 响应式隐藏样式 & 动画 ======= -->
+ <!-- ======= 👇 响应式隐藏样式 & 动画 ======= -->
   <style>
     /* 当屏幕宽度大于 768px 时（电脑端），隐藏这个按钮 */
     @media (min-width: 769px) {
@@ -728,11 +729,72 @@ body{
         80% { transform: translate(4px, 2px) rotate(4deg); }
         100% { transform: translate(0, 0) rotate(0deg); }
     }
+
+    /* ==========================================
+       新增：移动端尺寸适配 (蛋 / Logo / 凤凰)
+       ========================================== */
+
+    /* 1. 电脑端默认尺寸 */
+    #eggImg {
+        width: 220px; /* 初始 Logo 大小 */
+        touch-action: manipulation;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+    }
+
+    /* 2. 手机端屏幕适配 (宽度小于 768px 时生效) */
+    @media screen and (max-width: 768px) {
+        #eggImg {
+            /* 使用 !important 强制覆盖 JS 里动态设置的 180px */
+            width: 140px !important; 
+            max-width: 60vw; /* 防止极其小屏幕的折叠屏手机撑爆 */
+        }
+        
+        /* 孵化出来的凤凰也小一点 */
+        #eggWrapper img[src*="bird_hatch"] {
+            width: 200px !important; 
+            max-width: 75vw;
+        }
+    }
+
+    /* ==========================================
+       🚨 移动端紧急抢救适配 (修复截图中的丑版面)
+       ========================================== */
+
+    /* 强制保持干净的白底，拒绝手机深色模式瞎搞 */
+    html, body {
+        color-scheme: light !important;
+        background-color: #FFFFFF !important;
+    }
+
+    /* 针对手机屏幕宽度的排版修复 */
+    @media (max-width: 768px) {
+        /* 之前的产品功能模块是双列的，现在强制变成单列（上下排列），字就不会被挤断了 */
+        .feature-grid {
+            grid-template-columns: 1fr !important; /* 变成单列 */
+            gap: 12px !important;
+        }
+        
+        /* 调整模块内部的留白，让它看起来更透气 */
+        .feature-grid > div {
+            padding: 16px !important;
+            background-color: #FAFAFA !important; /* 抵抗深色模式 */
+            border: 1px solid #EEEEEE !important;
+        }
+
+        /* 确保中文字不会因为容器太窄而被强行断行 */
+        .feature-grid h4, 
+        .feature-grid p,
+        .feature-grid span {
+            word-break: keep-all !important; /* 保持单词完整，不随意断行 */
+            line-height: 1.6 !important;
+        }
+    }
   </style>
 
-  <!-- ======= 👇 幻化 & 孵化逻辑 ======= -->
-  <script>
-    const eggImg = document.getElementById('eggImg');
+ <!-- ======= 👇 幻化 & 孵化逻辑（双端 + 满血震动版） ======= -->
+<script>
+        const eggImg = document.getElementById('eggImg');
     const eggWrapper = document.getElementById('eggWrapper');
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
@@ -741,30 +803,41 @@ body{
 
     let progress = 0;
     let isReadyToHatch = false;
-    let isEggMode = false; // 是否已经变成了蛋
+    let isEggMode = false; 
     let clicksNeeded = 5; 
 
-    // 1. 鼠标移入：Logo 幻化成蛋
-    eggImg.addEventListener('mouseenter', () => {
+    // 1. 核心函数：从 Logo 变成蛋
+    function triggerEggMode() {
         if (!isEggMode) {
-            // 变成蛋
             eggImg.src = 'egg.png'; 
-            eggImg.style.width = '180px'; // 蛋的尺寸稍微小一点
+            // 注意：这里不用写 width，因为你在 CSS 里已经用 !important 限制死了 140px
             eggImg.style.filter = 'drop-shadow(0 15px 25px rgba(255, 140, 0, 0.4))';
-            eggImg.style.animation = 'breathe 2.5s infinite ease-in-out'; // 开始呼吸
+            eggImg.style.animation = 'breathe 2.5s infinite ease-in-out'; 
             
-            // 显示进度条，改变文案
             progressContainer.style.opacity = '1';
             progressContainer.style.pointerEvents = 'auto';
             hatchText.innerText = '点击蛋壳，给它加温';
             
             isEggMode = true;
         }
-    });
+    }
 
-    // 2. 核心点击逻辑
-    eggImg.addEventListener('click', () => {
-        if (!isEggMode) return; // 如果还没变蛋，点击无效
+    // 2. 绑定 PC 鼠标悬停 和 手机触摸屏幕
+    eggImg.addEventListener('mouseenter', triggerEggMode);
+    eggImg.addEventListener('touchstart', triggerEggMode, { passive: true }); // 手机专属
+
+    // 3. 核心点击/触摸逻辑
+    function handleTap(e) {
+        // 如果还没变成蛋，先变成蛋
+        if (!isEggMode) {
+            triggerEggMode();
+            return;
+        }
+
+        // 🚨 新增：手机震动反馈（10毫秒的轻震，让敲击感拉满）
+        if (navigator.vibrate) {
+            navigator.vibrate(10);
+        }
 
         if (progress < 100) {
             // 阶段一：加温
@@ -805,8 +878,7 @@ body{
                 // 👇 变出图2（出壳的凤凰）
                 const birdImg = document.createElement('img');
                 birdImg.src = 'bird_hatch.png'; 
-                birdImg.style.width = '280px'; 
-                birdImg.style.height = 'auto';
+                // 注意：尺寸在 CSS 里控制，这里不用写死
                 birdImg.style.animation = 'breathe 2s infinite ease-in-out';
                 birdImg.style.filter = 'drop-shadow(0 15px 25px rgba(255, 140, 0, 0.5))';
                 birdImg.style.cursor = 'pointer';
@@ -816,19 +888,29 @@ body{
 
                 // 出生后点它会有互动
                 birdImg.addEventListener('click', () => {
+                    if (navigator.vibrate) navigator.vibrate([20, 50, 20]); // 开心地连续震动
                     hatchText.innerText = '叽叽！(✿◡‿◡)'; 
                 });
             }
         }
-    });
+    }
 
-    // 3. 震动函数
+    // 4. 同时绑定点击和触摸事件
+    eggImg.addEventListener('click', handleTap);
+    // 注意：用 touchstart 可以防止手机端点击有300ms延迟
+    eggImg.addEventListener('touchstart', (e) => {
+        // 阻止默认的滚动行为，防止点击时页面跟着滑动
+        e.preventDefault(); 
+        handleTap(e);
+    }, { passive: false });
+
+    // 5. 震动动画函数
     function triggerShake() {
         eggImg.classList.remove('shake');
         void eggImg.offsetWidth; 
         eggImg.classList.add('shake');
     }
-  </script>
+</script>
 
 </section>
 
