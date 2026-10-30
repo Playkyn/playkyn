@@ -878,6 +878,7 @@ body{
                 // 👇 变出图2（出壳的凤凰）
                 const birdImg = document.createElement('img');
                 birdImg.src = 'bird_hatch.png'; 
+                birdImg.className = 'hatched-bird'; // 👈 加这一行
                 // 注意：尺寸在 CSS 里控制，这里不用写死
                 birdImg.style.animation = 'breathe 2s infinite ease-in-out';
                 birdImg.style.filter = 'drop-shadow(0 15px 25px rgba(255, 140, 0, 0.5))';
@@ -1099,7 +1100,7 @@ body{
     </div>
 
     <!-- 4x4 游戏网格 -->
-    <div id="game-board" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 400px; z-index: 10; min-height: 400px;">
+    <div id="game-board" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 400px; z-index: 10;">
         <!-- JS 动态生成 -->
     </div>
 
@@ -1115,35 +1116,125 @@ body{
 </div>
 
 <style>
-    .match-card { width: 100%; height: 110px; cursor: pointer; perspective: 1000px; position: relative; }
-    .match-card-inner { position: relative; width: 100%; height: 100%; transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); transform-style: preserve-3d; }
+        /* ==================== 卡片基础布局 ==================== */
+    .match-card { 
+        width: 100%; 
+        aspect-ratio: 3 / 4; /* 替代固定高度，保持卡片宽高比例，不易变形 */
+        cursor: pointer; 
+        perspective: 1000px; 
+        position: relative; 
+    }
+    
+    .match-card-inner { 
+        position: relative; 
+        width: 100%; 
+        height: 100%; 
+        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        transform-style: preserve-3d; 
+    }
+    
     .match-card:hover .match-card-inner { transform: translateY(-6px); }
     .match-card.flipped:hover .match-card-inner, .match-card.matched:hover .match-card-inner { transform: rotateY(180deg) translateY(-6px); }
     .match-card.flipped .match-card-inner, .match-card.matched .match-card-inner { transform: rotateY(180deg); }
     
+    /* 正反面通用 */
     .match-card-front, .match-card-back {
         position: absolute; top: 0; left: 0; width: 100%; height: 100%;
         -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 16px;
-        display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px; box-sizing: border-box;
+        display: flex; align-items: center; justify-content: center; text-align: center; 
+        padding: 6px; /* 留出一点安全边距 */
+        box-sizing: border-box;
     }
 
-    .match-card-front { background: linear-gradient(145deg, #ffffff, #FFF9E6); border: 2px solid #FFF; box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.15), 0 6px 12px rgba(253, 230, 138, 0.4); }
-    .match-card-front::after { content: ''; width: 65px; height: 65px; background-image: url('logo_bird_big2.png'); background-size: contain; background-repeat: no-repeat; background-position: center; filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15)); transition: transform 0.3s ease; }
+    /* 正面（带 Logo） */
+    .match-card-front { 
+        background: linear-gradient(145deg, #ffffff, #FFF9E6); 
+        border: 2px solid #FFF; 
+        box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.15), 0 6px 12px rgba(253, 230, 138, 0.4); 
+    }
+    
+    .match-card-front::after { 
+        content: ''; 
+        width: 65px; height: 65px; 
+        background-image: url('logo_bird_big2.png'); 
+        background-size: contain; background-repeat: no-repeat; background-position: center; 
+        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15)); 
+        transition: transform 0.3s ease; 
+    }
+    
     .match-card:hover .match-card-front::after { transform: scale(1.1) rotate(5deg); }
 
-    .match-card-back { background: #fff; transform: rotateY(180deg); font-weight: 800; line-height: 1.2; word-break: break-word; }
-    .match-card-back.en { color: #1E3A8A; background: #FFFFFF; border: 2px solid #E2E8F0; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 15px; }
-    .match-card-back.zh { color: #D97706; background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%); border: 2px solid #FCD34D; box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); font-size: 18px; }
+    /* ==================== 背面（文字核心修复区） ==================== */
+    .match-card-back { 
+        background: #fff; 
+        transform: rotateY(180deg); 
+        font-weight: 800; 
+        line-height: 1.1; /* 压缩行高，防止多行占太宽 */
+        
+        /* 👇 修复乱切单词的终极三连 👇 */
+        word-break: normal; /* 绝对不切断英文单词内部 */
+        overflow-wrap: anywhere; /* 如果实在放不下，再考虑断行 */
+        hyphens: auto;
+    }
 
+    /* 英文卡片 */
+    .match-card-back.en { 
+        color: #1E3A8A; 
+        background: #FFFFFF; 
+        border: 2px solid #E2E8F0; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
+        /* 动态字号：最小12px，最大16px，根据屏幕宽度自适应 */
+        font-size: clamp(10px, 3.5vw, 14px); /* 👈 极小值降到 10px，确保 school 这种长单词绝不换行 */
+    }
+
+    /* 中文卡片 */
+    .match-card-back.zh { 
+        color: #D97706; 
+        background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%); 
+        border: 2px solid #FCD34D; 
+        box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); 
+        /* 中文字号可以稍微大一点 */
+        font-size: clamp(14px, 4.5vw, 18px); 
+    }
+
+    /* 匹配成功、错误动画等保持原样 */
     .match-card.matched .match-card-back { border-color: #F59E0B !important; background: linear-gradient(145deg, #FEF3C7, #FDE68A) !important; color: #B45309 !important; box-shadow: 0 0 25px rgba(245, 158, 11, 0.8) !important; animation: matchedExplode 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
     @keyframes matchedExplode { 0% { transform: rotateY(180deg) scale(1); } 50% { transform: rotateY(180deg) scale(1.15); box-shadow: 0 0 40px rgba(255, 215, 0, 1); } 100% { transform: rotateY(180deg) scale(1); opacity: 0.6; } }
 
-    .float-text { position: absolute; color: #E11D48; font-weight: 900; font-size: 24px; pointer-events: none; z-index: 999; animation: floatUp 1s ease-out forwards; text-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-    @keyframes floatUp { 0% { transform: translateY(0) scale(0.5); opacity: 0; } 20% { transform: translateY(-20px) scale(1.2); opacity: 1; } 100% { transform: translateY(-60px) scale(1); opacity: 0; } }
-
     .match-card.error .match-card-inner { animation: shake 0.4s ease; }
     @keyframes shake { 0%, 100% { transform: rotateY(180deg) translateX(0); } 25% { transform: rotateY(180deg) translateX(-5px); } 75% { transform: rotateY(180deg) translateX(5px); } }
-    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  /* 极小屏幕适配 */
+    @media (max-width: 380px) {
+        #game-board {
+            gap: 8px !important; /* 减小卡片之间的缝隙 */
+            padding: 10px !important; 
+        }
+    }
+/* 凤凰的默认尺寸（电脑端） */
+    .hatched-bird {
+        width: 200px; 
+        height: auto;
+        display: block;
+        margin: 0 auto;
+    }
+
+    /* 手机端的凤凰尺寸 */
+    @media screen and (max-width: 768px) {
+        .hatched-bird {
+            width: 160px; 
+        }
+    }
+  /* ==================== 暴力强制浅色模式 ==================== */
+    @media (prefers-color-scheme: dark) {
+        html, body {
+            background-color: #FFFDF5 !important; 
+            color: #333 !important;
+        }
+        #game-wrapper {
+            background: radial-gradient(circle at 50% 0%, #FFFDF5 0%, #FFF5E1 100%) !important;
+        }
+    }
+
 </style>
 
 <script>
