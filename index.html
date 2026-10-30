@@ -731,33 +731,37 @@ body{
         100% { transform: translate(0, 0) rotate(0deg); }
     }
 
-    /* ==========================================
-       新增：移动端尺寸适配 (蛋 / Logo / 凤凰)
-       ========================================== */
 
-    /* 1. 电脑端默认尺寸 */
+
+/* 1. 电脑端默认尺寸：蛋/Logo */
+#eggImg {
+    width: 220px; 
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+/* 2. 电脑端默认尺寸：凤凰 (直接通过类名精准控制) */
+.hatched-bird {
+    width: 200px !important; /* 强制锁定 200px */
+    height: auto !important;
+    display: block;
+    margin: 0 auto;
+}
+
+/* 3. 手机端屏幕适配 (宽度小于 768px 时生效) */
+@media screen and (max-width: 768px) {
     #eggImg {
-        width: 220px; /* 初始 Logo 大小 */
-        touch-action: manipulation;
-        -webkit-tap-highlight-color: transparent;
-        user-select: none;
+        width: 140px !important; 
+        max-width: 60vw; 
     }
-
-    /* 2. 手机端屏幕适配 (宽度小于 768px 时生效) */
-    @media screen and (max-width: 768px) {
-        #eggImg {
-            /* 使用 !important 强制覆盖 JS 里动态设置的 180px */
-            width: 140px !important; 
-            max-width: 60vw; /* 防止极其小屏幕的折叠屏手机撑爆 */
-        }
-        
-        /* 孵化出来的凤凰也小一点 */
-        #eggWrapper img[src*="bird_hatch"] {
-            width: 200px !important; 
-            max-width: 75vw;
-        }
+    
+    /* 手机端的凤凰 */
+    .hatched-bird {
+        width: 160px !important; 
+        max-width: 75vw !important;
     }
-
+}
     /* ==========================================
        🚨 移动端紧急抢救适配 (修复截图中的丑版面)
        ========================================== */
@@ -1055,443 +1059,410 @@ body{
   免费体验 <span class="arr">→</span>
 </button>
 
-<!-- 真·对对碰体验区 -->
-<div class="match-game-wrapper" id="game-wrapper" style="
+<!-- ==================== 体验区：3D 原地穿透挖矿版 (全功能最终版) ==================== -->
+<div class="demo-miner-wrapper" style="
     margin-top: 32px; 
-    background: radial-gradient(circle at 50% 0%, #FFFDF5 0%, #FFF5E1 100%); 
-    border: 2px solid #FDE68A; 
+    background: linear-gradient(180deg, #18181b 0%, #09090b 100%); 
+    border: 2px solid #27272a; 
     border-radius: 28px; 
-    padding: 32px 24px; 
+    padding: 24px 16px; 
     display: flex; 
     flex-direction: column; 
     align-items: center; 
-    box-shadow: 0 10px 30px rgba(253, 230, 138, 0.3);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.8), inset 0 0 40px rgba(0,0,0,0.5);
     position: relative;
     overflow: hidden;
-    font-family: inherit;">
+    color: #fff;
+    font-family: inherit;
+">
 
-    <!-- 魔法白光遮罩 -->
-    <div id="magic-flash" style="position: absolute; inset: 0; background: #fff; z-index: 50; opacity: 0; pointer-events: none; transition: opacity 0.3s;"></div>
+    <!-- 游戏结束结算弹窗 (防变形/防溢出宽屏版) -->
+    <div id="demo-gameover" style="display:none; position:absolute; inset:0; background:rgba(0,0,0,0.85); backdrop-filter:blur(6px); z-index:200; flex-direction:column; align-items:center; justify-content:center; opacity:0; transition:opacity 0.3s; padding: 20px; box-sizing: border-box;">
+        <div id="gameover-content" style="width: 90%; max-width: 380px; max-height: 90vh; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none;"></div>
+    </div>
 
-    <!-- 顶部状态栏 -->
-    <div style="display: flex; justify-content: space-between; width: 100%; max-width: 400px; margin-bottom: 24px; align-items: center; z-index: 10;">
-        <div style="font-size: 16px; font-weight: 900; color: #B45309; display: flex; align-items: center; gap: 6px;">
-            <span>🎮</span> 单词对对碰
+    <!-- 顶部状态 -->
+    <div style="display: flex; justify-content: space-between; width: 100%; max-width: 400px; margin-bottom: 12px; align-items: center; z-index: 10;">
+        <div style="font-size: 16px; font-weight: 900; color: #a78bfa; display: flex; align-items: center; gap: 6px; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+            <span>⛏️</span> 深层矿区
+            <!-- 声音开关 -->
+            <button id="demo-sound-btn" onclick="toggleDemoSound()" style="background:none; border:none; font-size:18px; cursor:pointer; color:#fff; padding:0 4px; opacity:0.8;">🔊</button>
         </div>
-        
-        <!-- 右侧：状态栏 + 声音按钮 -->
-        <div style="display: flex; align-items: center; gap: 8px;">
-            <div id="game-status" style="font-size: 14px; font-weight: 800; color: #B45309; background: #FEF3C7; padding: 6px 14px; border-radius: 20px; border: 1px solid #FDE68A; transition: transform 0.2s;">
-                等待开始...
-            </div>
-            
-            <!-- 声音开关按钮 -->
-            <button id="sound-toggle" style="background: #FFF; border: 1px solid #FDE68A; border-radius: 50%; width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: all 0.2s; outline: none; color: #B45309;" title="开关声音">
-                <svg id="sound-icon-on" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-                </svg>
-                <svg id="sound-icon-off" style="display: none;" viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-                    <line x1="23" y1="9" x2="17" y2="15"></line>
-                    <line x1="17" y1="9" x2="23" y2="15"></line>
-                </svg>
-            </button>
+        <div style="display: flex; gap: 12px; font-size: 14px; font-weight: 800; background: #27272a; padding: 6px 12px; border-radius: 20px; border: 1px solid #3f3f46;">
+            <span>得分: <span id="demo-score" style="color: #fde047;">0</span></span>
+            <span>时间: <span id="demo-timer" style="color: #f87171;">60</span>s</span>
         </div>
     </div>
 
-    <!-- 4x4 游戏网格 -->
-    <div id="game-board" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; width: 100%; max-width: 400px; z-index: 10;">
-        <!-- JS 动态生成 -->
-    </div>
+    <!-- 背包栏 -->
+    <div id="demo-inventory" style="
+        display: flex; flex-wrap: wrap; gap: 8px; width: 100%; max-width: 400px; 
+        min-height: 32px; margin-bottom: 12px; padding: 6px 12px;
+        background: rgba(255,255,255,0.05); border-radius: 12px; font-size: 14px; font-weight: bold;
+    "></div>
 
-    <!-- 胜利弹窗 -->
-    <div id="victory-modal" style="display: none; position: absolute; inset: 0; background: rgba(255,255,255,0.9); backdrop-filter: blur(8px); z-index: 60; flex-direction: column; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s;">
-        <div style="font-size: 48px; margin-bottom: 16px; animation: bounce 1s infinite;">🎉</div>
-        <div style="font-size: 24px; font-weight: 900; color: #B45309; margin-bottom: 8px;">记忆满分！</div>
-        <div style="font-size: 15px; font-weight: 600; color: #64748B; margin-bottom: 24px;">小凤凰获得了 100 点孵化能量</div>
-        <button onclick="startGameFlow()" style="background: linear-gradient(180deg, #FDE68A 0%, #F59E0B 100%); color: #78350F; border: none; padding: 14px 40px; border-radius: 30px; font-weight: 800; font-size: 16px; cursor: pointer; box-shadow: 0 6px 15px rgba(245, 158, 11, 0.4); transition: transform 0.2s;">
-            再来一局
-        </button>
+    <!-- 游戏网格 (4x4) -->
+    <div id="demo-board" style="
+        display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; 
+        width: 100%; max-width: 400px; margin-bottom: 20px; aspect-ratio: 1 / 1;
+    "></div>
+
+    <!-- 答题区 -->
+    <div id="demo-question" style="width: 100%; max-width: 400px; background: #27272a; border-radius: 16px; padding: 16px; box-sizing: border-box; border: 1px solid #3f3f46;">
+        <div style="text-align: center; color: #a1a1aa; font-size: 14px;">点击开始挖掘</div>
+        <button onclick="startDemoMiner()" style="width: 100%; margin-top: 10px; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #a78bfa, #8b5cf6); color: white; font-weight: 900; font-size: 16px; cursor: pointer;">▶ 下矿！</button>
     </div>
 </div>
 
 <style>
-        /* ==================== 卡片基础布局 ==================== */
-    .match-card { 
-        width: 100%; 
-        aspect-ratio: 3 / 4; /* 替代固定高度，保持卡片宽高比例，不易变形 */
-        cursor: pointer; 
-        perspective: 1000px; 
-        position: relative; 
+    /* 隐藏内部滚动条 */
+    #gameover-content::-webkit-scrollbar { display: none; }
+
+    .demo-block {
+        background: #3f3f46; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+        cursor: pointer; transition: all 0.2s; position: relative;
+        box-shadow: inset 0 -6px 0 rgba(0,0,0,0.4), inset 0 2px 0 rgba(255,255,255,0.1), 0 4px 8px rgba(0,0,0,0.5);
     }
+    .demo-block.empty { background: #09090b; box-shadow: inset 0 8px 15px rgba(0,0,0,1); border: 1px solid #27272a; opacity: 0.8; }
+    .demo-block.target { border: 3px solid #fde047; transform: scale(1.05); box-shadow: inset 0 -6px 0 rgba(0,0,0,0.4), 0 0 20px rgba(253, 224, 71, 0.8); z-index: 2; }
+    .demo-word { color: #fff; font-weight: 900; font-size: 13px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); word-break: break-word; text-align: center; padding: 2px; pointer-events: none; }
     
-    .match-card-inner { 
-        position: relative; 
-        width: 100%; 
-        height: 100%; 
-        transition: transform 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-        transform-style: preserve-3d; 
-    }
+    /* 矿物颜色 */
+    .ore-coal { background: linear-gradient(145deg, #52525b, #27272a); }
+    .ore-iron { background: linear-gradient(145deg, #d4d4d8, #71717a); }
+    .ore-iron .demo-word { color: #18181b; text-shadow: none; }
+    .ore-gold { background: linear-gradient(145deg, #fde047, #ca8a04); }
+    .ore-gold .demo-word { color: #422006; text-shadow: none; }
+    .ore-diamond { background: linear-gradient(145deg, #67e8f9, #0891b2); }
+    .ore-diamond .demo-word { color: #083344; text-shadow: none; }
+    .ore-emerald { background: linear-gradient(145deg, #6ee7b7, #059669); }
+    .ore-emerald .demo-word { color: #022c22; text-shadow: none; }
+
+    /* 深度角标 */
+    .depth-badge { position: absolute; top: 2px; right: 4px; font-size: 10px; font-weight: 900; color: rgba(255, 255, 255, 0.8); text-shadow: 0 1px 3px rgba(0,0,0,0.8); pointer-events: none; }
+    .ore-iron .depth-badge, .ore-gold .depth-badge { color: rgba(0, 0, 0, 0.6); text-shadow: none; }
+
+    .demo-option { background: #3f3f46; color: #fff; border: 2px solid transparent; padding: 12px; border-radius: 12px; font-weight: bold; font-size: 15px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 0 #18181b;}
+    .demo-option:active { transform: translateY(4px); box-shadow: 0 0 0 #18181b; }
+    .demo-option.correct { background: #10b981; border-color: #34d399; box-shadow: 0 4px 0 #047857; }
+    .demo-option.wrong { background: #ef4444; border-color: #f87171; box-shadow: 0 4px 0 #991b1b; }
+    .demo-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 10px; }
+
+    .inv-item { background: rgba(0,0,0,0.4); padding: 2px 8px; border-radius: 8px; display: flex; align-items: center; gap: 4px; border: 1px solid rgba(255,255,255,0.1); }
+
+    @keyframes dropIn { 0% { transform: translateY(-30px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
+    .new-drop { animation: dropIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
     
-    .match-card:hover .match-card-inner { transform: translateY(-6px); }
-    .match-card.flipped:hover .match-card-inner, .match-card.matched:hover .match-card-inner { transform: rotateY(180deg) translateY(-6px); }
-    .match-card.flipped .match-card-inner, .match-card.matched .match-card-inner { transform: rotateY(180deg); }
-    
-    /* 正反面通用 */
-    .match-card-front, .match-card-back {
-        position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-        -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 16px;
-        display: flex; align-items: center; justify-content: center; text-align: center; 
-        padding: 6px; /* 留出一点安全边距 */
-        box-sizing: border-box;
-    }
-
-    /* 正面（带 Logo） */
-    .match-card-front { 
-        background: linear-gradient(145deg, #ffffff, #FFF9E6); 
-        border: 2px solid #FFF; 
-        box-shadow: inset 0 0 15px rgba(255, 215, 0, 0.15), 0 6px 12px rgba(253, 230, 138, 0.4); 
-    }
-    
-    .match-card-front::after { 
-        content: ''; 
-        width: 65px; height: 65px; 
-        background-image: url('logo_bird_big2.png'); 
-        background-size: contain; background-repeat: no-repeat; background-position: center; 
-        filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.15)); 
-        transition: transform 0.3s ease; 
-    }
-    
-    .match-card:hover .match-card-front::after { transform: scale(1.1) rotate(5deg); }
-
-    /* ==================== 背面（文字核心修复区） ==================== */
-    .match-card-back { 
-        background: #fff; 
-        transform: rotateY(180deg); 
-        font-weight: 800; 
-        line-height: 1.1; /* 压缩行高，防止多行占太宽 */
-        
-        /* 👇 修复乱切单词的终极三连 👇 */
-        word-break: normal; /* 绝对不切断英文单词内部 */
-        overflow-wrap: anywhere; /* 如果实在放不下，再考虑断行 */
-        hyphens: auto;
-    }
-
-    /* 英文卡片 */
-    .match-card-back.en { 
-        color: #1E3A8A; 
-        background: #FFFFFF; 
-        border: 2px solid #E2E8F0; 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.05); 
-        /* 动态字号：最小12px，最大16px，根据屏幕宽度自适应 */
-        font-size: clamp(10px, 3.5vw, 14px); /* 👈 极小值降到 10px，确保 school 这种长单词绝不换行 */
-    }
-
-    /* 中文卡片 */
-    .match-card-back.zh { 
-        color: #D97706; 
-        background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%); 
-        border: 2px solid #FCD34D; 
-        box-shadow: 0 4px 10px rgba(245, 158, 11, 0.2); 
-        /* 中文字号可以稍微大一点 */
-        font-size: clamp(14px, 4.5vw, 18px); 
-    }
-
-    /* 匹配成功、错误动画等保持原样 */
-    .match-card.matched .match-card-back { border-color: #F59E0B !important; background: linear-gradient(145deg, #FEF3C7, #FDE68A) !important; color: #B45309 !important; box-shadow: 0 0 25px rgba(245, 158, 11, 0.8) !important; animation: matchedExplode 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-    @keyframes matchedExplode { 0% { transform: rotateY(180deg) scale(1); } 50% { transform: rotateY(180deg) scale(1.15); box-shadow: 0 0 40px rgba(255, 215, 0, 1); } 100% { transform: rotateY(180deg) scale(1); opacity: 0.6; } }
-
-    .match-card.error .match-card-inner { animation: shake 0.4s ease; }
-    @keyframes shake { 0%, 100% { transform: rotateY(180deg) translateX(0); } 25% { transform: rotateY(180deg) translateX(-5px); } 75% { transform: rotateY(180deg) translateX(5px); } }
-  /* 极小屏幕适配 */
-    @media (max-width: 380px) {
-        #game-board {
-            gap: 8px !important; /* 减小卡片之间的缝隙 */
-            padding: 10px !important; 
-        }
-    }
-/* 凤凰的默认尺寸（电脑端） */
-    .hatched-bird {
-        width: 200px; 
-        height: auto;
-        display: block;
-        margin: 0 auto;
-    }
-
-    /* 手机端的凤凰尺寸 */
-    @media screen and (max-width: 768px) {
-        .hatched-bird {
-            width: 160px; 
-        }
-    }
-     /* ==================== 终极防强制深色补丁 ==================== */
-    html, body {
-        background-color: #FFFDF5 !important;
-        color: #333333 !important;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        html, body, #app, main, .container {
-            background-color: #FFFDF5 !important;
-            color: #333333 !important;
-        }
-        
-        /* 强制把文字颜色改回来，防止白字配白底 */
-        h1, h2, h3, p, span, div {
-            color: #333333 !important;
-        }
-        
-        /* 强行拉回游戏框的背景 */
-        #game-wrapper {
-            background: radial-gradient(circle at 50% 0%, #FFFDF5 0%, #FFF5E1 100%) !important;
-        }
-        
-        /* 强行拉回卡片的背景和文字 */
-        .match-card-back.en {
-            background: #FFFFFF !important;
-            color: #1E3A8A !important;
-        }
-        
-        .match-card-back.zh {
-            background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%) !important;
-            color: #D97706 !important;
-        }
-    }
-
+    @keyframes popIn { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    @keyframes bounceIn { 0% { transform: scale(0.3); opacity: 0; } 50% { transform: scale(1.1); } 70% { transform: scale(0.9); } 100% { transform: scale(1); opacity: 1; } }
 </style>
 
 <script>
-    const vocabData = [
-        { en: "apple", zh: "苹果" }, { en: "book", zh: "书本" },
-        { en: "cat", zh: "猫" }, { en: "dog", zh: "狗" },
-        { en: "egg", zh: "鸡蛋" }, { en: "fish", zh: "鱼" },
-        { en: "green", zh: "绿色" }, { en: "house", zh: "房子" },
-        { en: "milk", zh: "牛奶" }, { en: "water", zh: "水" },
-        { en: "school", zh: "学校" }, { en: "teacher", zh: "老师" },
-        { en: "friend", zh: "朋友" }, { en: "happy", zh: "开心" }
+    // 词库
+    const DEMO_VOCAB = [
+        { en: "apple", zh: "苹果" }, { en: "book", zh: "书本" }, { en: "cat", zh: "猫" }, { en: "dog", zh: "狗" },
+        { en: "egg", zh: "鸡蛋" }, { en: "fish", zh: "鱼" }, { en: "green", zh: "绿色" }, { en: "house", zh: "房子" },
+        { en: "milk", zh: "牛奶" }, { en: "water", zh: "水" }, { en: "school", zh: "学校" }, { en: "teacher", zh: "老师" },
+        { en: "friend", zh: "朋友" }, { en: "happy", zh: "开心" }, { en: "bird", zh: "鸟" }, { en: "tree", zh: "树" },
+        { en: "sun", zh: "太阳" }, { en: "moon", zh: "月亮" }, { en: "star", zh: "星星" }, { en: "rain", zh: "雨" },
+        { en: "snow", zh: "雪" }, { en: "wind", zh: "风" }, { en: "fire", zh: "火" }, { en: "hand", zh: "手" },
+        { en: "foot", zh: "脚" }, { en: "eye", zh: "眼睛" }, { en: "ear", zh: "耳朵" }, { en: "nose", zh: "鼻子" },
+        { en: "mouth", zh: "嘴巴" }, { en: "hair", zh: "头发" }
     ];
 
-    let isSoundOn = true;
-    let firstCard = null;
-    let secondCard = null;
-    let lockBoard = true;
-    let matchedCount = 0;
-    let isPreviewing = false;
-    let hasPlayed = false;
-    const totalPairs = 8;
-    const PREVIEW_TIME = 10;
-    let timeLeft = PREVIEW_TIME;
-    let timerInterval = null;
+    // 矿物数据及掉落权重
+    const ORES_DATA = {
+        coal:    { icon: '🪨', name: '煤', class: 'ore-coal', weights: [80, 40, 20, 10, 5] },
+        iron:    { icon: '⚙️', name: '铁', class: 'ore-iron', weights: [20, 40, 30, 20, 10] },
+        gold:    { icon: '🟡', name: '金', class: 'ore-gold', weights: [0, 20, 40, 30, 20] },
+        diamond: { icon: '💎', name: '钻', class: 'ore-diamond', weights: [0, 0, 10, 30, 40] },
+        emerald: { icon: '💚', name: '绿', class: 'ore-emerald', weights: [0, 0, 0, 10, 25] }
+    };
 
-    const board = document.getElementById('game-board');
-    const statusDisplay = document.getElementById('game-status');
-    const victoryModal = document.getElementById('victory-modal');
-    const gameWrapper = document.getElementById('game-wrapper');
-    const magicFlash = document.getElementById('magic-flash');
+    const MAX_DEPTH = 5; 
+    let demoGame = null;
 
-    // 绑定声音按钮事件
-    document.addEventListener("DOMContentLoaded", () => {
-        const soundBtn = document.getElementById('sound-toggle');
-        const iconOn = document.getElementById('sound-icon-on');
-        const iconOff = document.getElementById('sound-icon-off');
-        if(!soundBtn) return;
-        
-        soundBtn.addEventListener('click', () => {
-            isSoundOn = !isSoundOn;
-            if (isSoundOn) {
-                iconOn.style.display = 'block'; iconOff.style.display = 'none'; soundBtn.style.opacity = '1';
-            } else {
-                iconOn.style.display = 'none'; iconOff.style.display = 'block'; soundBtn.style.opacity = '0.5';
-                if ('speechSynthesis' in window) window.speechSynthesis.cancel();
-            }
-        });
-    });
+    // ================== 音频系统 (Web Audio API) ==================
+    let demoSoundOn = true;
+    let audioCtx = null;
 
-    function shuffle(array) {
-        let currentIndex = array.length, randomIndex;
-        while (currentIndex != 0) {
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex--;
-            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
         }
-        return array;
+        if (audioCtx.state === 'suspended') audioCtx.resume();
     }
 
-    function initMatchGame() {
-        board.innerHTML = '';
-        firstCard = null; secondCard = null; lockBoard = true;
-        matchedCount = 0;
-        victoryModal.style.display = 'none'; victoryModal.style.opacity = '0';
+    function toggleDemoSound() {
+        demoSoundOn = !demoSoundOn;
+        document.getElementById('demo-sound-btn').innerText = demoSoundOn ? '🔊' : '🔇';
+        document.getElementById('demo-sound-btn').style.opacity = demoSoundOn ? '0.8' : '0.4';
+    }
 
-        const selectedWords = shuffle([...vocabData]).slice(0, totalPairs);
-        let cardsData = [];
-        selectedWords.forEach((word, index) => {
-            cardsData.push({ type: 'en', text: word.en, id: index });
-            cardsData.push({ type: 'zh', text: word.zh, id: index });
+    function playCorrectSound() {
+        if (!demoSoundOn) return;
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(880, audioCtx.currentTime); 
+        osc.frequency.exponentialRampToValueAtTime(1760, audioCtx.currentTime + 0.1);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+    }
+
+    function playWrongSound() {
+        if (!demoSoundOn) return;
+        initAudio();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.2);
+        gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+        osc.start(); osc.stop(audioCtx.currentTime + 0.3);
+    }
+
+    function playFinishSound() {
+        if (!demoSoundOn) return;
+        initAudio();
+        const notes = [523.25, 659.25, 783.99, 1046.50]; 
+        notes.forEach((freq, i) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.type = 'triangle';
+            osc.frequency.value = freq;
+            const startTime = audioCtx.currentTime + i * 0.1;
+            gain.gain.setValueAtTime(0, startTime);
+            gain.gain.linearRampToValueAtTime(0.3, startTime + 0.05);
+            gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.4);
+            osc.start(startTime); osc.stop(startTime + 0.4);
         });
-
-        cardsData = shuffle(cardsData);
-
-        cardsData.forEach(data => {
-            const card = document.createElement('div');
-            card.classList.add('match-card', 'flipped'); 
-            card.dataset.id = data.id;
-            card.innerHTML = `
-                <div class="match-card-inner">
-                    <div class="match-card-front"></div>
-                    <div class="match-card-back ${data.type}">${data.text}</div>
-                </div>
-            `;
-            card.addEventListener('click', flipCard);
-            board.appendChild(card);
-        });
-    }
-
-    function startGameFlow() {
-        isPreviewing = true;
-        timeLeft = PREVIEW_TIME;
-        initMatchGame(); 
-        
-        if (timerInterval) clearInterval(timerInterval);
-
-        timerInterval = setInterval(() => {
-            timeLeft--;
-            statusDisplay.innerText = `🧠 快速记忆: ${timeLeft}s`;
-            statusDisplay.style.color = '#0284C7'; statusDisplay.style.background = '#E0F2FE';
-
-            if (timeLeft <= 0) {
-                clearInterval(timerInterval);
-                executeMagicFlip();
-            }
-        }, 1000);
-        
-        statusDisplay.innerText = `🧠 快速记忆: ${timeLeft}s`;
-        statusDisplay.style.color = '#0284C7'; statusDisplay.style.background = '#E0F2FE';
-    }
-
-    function executeMagicFlip() {
-        magicFlash.style.opacity = '1';
-        setTimeout(() => {
-            const allCards = document.querySelectorAll('.match-card');
-            allCards.forEach(card => card.classList.remove('flipped'));
-            magicFlash.style.opacity = '0';
-            
-            statusDisplay.innerText = `已配对: 0 / ${totalPairs}`;
-            statusDisplay.style.color = '#B45309'; statusDisplay.style.background = '#FEF3C7';
-            
-            lockBoard = false; isPreviewing = false; hasPlayed = true;
-        }, 300); 
-    }
-
-    function flipCard() {
-        if (lockBoard || isPreviewing) return;
-        if (this === firstCard) return; 
-
-        this.classList.add('flipped');
-
-        // 翻开就读
-        const enCard = this.querySelector('.match-card-back.en');
-        if (enCard) speakWord(enCard.innerText);
-
-        if (!firstCard) { firstCard = this; return; }
-        secondCard = this;
-        checkForMatch();
-    }
-
-    function checkForMatch() {
-        const isMatch = firstCard.dataset.id === secondCard.dataset.id;
-        if (isMatch) disableCards(); else unflipCards();
-    }
-
-    function playSuccessSound() {
-        if (!isSoundOn) return;
-        try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            const gain = ctx.createGain();
-            osc.connect(gain); gain.connect(ctx.destination);
-            osc.type = 'sine';
-            osc.frequency.setValueAtTime(880, ctx.currentTime); 
-            osc.frequency.exponentialRampToValueAtTime(1760, ctx.currentTime + 0.1);
-            gain.gain.setValueAtTime(0.3, ctx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
-            osc.start(); osc.stop(ctx.currentTime + 0.2);
-        } catch (e) { }
     }
 
     function speakWord(word) {
-        if (!isSoundOn) return;
+        if (!demoSoundOn) return;
         if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel(); 
+            window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(word);
             utterance.lang = 'en-US';
-            utterance.rate = 0.9;
-            utterance.pitch = 1.1;
+            utterance.rate = 1.0;
             window.speechSynthesis.speak(utterance);
         }
     }
 
-    function showFloatText(x, y, text, color) {
-        const div = document.createElement('div');
-        div.classList.add('float-text');
-        div.innerText = text; div.style.color = color;
-        div.style.left = x + 'px'; div.style.top = y + 'px';
-        document.querySelector('.match-game-wrapper').appendChild(div);
-        setTimeout(() => div.remove(), 1000);
+    // ================== 游戏核心逻辑 ==================
+    function demoShuffle(a){return a.sort(()=>Math.random()-0.5);}
+
+    function rollOreType(depth) {
+        const dIndex = Math.min(depth, MAX_DEPTH) - 1; 
+        let totalWeight = 0;
+        for (const key in ORES_DATA) totalWeight += ORES_DATA[key].weights[dIndex];
+        let r = Math.random() * totalWeight;
+        for (const key in ORES_DATA) {
+            r -= ORES_DATA[key].weights[dIndex];
+            if (r <= 0) return key;
+        }
+        return 'coal';
     }
 
-    function disableCards() {
-        firstCard.classList.add('matched');
-        secondCard.classList.add('matched');
-        playSuccessSound();
+    function createBlock(depth) {
+        return { depth: depth, word: demoShuffle([...DEMO_VOCAB])[0], oreKey: rollOreType(depth) };
+    }
 
-        const rect1 = firstCard.getBoundingClientRect();
-        const rect2 = secondCard.getBoundingClientRect();
-        const wRect = document.querySelector('.match-game-wrapper').getBoundingClientRect();
-        const centerX = ((rect1.left + rect2.left) / 2) - wRect.left + 30;
-        const centerY = ((rect1.top + rect2.top) / 2) - wRect.top;
+    function startDemoMiner() {
+        initAudio(); 
+        if(demoGame && demoGame.timer) clearInterval(demoGame.timer);
+        
+        demoGame = { 
+            score: 0, timeLeft: 60, timer: null, locked: false, 
+            inventory: { coal:0, iron:0, gold:0, diamond:0, emerald:0 },
+            pillars: Array.from({length: 16}, () => createBlock(1)),
+            currentIdx: Math.floor(Math.random() * 16) 
+        };
 
-        const praises = ["太棒了!", "好记性!", "Match!", "Perfect!"];
-        showFloatText(centerX, centerY, `+100 ${praises[Math.floor(Math.random() * praises.length)]}`, '#E11D48');
+        document.getElementById('demo-score').innerText = '0';
+        document.getElementById('demo-timer').innerText = '60';
+        document.getElementById('demo-inventory').innerHTML = '';
+        
+        renderDemoBoard();
+        renderDemoOptions();
 
-        matchedCount++;
-        statusDisplay.innerText = `已配对: ${matchedCount} / ${totalPairs}`;
-        statusDisplay.style.transform = 'scale(1.2)';
-        setTimeout(() => statusDisplay.style.transform = 'scale(1)', 200);
+        demoGame.timer = setInterval(() => {
+            if(!demoGame) return;
+            demoGame.timeLeft--;
+            document.getElementById('demo-timer').innerText = demoGame.timeLeft;
+            if(demoGame.timeLeft <= 0) endDemoMiner();
+        }, 1000);
+    }
 
-        firstCard.style.pointerEvents = 'none';
-        secondCard.style.pointerEvents = 'none';
+    function renderInventory() {
+        const invEl = document.getElementById('demo-inventory');
+        let html = '';
+        for (const [key, count] of Object.entries(demoGame.inventory)) {
+            if(count > 0) html += `<div class="inv-item"><span>${ORES_DATA[key].icon}</span> <span style="color:#fff;">${count}</span></div>`;
+        }
+        invEl.innerHTML = html || '<span style="color:#71717a; font-size:12px;">背包空空如也...</span>';
+    }
 
-        resetBoard();
+    function renderDemoBoard(newDropIdx = -1) {
+        const board = document.getElementById('demo-board');
+        board.innerHTML = demoGame.pillars.map((b, i) => {
+            const isTarget = i === demoGame.currentIdx;
+            const isNew = i === newDropIdx;
+            
+            if(b.depth > MAX_DEPTH) return `<div class="demo-block empty"></div>`;
+            
+            const oreClass = ORES_DATA[b.oreKey].class;
+            return `<div class="demo-block ${oreClass} ${isTarget ? 'target' : ''} ${isNew ? 'new-drop' : ''}">
+                <div class="depth-badge">${b.depth}</div>
+                <span class="demo-word">${b.word.en}</span>
+            </div>`;
+        }).join('');
+    }
 
-        if (matchedCount === totalPairs) {
+    function renderDemoOptions() {
+        if(!demoGame) return;
+        const target = demoGame.pillars[demoGame.currentIdx];
+        if(target.depth > MAX_DEPTH) { pickNextTarget(); return; }
+        
+        const w = target.word;
+        const wrongWords = demoShuffle(DEMO_VOCAB.filter(x => x.en !== w.en)).slice(0, 3);
+        const opts = demoShuffle([w, ...wrongWords]);
+
+        const el = document.getElementById('demo-question');
+        el.innerHTML = `
+            <div style="text-align: center; margin-bottom: 8px;">
+                <span style="font-size: 18px; font-weight: 900; color: #fde047; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                    目标: ${w.en} <span style="font-size:12px; color:#a1a1aa;">(深 ${target.depth} 层)</span>
+                </span>
+            </div>
+            <div class="demo-options-grid">
+                ${opts.map(o => `<button class="demo-option" onclick="checkDemoAnswer('${o.en}', '${w.en}', this)">${o.zh}</button>`).join('')}
+            </div>
+        `;
+    }
+
+    function pickNextTarget() {
+        let validIdxs = demoGame.pillars.map((b, i) => b.depth <= MAX_DEPTH ? i : -1).filter(i => i !== -1);
+        if(validIdxs.length === 0) {
+            demoGame.pillars = Array.from({length: 16}, () => createBlock(1));
+            validIdxs = [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15];
+        }
+        demoGame.currentIdx = validIdxs[Math.floor(Math.random() * validIdxs.length)];
+        renderDemoBoard();
+        renderDemoOptions();
+    }
+
+    function checkDemoAnswer(selected, correct, btn) {
+        if(demoGame.locked) return;
+        demoGame.locked = true;
+        
+        if(selected === correct) {
+            btn.classList.add('correct');
+            if(navigator.vibrate) navigator.vibrate(40);
+            
+            playCorrectSound(); 
+            speakWord(correct); 
+
+            const currentDepth = demoGame.pillars[demoGame.currentIdx].depth;
+            demoGame.score += (currentDepth * 10);
+            document.getElementById('demo-score').innerText = demoGame.score;
+            
+            const oreKey = demoGame.pillars[demoGame.currentIdx].oreKey;
+            demoGame.inventory[oreKey]++;
+            renderInventory();
+
+            const oldIdx = demoGame.currentIdx;
+            demoGame.pillars[oldIdx].depth++;
+            
+            if(demoGame.pillars[oldIdx].depth <= MAX_DEPTH) {
+                const newBlock = createBlock(demoGame.pillars[oldIdx].depth);
+                demoGame.pillars[oldIdx].word = newBlock.word;
+                demoGame.pillars[oldIdx].oreKey = newBlock.oreKey;
+            }
+            renderDemoBoard(oldIdx);
+            
             setTimeout(() => {
-                victoryModal.style.display = 'flex';
-                setTimeout(() => victoryModal.style.opacity = '1', 10);
-            }, 800); 
+                pickNextTarget();
+                demoGame.locked = false;
+            }, 500);
+
+        } else {
+            btn.classList.add('wrong');
+            if(navigator.vibrate) navigator.vibrate([50, 50]);
+            playWrongSound(); 
+            setTimeout(() => { demoGame.locked = false; }, 600);
         }
     }
 
-    function unflipCards() {
-        lockBoard = true;
-        firstCard.classList.add('error'); secondCard.classList.add('error');
-        setTimeout(() => {
-            firstCard.classList.remove('flipped', 'error');
-            secondCard.classList.remove('flipped', 'error');
-            resetBoard();
-        }, 800);
+    function endDemoMiner() {
+        if(!demoGame) return;
+        clearInterval(demoGame.timer);
+        demoGame.locked = true; 
+        
+        if(navigator.vibrate) navigator.vibrate([100, 50, 100, 50, 300]);
+        playFinishSound(); 
+
+        let lootHtml = '';
+        let totalOres = 0;
+        for (const [key, count] of Object.entries(demoGame.inventory)) {
+            if(count > 0) {
+                totalOres += count;
+                lootHtml += `<div style="margin: 0 6px; display:flex; align-items:center; gap:4px; font-size:16px;">${ORES_DATA[key].icon} <span style="color:#fff;font-weight:bold;">x${count}</span></div>`;
+            }
+        }
+        if(totalOres === 0) lootHtml = '<span style="color:#a1a1aa; font-size:14px;">两手空空...</span>';
+
+        let rating = "🌱 新手矿工";
+        let ratingColor = "#a1a1aa";
+        if(demoGame.score >= 400) { rating = "👑 传奇矿工"; ratingColor = "#fbbf24"; }
+        else if(demoGame.score >= 200) { rating = "💎 钻石矿工"; ratingColor = "#67e8f9"; }
+        else if(demoGame.score >= 100) { rating = "🟡 黄金矿工"; ratingColor = "#fde047"; }
+        else if(demoGame.score >= 50) { rating = "⚙️ 熟练矿工"; ratingColor = "#d4d4d8"; }
+
+        const modal = document.getElementById('demo-gameover');
+        const content = document.getElementById('gameover-content');
+        
+        content.innerHTML = `
+            <div style="text-align:center; padding: 30px 20px; background: #1e1e24; border-radius: 24px; border: 2px solid #3f3f46; box-shadow: 0 10px 40px rgba(0,0,0,0.9); width: 100%; box-sizing: border-box; animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;">
+                <div style="font-size: 54px; margin-bottom: 10px; animation: bounceIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);">⏱️</div>
+                <div style="font-size: 24px; font-weight: 900; color: #fff; margin-bottom: 4px;">时间到！</div>
+                <div style="font-size: 18px; font-weight: 900; color: ${ratingColor}; margin-bottom: 20px; text-shadow: 0 0 15px ${ratingColor}80;">${rating}</div>
+                
+                <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 16px; margin-bottom: 24px; border: 1px solid #3f3f46;">
+                    <div style="font-size: 42px; font-weight: 900; color: #fde047; text-shadow: 0 0 20px rgba(253, 224, 71, 0.4); line-height: 1.1;">
+                        ${demoGame.score} <span style="font-size:16px; color:#a1a1aa;">分</span>
+                    </div>
+                    <div style="font-size: 13px; color: #a1a1aa; margin-top: 6px; font-weight: bold;">共计挖掘 ${totalOres} 块矿石</div>
+                    
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; margin-top: 12px; border-top: 1px dashed #3f3f46; padding-top: 12px;">
+                        ${lootHtml}
+                    </div>
+                </div>
+
+                <button onclick="closeGameOverAndRestart()" style="width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, #a78bfa, #8b5cf6); color: white; font-weight: 900; font-size: 16px; cursor: pointer; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4); transition: transform 0.2s;">🔄 再次下矿</button>
+            </div>
+        `;
+        
+        modal.style.display = 'flex';
+        setTimeout(() => modal.style.opacity = '1', 10);
     }
 
-    function resetBoard() { [firstCard, secondCard, lockBoard] = [null, null, false]; }
-
-    // 当滚动到该区域时触发
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting && !hasPlayed && !isPreviewing) startGameFlow();
-        });
-    }, { threshold: 0.5 });
-    observer.observe(gameWrapper);
+    function closeGameOverAndRestart() {
+        const modal = document.getElementById('demo-gameover');
+        modal.style.opacity = '0';
+        setTimeout(() => {
+            modal.style.display = 'none';
+            demoGame = null;
+            startDemoMiner(); 
+        }, 300);
+    }
 </script>
   </div>
 </section>
