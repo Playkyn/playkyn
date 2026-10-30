@@ -6,6 +6,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Permanent+Marker&display=swap" rel="stylesheet">
 <meta name="theme-color" content="#ffffff">
 <meta name="color-scheme" content="light only">
+<meta name="supported-color-schemes" content="light only">
 <title>Playkyn · Just play, Get it.</title>
 <link rel="manifest" href="manifest.json">
 <style>
@@ -1224,14 +1225,37 @@ body{
             width: 160px; 
         }
     }
-  /* ==================== 暴力强制浅色模式 ==================== */
+     /* ==================== 终极防强制深色补丁 ==================== */
+    html, body {
+        background-color: #FFFDF5 !important;
+        color: #333333 !important;
+    }
+
     @media (prefers-color-scheme: dark) {
-        html, body {
-            background-color: #FFFDF5 !important; 
-            color: #333 !important;
+        html, body, #app, main, .container {
+            background-color: #FFFDF5 !important;
+            color: #333333 !important;
         }
+        
+        /* 强制把文字颜色改回来，防止白字配白底 */
+        h1, h2, h3, p, span, div {
+            color: #333333 !important;
+        }
+        
+        /* 强行拉回游戏框的背景 */
         #game-wrapper {
             background: radial-gradient(circle at 50% 0%, #FFFDF5 0%, #FFF5E1 100%) !important;
+        }
+        
+        /* 强行拉回卡片的背景和文字 */
+        .match-card-back.en {
+            background: #FFFFFF !important;
+            color: #1E3A8A !important;
+        }
+        
+        .match-card-back.zh {
+            background: linear-gradient(180deg, #FEF3C7 0%, #FDE68A 100%) !important;
+            color: #D97706 !important;
         }
     }
 
